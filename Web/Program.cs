@@ -1,3 +1,4 @@
+using System.Text;
 using Tesseract;
 using UglyToad.PdfPig;
 
@@ -28,10 +29,15 @@ file sealed class Program
             using var document = PdfDocument.Open(file);
             var pages = document.GetPages();
 
+            var builder = new StringBuilder();
+            
             foreach (var page in pages)
             {
+                var searchableText = page.Text;
+                builder.AppendLine(searchableText);
+                builder.AppendLine();
+                
                 var images = page.GetImages();
-
                 foreach (var image in images)
                 {
                     if (image.TryGetPng(out var pngBytes))
@@ -39,19 +45,22 @@ file sealed class Program
                         using var imageDocument = Pix.LoadFromMemory(pngBytes);
                         using var imagePage = engine.Process(imageDocument);
                         var text = imagePage.GetText();
-                        await context.Response.WriteAsJsonAsync(text);
-                        return;
+                        builder.AppendLine(text);
+                        builder.AppendLine();
                     }
                     else
                     {
                         using var imageDocument = Pix.LoadFromMemory(image.RawBytes.ToArray());
                         using var imagePage = engine.Process(imageDocument);
                         var text = imagePage.GetText();
-                        await context.Response.WriteAsJsonAsync(text);
-                        return;
+                        builder.AppendLine(text);
+                        builder.AppendLine();
                     }
                 }
             }
+            
+            var result = builder.ToString();
+            await context.Response.WriteAsJsonAsync(result);
         });
 
         await app.RunAsync();
