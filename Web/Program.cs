@@ -8,7 +8,7 @@ file sealed class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        using var engine = new TesseractEngine("./tessdata", "rus", EngineMode.Default);
+        using var engine = new TesseractEngine("./tesseract", "rus", EngineMode.Default);
 
         await using var app = builder.Build();
 
