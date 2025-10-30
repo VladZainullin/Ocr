@@ -2,4 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
+  <ItemGroup>
+    <PackageVersion Include="Tesseract" Version="5.2.0" />
+  </ItemGroup>
 </Project>

@@ -1,3 +1,9 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
-
+    <ItemGroup>
+        <PackageReference Include="Tesseract"/>
+    </ItemGroup>
+    <Target Name="link_deps" AfterTargets="AfterBuild">
+        <Exec Command="ln -sf /opt/homebrew/lib/libleptonica.dylib ./bin/Debug/net9.0/libleptonica-1.82.0.dylib"/>
+        <Exec Command="ln -sf /opt/homebrew/lib/libtesseract.dylib ./bin/Debug/net9.0/libtesseract50.dylib"/>
+    </Target>
 </Project>
