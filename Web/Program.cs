@@ -1,4 +1,6 @@
 using System.Text;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
 
@@ -9,27 +11,32 @@ file sealed class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
-        builder.Services.AddSingleton(static sp =>
+        
+        builder.Services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
+        builder.Services.TryAddSingleton<ObjectPool<StringBuilder>>(static serviceProvider =>
         {
-            var applicationLifetime = sp.GetRequiredService<IHostApplicationLifetime>();
-
-            var engine = new TesseractEngine("./tesseract", "rus");
-            applicationLifetime.ApplicationStopping.Register(() => engine.Dispose());
-
-            return engine;
+            var provider = serviceProvider.GetRequiredService<ObjectPoolProvider>();
+            var policy = new StringBuilderPooledObjectPolicy();
+            return provider.Create(policy);
+        });
+        builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
+        {
+            var provider = serviceProvider.GetRequiredService<ObjectPoolProvider>();
+            var policy = new TesseractEnginePooledObjectPolicy("./tesseract", "rus");
+            return provider.Create(policy);
         });
 
         await using var app = builder.Build();
 
         app.MapPost("/documents", static async context =>
         {
-            var engine = context.RequestServices.GetRequiredService<TesseractEngine>();
+            using var engine = new TesseractEngine("./tesseract", "rus");
             await using var file = context.Request.Form.Files[0].OpenReadStream();
             using var document = PdfDocument.Open(file);
             var pages = document.GetPages();
 
-            var builder = new StringBuilder();
+            var stringBuilderObjectPool = context.RequestServices.GetRequiredService<ObjectPool<StringBuilder>>();
+            var builder = stringBuilderObjectPool.Get();
             
             foreach (var page in pages)
             {
@@ -60,6 +67,7 @@ file sealed class Program
             }
             
             var result = builder.ToString();
+            stringBuilderObjectPool.Return(builder);
             await context.Response.WriteAsJsonAsync(result);
         });
 
