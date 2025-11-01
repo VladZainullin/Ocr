@@ -1,3 +1,4 @@
+using ImageMagick;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
@@ -11,9 +12,9 @@ file sealed class Program
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-        
+
         builder.WebHost.ConfigureKestrel(static options => options.Limits.MaxRequestBodySize = 50 * 1024 * 1024);
-        
+
         builder.Services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {
@@ -30,9 +31,9 @@ file sealed class Program
             await using var file = context.Request.Form.Files[0].OpenReadStream();
             using var document = PdfDocument.Open(file);
             var pages = document.GetPages();
-            
+
             var pageResponses = ProcessPages(pages, engine);
-            
+
             await context.Response.WriteAsJsonAsync(new Response
             {
                 Pages = pageResponses,
@@ -54,8 +55,8 @@ file sealed class Program
         var imageResponses = ProcessImages(page, engine);
 
         var hyperlinks = ProcessHyperlinks(page);
-        
-        var annotationResponse =  ProcessAnnotations(page);
+
+        var annotationResponse = ProcessAnnotations(page);
 
         return new PageResponse
         {
@@ -65,7 +66,6 @@ file sealed class Program
             Hyperlinks = hyperlinks,
             Annotations = annotationResponse
         };
-
     }
 
     private static IEnumerable<string> ProcessHyperlinks(Page page)
@@ -79,7 +79,7 @@ file sealed class Program
 
     private static IEnumerable<AnnotationResponse> ProcessAnnotations(Page page)
     {
-        var annotations= page.GetAnnotations();
+        var annotations = page.GetAnnotations();
 
         foreach (var annotation in annotations)
         {
@@ -93,10 +93,10 @@ file sealed class Program
 
     private static IEnumerable<ImageResponse> ProcessImages(Page page, TesseractEngine engine)
     {
-        var images = page.GetImages();
-        foreach (var image in images)
+        var pdfImages = page.GetImages();
+        foreach (var pdfImage in pdfImages)
         {
-            if (image.TryGetPng(out var pngBytes))
+            if (pdfImage.TryGetPng(out var pngBytes))
             {
                 using var imageDocument = Pix.LoadFromMemory(pngBytes);
                 using var imagePage = engine.Process(imageDocument);
@@ -105,12 +105,27 @@ file sealed class Program
                 {
                     Text = text
                 };
-
+            }
+            else if (pdfImage.TryGetBytesAsMemory(out var memory))
+            {
+                var bytes = memory.ToArray();
+                using var imageDocument = Pix.LoadFromMemory(bytes);
+                using var imagePage = engine.Process(imageDocument);
+                var text = imagePage.GetText();
+                yield return new ImageResponse
+                {
+                    Text = text
+                };
             }
             else
             {
-                var bytes = image.RawBytes.ToArray();
-                using var imageDocument = Pix.LoadFromMemory(bytes);
+                var image = new MagickImage(pdfImage.RawBytes);
+                image.Grayscale();
+                image.Format = MagickFormat.WebP;
+                var stream = new MemoryStream();
+                image.Write(stream);
+                
+                using var imageDocument = Pix.LoadFromMemory(stream.ToArray());
                 using var imagePage = engine.Process(imageDocument);
                 var text = imagePage.GetText();
                 yield return new ImageResponse
@@ -148,6 +163,6 @@ public sealed class ImageResponse
 public sealed class AnnotationResponse
 {
     public required string? Name { get; init; }
-    
+
     public required string? Text { get; init; }
 }

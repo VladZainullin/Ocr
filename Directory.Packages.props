@@ -3,6 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.9.1" />
     <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="9.0.10" />
     <PackageVersion Include="PdfPig" Version="0.1.11" />
     <PackageVersion Include="Tesseract" Version="5.2.0" />
