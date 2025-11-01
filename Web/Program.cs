@@ -12,6 +12,8 @@ file sealed class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         
+        builder.WebHost.ConfigureKestrel(static options => options.Limits.MaxRequestBodySize = 50 * 1024 * 1024);
+        
         builder.Services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {
@@ -51,13 +53,42 @@ file sealed class Program
 
         var imageResponses = ProcessImages(page, engine);
 
+        var hyperlinks = ProcessHyperlinks(page);
+        
+        var annotationResponse =  ProcessAnnotations(page);
+
         return new PageResponse
         {
             Number = page.Number,
             Text = searchableText,
-            Images = imageResponses
+            Images = imageResponses,
+            Hyperlinks = hyperlinks,
+            Annotations = annotationResponse
         };
 
+    }
+
+    private static IEnumerable<string> ProcessHyperlinks(Page page)
+    {
+        var hyperlinks = page.GetHyperlinks();
+        foreach (var hyperlink in hyperlinks)
+        {
+            yield return hyperlink.Text;
+        }
+    }
+
+    private static IEnumerable<AnnotationResponse> ProcessAnnotations(Page page)
+    {
+        var annotations= page.GetAnnotations();
+
+        foreach (var annotation in annotations)
+        {
+            yield return new AnnotationResponse
+            {
+                Name = annotation.Name,
+                Text = annotation.Content
+            };
+        }
     }
 
     private static IEnumerable<ImageResponse> ProcessImages(Page page, TesseractEngine engine)
@@ -78,7 +109,8 @@ file sealed class Program
             }
             else
             {
-                using var imageDocument = Pix.LoadFromMemory(image.RawBytes.ToArray());
+                var bytes = image.RawBytes.ToArray();
+                using var imageDocument = Pix.LoadFromMemory(bytes);
                 using var imagePage = engine.Process(imageDocument);
                 var text = imagePage.GetText();
                 yield return new ImageResponse
@@ -102,9 +134,20 @@ public sealed class PageResponse
     public required string Text { get; init; }
 
     public required IEnumerable<ImageResponse> Images { get; init; }
+
+    public required IEnumerable<string> Hyperlinks { get; init; }
+
+    public required IEnumerable<AnnotationResponse> Annotations { get; init; }
 }
 
 public sealed class ImageResponse
 {
     public required string Text { get; init; }
+}
+
+public sealed class AnnotationResponse
+{
+    public required string? Name { get; init; }
+    
+    public required string? Text { get; init; }
 }
