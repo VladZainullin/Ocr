@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
-using UglyToad.PdfPig.Content;
 
 namespace Web;
 
@@ -42,26 +41,39 @@ file sealed class Program
                 return;
             }
 
-            await using var file = context.Request.Form.Files[0].OpenReadStream();
-
-            using var memoryStream = new MemoryStream();
-            await file.CopyToAsync(memoryStream);
-            memoryStream.Position = 0;
-
-            using var document = PdfDocument.Open(memoryStream);
-            var pages = document.GetPages();
+            await using var stream = context.Request.Form.Files[0].OpenReadStream();
+            using var pdfDocument = PdfDocument.Open(stream);
             
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var pageResponses = new ConcurrentBag<PageResponse>();
+            
+            var pages = pdfDocument.GetPages();
 
-            Parallel.ForEach(pages, ParallelOptions, page =>
+            foreach(var page in pages)
             {
                 var searchableText = page.Text;
 
                 var imageResponses = new ConcurrentBag<ImageResponse>();
                 var pdfImages = page.GetImages();
-                Parallel.ForEach(pdfImages, ParallelOptions, ProcessImage(tesseractEngineObjectPool, imageResponses));
+                foreach(var pdfImage in pdfImages)
+                {
+                    if (pdfImage.IsInlineImage)
+                    {
+                        Console.WriteLine();
+                    }
+
+                    if (pdfImage.IsImageMask)
+                    {
+                        Console.WriteLine();
+                    }
+                    
+                    if (pdfImage.RawBytes.Length == 0) continue;
+                    var bytes = PreparateImage(pdfImage.RawBytes);
+                    if (bytes.Length == 0) continue;
+
+                    RecognitionTextFromImage(tesseractEngineObjectPool, bytes, imageResponses);
+                }
 
                 pageResponses.Add(new PageResponse
                 {
@@ -69,7 +81,7 @@ file sealed class Program
                     Text = searchableText,
                     Images = imageResponses,
                 });
-            });
+            }
 
             await context.Response.WriteAsJsonAsync(new Response
             {
@@ -78,19 +90,6 @@ file sealed class Program
         });
 
         await app.RunAsync();
-    }
-
-    private static Action<IPdfImage> ProcessImage(ObjectPool<TesseractEngine> tesseractEngineObjectPool,
-        ConcurrentBag<ImageResponse> imageResponses)
-    {
-        return pdfImage =>
-        {
-            if (pdfImage.RawBytes.Length == 0) return;
-            var bytes = PreparateImage(pdfImage.RawBytes);
-            if (bytes.Length == 0) return;
-
-            RecognitionTextFromImage(tesseractEngineObjectPool, bytes, imageResponses);
-        };
     }
 
     private static void RecognitionTextFromImage(
