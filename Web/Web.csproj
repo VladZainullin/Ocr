@@ -4,7 +4,6 @@
         <PackageReference Include="Microsoft.Extensions.ObjectPool" />
         <PackageReference Include="PdfPig" />
         <PackageReference Include="Tesseract"/>
-        <PackageReference Include="ZLinq" />
     </ItemGroup>
     <Target Name="Copy tesseract dll" 
             Condition="'$(PROCESSOR_ARCHITECTURE)' == 'ARM64'"

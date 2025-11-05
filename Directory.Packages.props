@@ -7,6 +7,5 @@
     <PackageVersion Include="Microsoft.Extensions.ObjectPool" Version="9.0.10" />
     <PackageVersion Include="PdfPig" Version="0.1.11" />
     <PackageVersion Include="Tesseract" Version="5.2.0" />
-    <PackageVersion Include="ZLinq" Version="1.5.3" />
   </ItemGroup>
 </Project>

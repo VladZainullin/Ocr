@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
-using ZLinq;
 
 namespace Web;
 
@@ -50,8 +49,6 @@ file sealed class Program
             using var pdfDocument = PdfDocument.Open(bytes);
             var pdfPageWithImagesNumbers = pdfDocument
                 .GetPages()
-                .AsValueEnumerable()
-                .Where(p => p.NumberOfImages > 0)
                 .Select(p => p.Number)
                 .ToArray();
             
