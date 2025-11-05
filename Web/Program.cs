@@ -56,15 +56,12 @@ file sealed class Program
 
         var hyperlinks = ProcessHyperlinks(page);
 
-        var annotationResponse = ProcessAnnotations(page);
-
         return new PageResponse
         {
             Number = page.Number,
             Text = searchableText,
             Images = imageResponses,
             Hyperlinks = hyperlinks,
-            Annotations = annotationResponse
         };
     }
 
@@ -74,20 +71,6 @@ file sealed class Program
         foreach (var hyperlink in hyperlinks)
         {
             yield return hyperlink.Text;
-        }
-    }
-
-    private static IEnumerable<AnnotationResponse> ProcessAnnotations(Page page)
-    {
-        var annotations = page.GetAnnotations();
-
-        foreach (var annotation in annotations)
-        {
-            yield return new AnnotationResponse
-            {
-                Name = annotation.Name,
-                Text = annotation.Content
-            };
         }
     }
 
@@ -161,8 +144,6 @@ public sealed class PageResponse
     public required IEnumerable<ImageResponse> Images { get; init; }
 
     public required IEnumerable<string> Hyperlinks { get; init; }
-
-    public required IEnumerable<AnnotationResponse> Annotations { get; init; }
 }
 
 public sealed class ImageResponse
@@ -175,41 +156,4 @@ public sealed class AnnotationResponse
     public required string? Name { get; init; }
 
     public required string? Text { get; init; }
-}
-
-public class FileFormatDetector
-{
-    private static readonly Dictionary<string, byte[]> Signatures = new()
-    {
-        { "PNG", new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A } },
-        { "JPEG", new byte[] { 0xFF, 0xD8, 0xFF } },
-        { "GIF", new byte[] { 0x47, 0x49, 0x46 } },
-        { "BMP", new byte[] { 0x42, 0x4D } },
-        { "PDF", new byte[] { 0x25, 0x50, 0x44, 0x46 } },
-        { "ZIP", new byte[] { 0x50, 0x4B, 0x03, 0x04 } },
-        { "DOCX", new byte[] { 0x50, 0x4B, 0x03, 0x04 } },
-        { "XLSX", new byte[] { 0x50, 0x4B, 0x03, 0x04 } },
-        { "PPTX", new byte[] { 0x50, 0x4B, 0x03, 0x04 } },
-        { "MP3", new byte[] { 0x49, 0x44, 0x33 } }, // ID3 tag
-        { "MP4", new byte[] { 0x66, 0x74, 0x79, 0x70 } }, // ftyp
-        { "EXE", new byte[] { 0x4D, 0x5A } }, // MZ
-        { "DLL", new byte[] { 0x4D, 0x5A } }  // MZ
-    };
-
-    public static string Detect(byte[] bytes)
-    {
-        if (bytes.Length < 4)
-            return "UNKNOWN";
-
-        foreach (var signature in Signatures)
-        {
-            if (bytes.Length >= signature.Value.Length && 
-                bytes.Take(signature.Value.Length).SequenceEqual(signature.Value))
-            {
-                return signature.Key;
-            }
-        }
-
-        return "UNKNOWN";
-    }
 }
