@@ -109,7 +109,8 @@ file sealed class Program
             await stream.ReadExactlyAsync(bytes);
             
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
-            var pdfDocumentObjectPool = new DefaultObjectPool<PdfDocument>(new PdfDocumentPooledObjectPolicy(bytes), Environment.ProcessorCount);
+            var objectPoolProvider = context.RequestServices.GetRequiredService<ObjectPoolProvider>();
+            var pdfDocumentObjectPool = objectPoolProvider.Create(new PdfDocumentPooledObjectPolicy(bytes));
             
             var pdfDocument = pdfDocumentObjectPool.Get();
 
