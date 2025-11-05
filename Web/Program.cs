@@ -30,6 +30,68 @@ file sealed class Program
 
         await using var app = builder.Build();
 
+        app.MapPost("api/v1/documents", static async context =>
+        {
+            if (context.Request.Form.Files.Count < 1)
+            {
+                await context.Response.WriteAsJsonAsync(new Response
+                {
+                    Pages = [],
+                });
+                return;
+            }
+
+            await using var stream = context.Request.Form.Files[0].OpenReadStream();
+
+            var streamBytes = new byte[stream.Length];
+            await stream.ReadExactlyAsync(streamBytes);
+
+            using var pdfDocument = PdfDocument.Open(streamBytes);
+            var pdfPages = pdfDocument.GetPages();
+
+            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
+
+            var pageResponses = new ConcurrentBag<PageResponse>();
+
+            foreach (var pdfPage in pdfPages)
+            {
+                var pdfImages = pdfPage.GetImages();
+                var imageResponses = new ConcurrentBag<ImageResponse>();
+                foreach (var pdfImage in pdfImages)
+                {
+                    var bytes = PreparateImage(pdfImage.RawBytes);
+                    if (bytes.Length == 0) continue;
+                    var engine = tesseractEngineObjectPool.Get();
+                    try
+                    {
+                        using var imageDocument = Pix.LoadFromMemory(bytes);
+                        using var imagePage = engine.Process(imageDocument);
+                        var text = imagePage.GetText();
+                        imageResponses.Add(new ImageResponse
+                        {
+                            Text = text
+                        });
+                    }
+                    finally
+                    {
+                        tesseractEngineObjectPool.Return(engine);
+                    }
+                }
+
+                pageResponses.Add(new PageResponse
+                {
+                    Number = pdfPage.Number,
+                    Text = pdfPage.Text,
+                    Images = imageResponses,
+                });
+            }
+
+            await context.Response.WriteAsJsonAsync(new Response
+            {
+                Pages = pageResponses.OrderBy(static response => response.Number),
+            });
+        });
+
         app.MapPost("api/v2/documents", static async context =>
         {
             if (context.Request.Form.Files.Count < 1)
@@ -52,11 +114,11 @@ file sealed class Program
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var pageResponses = new ConcurrentBag<PageResponse>();
-            
+
+            var pdfDocumentObjectPool = new DefaultObjectPool<PdfDocument>(new PdfDocumentPooledObjectPolicy(bytes), Environment.ProcessorCount);
             Parallel.For(1, pdfPageWithImagesNumbers + 1, ParallelOptions, pdfPageNumber =>
             {
-                using var pdfDocument = PdfDocument.Open(bytes);
-
+                var pdfDocument = pdfDocumentObjectPool.Get();
                 var pdfPage = pdfDocument.GetPage(pdfPageNumber);
                 var pdfImages = pdfPage.GetImages();
                 var imageResponses = new ConcurrentBag<ImageResponse>();
@@ -87,6 +149,7 @@ file sealed class Program
                     Text = pdfPage.Text,
                     Images = imageResponses,
                 });
+                pdfDocumentObjectPool.Return(pdfDocument);
             });
             
             await context.Response.WriteAsJsonAsync(new Response
