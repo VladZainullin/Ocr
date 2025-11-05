@@ -27,46 +27,40 @@ file sealed class Program
 
         app.MapPost("/documents", static async context =>
         {
+            context.Request.EnableBuffering();
+            
             await using var file = context.Request.Form.Files[0].OpenReadStream();
-            using var document = PdfDocument.Open(file);
-            var pages = document.GetPages().ToArray();
+            
+            using var memoryStream = new MemoryStream();
+            await file.CopyToAsync(memoryStream);
+            memoryStream.Position = 0;
+            
+            using var document = PdfDocument.Open(memoryStream);
+            var pages = document.GetPages();
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var pageResponses = new ConcurrentBag<PageResponse>();
 
-            Parallel.ForEach(pages, page =>
+            Parallel.ForEach(pages, new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount
+            }, page =>
             {
                 var searchableText = page.Text;
 
                 var imageResponses = new ConcurrentBag<ImageResponse>();
-                var pdfImages = page.GetImages().ToArray();
-                Parallel.ForEach(pdfImages, pdfImage =>
+                var pdfImages = page.GetImages();
+                Parallel.ForEach(pdfImages, new ParallelOptions
                 {
-                    using var image = new MagickImage();
-                    try
-                    {
-                        image.Ping(pdfImage.RawBytes);
-                    }
-                    catch (MagickMissingDelegateErrorException)
-                    {
-                        return;
-                    }
-                    image.Read(pdfImage.RawBytes);
-                    image.AutoOrient();
-                    image.Despeckle();
-                    image.Grayscale();
-                    var bytes = image.ToByteArray();
+                    MaxDegreeOfParallelism = Environment.ProcessorCount
+                }, pdfImage =>
+                {
+                    if (pdfImage.RawBytes.Length == 0) return;
+                    var bytes = PreparateImage(pdfImage.RawBytes);
+                    if (bytes.Length == 0) return;
 
-                    using var imageDocument = Pix.LoadFromMemory(bytes);
-                    var engine = tesseractEngineObjectPool.Get();
-                    using var imagePage = engine.Process(imageDocument);
-                    var text = imagePage.GetText();
-                    imageResponses.Add(new ImageResponse
-                    {
-                        Text = text
-                    });
-                    tesseractEngineObjectPool.Return(engine);
+                    RecognitionTextFromImage(tesseractEngineObjectPool, bytes, imageResponses);
                 });
 
                 pageResponses.Add(new PageResponse
@@ -84,6 +78,45 @@ file sealed class Program
         });
 
         await app.RunAsync();
+    }
+
+    private static void RecognitionTextFromImage(
+        ObjectPool<TesseractEngine> tesseractEngineObjectPool,
+        byte[] bytes,
+        ConcurrentBag<ImageResponse> imageResponses)
+    {
+        var engine = tesseractEngineObjectPool.Get();
+        try
+        {
+            using var imageDocument = Pix.LoadFromMemory(bytes);
+            using var imagePage = engine.Process(imageDocument);
+            var text = imagePage.GetText();
+            imageResponses.Add(new ImageResponse
+            {
+                Text = text
+            });
+        }
+        finally
+        {
+            tesseractEngineObjectPool.Return(engine);
+        }
+    }
+
+    private static byte[] PreparateImage(Span<byte> bytes)
+    {
+        using var image = new MagickImage();
+        try
+        {
+            image.Read(bytes);
+            image.AutoOrient();
+            image.Despeckle();
+            image.Grayscale();
+            return image.ToByteArray();
+        }
+        catch (MagickMissingDelegateErrorException)
+        {
+            return [];
+        }
     }
 }
 
