@@ -31,7 +31,7 @@ file sealed class Program
 
         await using var app = builder.Build();
 
-        app.MapPost("/documents", static async context =>
+        app.MapPost("api/v2/documents", static async context =>
         {
             if (context.Request.Form.Files.Count < 1)
             {
