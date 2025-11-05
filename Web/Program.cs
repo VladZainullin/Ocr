@@ -1,3 +1,4 @@
+using System.Collections.Concurrent;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
@@ -27,12 +28,73 @@ file sealed class Program
 
         app.MapPost("/documents", static async context =>
         {
-            using var engine = new TesseractEngine("./tesseract", "rus");
             await using var file = context.Request.Form.Files[0].OpenReadStream();
             using var document = PdfDocument.Open(file);
-            var pages = document.GetPages();
+            var pages = document.GetPages().ToArray();
+            
+            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
-            var pageResponses = ProcessPages(pages, engine);
+            var pageResponses = new ConcurrentBag<PageResponse>();
+            
+            Parallel.ForEach(pages, page =>
+            {
+                var searchableText = page.Text;
+
+                var imageResponses = new ConcurrentBag<ImageResponse>();
+                try
+                {
+                    var pdfImages = page.GetImages().ToArray();
+                    Parallel.ForEach(pdfImages, pdfImage =>
+                    {
+                        using var image = new MagickImage();
+
+                        try
+                        {
+                            image.Ping(pdfImage.RawBytes);
+                        }
+                        catch (MagickMissingDelegateErrorException)
+                        {
+                            return;
+                        }
+
+                        try
+                        {
+                            image.Read(pdfImage.RawBytes);
+                        }
+                        catch (Exception e)
+                        {
+                            Console.WriteLine(e);
+                            throw;
+                        }
+                        image.AutoOrient();
+                        image.Despeckle();
+                        image.Grayscale();
+                        var bytes = image.ToByteArray();
+                    
+                        using var imageDocument = Pix.LoadFromMemory(bytes);
+                        var engine = tesseractEngineObjectPool.Get();
+                        using var imagePage = engine.Process(imageDocument);
+                        var text = imagePage.GetText();
+                        imageResponses.Add(new ImageResponse
+                        {
+                            Text = text
+                        });
+                        tesseractEngineObjectPool.Return(engine);
+                    });
+
+                    pageResponses.Add(new PageResponse
+                    {
+                        Number = page.Number,
+                        Text = searchableText,
+                        Images = imageResponses,
+                    });
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e);
+                    throw;
+                }
+            });
 
             await context.Response.WriteAsJsonAsync(new Response
             {
@@ -41,28 +103,6 @@ file sealed class Program
         });
 
         await app.RunAsync();
-    }
-
-    private static IEnumerable<PageResponse> ProcessPages(IEnumerable<Page> pages, TesseractEngine engine)
-    {
-        return pages.Select(page => ProcessPage(engine, page));
-    }
-
-    private static PageResponse ProcessPage(TesseractEngine engine, Page page)
-    {
-        var searchableText = page.Text;
-
-        var imageResponses = ProcessImages(page, engine);
-
-        var hyperlinks = ProcessHyperlinks(page);
-
-        return new PageResponse
-        {
-            Number = page.Number,
-            Text = searchableText,
-            Images = imageResponses,
-            Hyperlinks = hyperlinks,
-        };
     }
 
     private static IEnumerable<string> ProcessHyperlinks(Page page)
@@ -74,60 +114,38 @@ file sealed class Program
         }
     }
 
-    private static IEnumerable<ImageResponse> ProcessImages(Page page, TesseractEngine engine)
+    private static IEnumerable<ImageResponse> ProcessImages(Page page)
     {
         var pdfImages = page.GetImages();
         foreach (var pdfImage in pdfImages)
         {
-            if (pdfImage.TryGetPng(out var pngBytes))
-            {
-                using var imageDocument = Pix.LoadFromMemory(pngBytes);
-                using var imagePage = engine.Process(imageDocument);
-                var text = imagePage.GetText();
-                yield return new ImageResponse
-                {
-                    Text = text
-                };
-            }
-            else if (pdfImage.TryGetBytesAsMemory(out var memory))
-            {
-                var bytes = memory.ToArray();
-                using var imageDocument = Pix.LoadFromMemory(bytes);
-                using var imagePage = engine.Process(imageDocument);
-                var text = imagePage.GetText();
-                yield return new ImageResponse
-                {
-                    Text = text
-                };
-            }
-            else
-            {
-                using var image = new MagickImage();
+            
+            using var image = new MagickImage();
 
-                try
-                {
-                    image.Ping(pdfImage.RawBytes);
-                }
-                catch (MagickMissingDelegateErrorException)
-                {
-                    continue;
-                }
-                
-                image.Read(pdfImage.RawBytes);
-                image.AutoOrient();
-                image.Despeckle();
-                image.Grayscale();
-                var stream = new MemoryStream();
-                image.Write(stream);
-                
-                using var imageDocument = Pix.LoadFromMemory(stream.ToArray());
-                using var imagePage = engine.Process(imageDocument);
-                var text = imagePage.GetText();
-                yield return new ImageResponse
-                {
-                    Text = text
-                };
+            try
+            {
+                image.Ping(pdfImage.RawBytes);
             }
+            catch (MagickMissingDelegateErrorException)
+            {
+                continue;
+            }
+                
+            image.Read(pdfImage.RawBytes);
+            image.AutoOrient();
+            image.Despeckle();
+            image.Grayscale();
+            var stream = new MemoryStream();
+            image.Write(stream);
+                
+            using var imageDocument = Pix.LoadFromMemory(stream.ToArray());
+            using var engine = new TesseractEngine("./tesseract", "rus");
+            using var imagePage = engine.Process(imageDocument);
+            var text = imagePage.GetText();
+            yield return new ImageResponse
+            {
+                Text = text
+            };
         }
     }
 }
@@ -144,8 +162,6 @@ public sealed class PageResponse
     public required string Text { get; init; }
 
     public required IEnumerable<ImageResponse> Images { get; init; }
-
-    public required IEnumerable<string> Hyperlinks { get; init; }
 }
 
 public sealed class ImageResponse
