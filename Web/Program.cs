@@ -104,50 +104,6 @@ file sealed class Program
 
         await app.RunAsync();
     }
-
-    private static IEnumerable<string> ProcessHyperlinks(Page page)
-    {
-        var hyperlinks = page.GetHyperlinks();
-        foreach (var hyperlink in hyperlinks)
-        {
-            yield return hyperlink.Text;
-        }
-    }
-
-    private static IEnumerable<ImageResponse> ProcessImages(Page page)
-    {
-        var pdfImages = page.GetImages();
-        foreach (var pdfImage in pdfImages)
-        {
-            
-            using var image = new MagickImage();
-
-            try
-            {
-                image.Ping(pdfImage.RawBytes);
-            }
-            catch (MagickMissingDelegateErrorException)
-            {
-                continue;
-            }
-                
-            image.Read(pdfImage.RawBytes);
-            image.AutoOrient();
-            image.Despeckle();
-            image.Grayscale();
-            var stream = new MemoryStream();
-            image.Write(stream);
-                
-            using var imageDocument = Pix.LoadFromMemory(stream.ToArray());
-            using var engine = new TesseractEngine("./tesseract", "rus");
-            using var imagePage = engine.Process(imageDocument);
-            var text = imagePage.GetText();
-            yield return new ImageResponse
-            {
-                Text = text
-            };
-        }
-    }
 }
 
 public sealed class Response
