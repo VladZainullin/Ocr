@@ -4,11 +4,17 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
 
 namespace Web;
 
 file sealed class Program
 {
+    private static readonly ParallelOptions ParallelOptions = new()
+    {
+        MaxDegreeOfParallelism = Environment.ProcessorCount
+    };
+
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -27,41 +33,35 @@ file sealed class Program
 
         app.MapPost("/documents", static async context =>
         {
-            context.Request.EnableBuffering();
-            
+            if (context.Request.Form.Files.Count < 1)
+            {
+                await context.Response.WriteAsJsonAsync(new Response
+                {
+                    Pages = [],
+                });
+                return;
+            }
+
             await using var file = context.Request.Form.Files[0].OpenReadStream();
-            
+
             using var memoryStream = new MemoryStream();
             await file.CopyToAsync(memoryStream);
             memoryStream.Position = 0;
-            
+
             using var document = PdfDocument.Open(memoryStream);
             var pages = document.GetPages();
-
+            
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var pageResponses = new ConcurrentBag<PageResponse>();
 
-            Parallel.ForEach(pages, new ParallelOptions
-            {
-                MaxDegreeOfParallelism = Environment.ProcessorCount
-            }, page =>
+            Parallel.ForEach(pages, ParallelOptions, page =>
             {
                 var searchableText = page.Text;
 
                 var imageResponses = new ConcurrentBag<ImageResponse>();
                 var pdfImages = page.GetImages();
-                Parallel.ForEach(pdfImages, new ParallelOptions
-                {
-                    MaxDegreeOfParallelism = Environment.ProcessorCount
-                }, pdfImage =>
-                {
-                    if (pdfImage.RawBytes.Length == 0) return;
-                    var bytes = PreparateImage(pdfImage.RawBytes);
-                    if (bytes.Length == 0) return;
-
-                    RecognitionTextFromImage(tesseractEngineObjectPool, bytes, imageResponses);
-                });
+                Parallel.ForEach(pdfImages, ParallelOptions, ProcessImage(tesseractEngineObjectPool, imageResponses));
 
                 pageResponses.Add(new PageResponse
                 {
@@ -78,6 +78,19 @@ file sealed class Program
         });
 
         await app.RunAsync();
+    }
+
+    private static Action<IPdfImage> ProcessImage(ObjectPool<TesseractEngine> tesseractEngineObjectPool,
+        ConcurrentBag<ImageResponse> imageResponses)
+    {
+        return pdfImage =>
+        {
+            if (pdfImage.RawBytes.Length == 0) return;
+            var bytes = PreparateImage(pdfImage.RawBytes);
+            if (bytes.Length == 0) return;
+
+            RecognitionTextFromImage(tesseractEngineObjectPool, bytes, imageResponses);
+        };
     }
 
     private static void RecognitionTextFromImage(
