@@ -108,15 +108,14 @@ file sealed class Program
             var bytes = new byte[stream.Length];
             await stream.ReadExactlyAsync(bytes);
             
-            using var pdfDocument = PdfDocument.Open(bytes);
-            var pdfPageWithImagesNumbers = pdfDocument.GetPages().Count();
-            
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
+            var pdfDocumentObjectPool = new DefaultObjectPool<PdfDocument>(new PdfDocumentPooledObjectPolicy(bytes), Environment.ProcessorCount);
+            
+            var pdfDocument = pdfDocumentObjectPool.Get();
 
             var pageResponses = new ConcurrentBag<PageResponse>();
-
-            var pdfDocumentObjectPool = new DefaultObjectPool<PdfDocument>(new PdfDocumentPooledObjectPolicy(bytes), Environment.ProcessorCount);
-            Parallel.For(1, pdfPageWithImagesNumbers + 1, ParallelOptions, pdfPageNumber =>
+            
+            Parallel.For(1, pdfDocument.NumberOfPages + 1, ParallelOptions, pdfPageNumber =>
             {
                 var pdfDocument = pdfDocumentObjectPool.Get();
                 var pdfPage = pdfDocument.GetPage(pdfPageNumber);
@@ -151,6 +150,8 @@ file sealed class Program
                 });
                 pdfDocumentObjectPool.Return(pdfDocument);
             });
+            
+            pdfDocumentObjectPool.Return(pdfDocument);
             
             await context.Response.WriteAsJsonAsync(new Response
             {
