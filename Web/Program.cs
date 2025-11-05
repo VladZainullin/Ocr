@@ -4,7 +4,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
-using Page = UglyToad.PdfPig.Content.Page;
 
 namespace Web;
 
@@ -31,69 +30,51 @@ file sealed class Program
             await using var file = context.Request.Form.Files[0].OpenReadStream();
             using var document = PdfDocument.Open(file);
             var pages = document.GetPages().ToArray();
-            
+
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var pageResponses = new ConcurrentBag<PageResponse>();
-            
+
             Parallel.ForEach(pages, page =>
             {
                 var searchableText = page.Text;
 
                 var imageResponses = new ConcurrentBag<ImageResponse>();
-                try
+                var pdfImages = page.GetImages().ToArray();
+                Parallel.ForEach(pdfImages, pdfImage =>
                 {
-                    var pdfImages = page.GetImages().ToArray();
-                    Parallel.ForEach(pdfImages, pdfImage =>
+                    using var image = new MagickImage();
+                    try
                     {
-                        using var image = new MagickImage();
-
-                        try
-                        {
-                            image.Ping(pdfImage.RawBytes);
-                        }
-                        catch (MagickMissingDelegateErrorException)
-                        {
-                            return;
-                        }
-
-                        try
-                        {
-                            image.Read(pdfImage.RawBytes);
-                        }
-                        catch (Exception e)
-                        {
-                            Console.WriteLine(e);
-                            throw;
-                        }
-                        image.AutoOrient();
-                        image.Despeckle();
-                        image.Grayscale();
-                        var bytes = image.ToByteArray();
-                    
-                        using var imageDocument = Pix.LoadFromMemory(bytes);
-                        var engine = tesseractEngineObjectPool.Get();
-                        using var imagePage = engine.Process(imageDocument);
-                        var text = imagePage.GetText();
-                        imageResponses.Add(new ImageResponse
-                        {
-                            Text = text
-                        });
-                        tesseractEngineObjectPool.Return(engine);
-                    });
-
-                    pageResponses.Add(new PageResponse
+                        image.Ping(pdfImage.RawBytes);
+                    }
+                    catch (MagickMissingDelegateErrorException)
                     {
-                        Number = page.Number,
-                        Text = searchableText,
-                        Images = imageResponses,
+                        return;
+                    }
+                    image.Read(pdfImage.RawBytes);
+                    image.AutoOrient();
+                    image.Despeckle();
+                    image.Grayscale();
+                    var bytes = image.ToByteArray();
+
+                    using var imageDocument = Pix.LoadFromMemory(bytes);
+                    var engine = tesseractEngineObjectPool.Get();
+                    using var imagePage = engine.Process(imageDocument);
+                    var text = imagePage.GetText();
+                    imageResponses.Add(new ImageResponse
+                    {
+                        Text = text
                     });
-                }
-                catch (Exception e)
+                    tesseractEngineObjectPool.Return(engine);
+                });
+
+                pageResponses.Add(new PageResponse
                 {
-                    Console.WriteLine(e);
-                    throw;
-                }
+                    Number = page.Number,
+                    Text = searchableText,
+                    Images = imageResponses,
+                });
             });
 
             await context.Response.WriteAsJsonAsync(new Response
