@@ -47,16 +47,13 @@ file sealed class Program
             await stream.ReadExactlyAsync(bytes);
             
             using var pdfDocument = PdfDocument.Open(bytes);
-            var pdfPageWithImagesNumbers = pdfDocument
-                .GetPages()
-                .Select(p => p.Number)
-                .ToArray();
+            var pdfPageWithImagesNumbers = pdfDocument.GetPages().Count();
             
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var pageResponses = new ConcurrentBag<PageResponse>();
             
-            Parallel.ForEach(pdfPageWithImagesNumbers, ParallelOptions, pdfPageNumber =>
+            Parallel.For(1, pdfPageWithImagesNumbers + 1, ParallelOptions, pdfPageNumber =>
             {
                 using var pdfDocument = PdfDocument.Open(bytes);
 
@@ -94,7 +91,7 @@ file sealed class Program
             
             await context.Response.WriteAsJsonAsync(new Response
             {
-                Pages = pageResponses,
+                Pages = pageResponses.OrderBy(static response => response.Number),
             });
         });
 
