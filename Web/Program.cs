@@ -42,47 +42,57 @@ file sealed class Program
             }
 
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
-            using var pdfDocument = PdfDocument.Open(stream);
+            
+            var bytes = new byte[stream.Length];
+            await stream.ReadExactlyAsync(bytes);
+            
+            using var pdfDocument = PdfDocument.Open(bytes);
+            var pdfPageWithImagesNumbers = pdfDocument
+                .GetPages()
+                .Where(p => p.NumberOfImages > 0)
+                .Select(p => p.Number)
+                .ToArray();
             
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var pageResponses = new ConcurrentBag<PageResponse>();
             
-            var pages = pdfDocument.GetPages();
-
-            foreach(var page in pages)
+            Parallel.ForEach(pdfPageWithImagesNumbers, ParallelOptions, pdfPageNumber =>
             {
-                var searchableText = page.Text;
+                using var pdfDocument = PdfDocument.Open(bytes);
 
+                var pdfPage = pdfDocument.GetPage(pdfPageNumber);
+                var pdfImages = pdfPage.GetImages();
                 var imageResponses = new ConcurrentBag<ImageResponse>();
-                var pdfImages = page.GetImages();
-                foreach(var pdfImage in pdfImages)
+                foreach (var pdfImage in pdfImages)
                 {
-                    if (pdfImage.IsInlineImage)
-                    {
-                        Console.WriteLine();
-                    }
-
-                    if (pdfImage.IsImageMask)
-                    {
-                        Console.WriteLine();
-                    }
-                    
-                    if (pdfImage.RawBytes.Length == 0) continue;
                     var bytes = PreparateImage(pdfImage.RawBytes);
                     if (bytes.Length == 0) continue;
-
-                    RecognitionTextFromImage(tesseractEngineObjectPool, bytes, imageResponses);
+                    var engine = tesseractEngineObjectPool.Get();
+                    try
+                    {
+                        using var imageDocument = Pix.LoadFromMemory(bytes);
+                        using var imagePage = engine.Process(imageDocument);
+                        var text = imagePage.GetText();
+                        imageResponses.Add(new ImageResponse
+                        {
+                            Text = text
+                        });
+                    }
+                    finally
+                    {
+                        tesseractEngineObjectPool.Return(engine);
+                    }
                 }
-
+                
                 pageResponses.Add(new PageResponse
                 {
-                    Number = page.Number,
-                    Text = searchableText,
+                    Number = pdfPage.Number,
+                    Text = pdfPage.Text,
                     Images = imageResponses,
                 });
-            }
-
+            });
+            
             await context.Response.WriteAsJsonAsync(new Response
             {
                 Pages = pageResponses,
