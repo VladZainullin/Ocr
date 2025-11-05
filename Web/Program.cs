@@ -119,11 +119,21 @@ file sealed class Program
             }
             else
             {
-                var image = new MagickImage(pdfImage.RawBytes);
-                image.Grayscale();
-                image.Format = MagickFormat.WebP;
+                using var image = new MagickImage();
+
+                try
+                {
+                    image.Ping(pdfImage.RawBytes);
+                }
+                catch (MagickMissingDelegateErrorException)
+                {
+                    continue;
+                }
+                
+                image.Read(pdfImage.RawBytes);
                 var stream = new MemoryStream();
                 image.Write(stream);
+                stream.Seek(0, SeekOrigin.Begin);
                 
                 using var imageDocument = Pix.LoadFromMemory(stream.ToArray());
                 using var imagePage = engine.Process(imageDocument);
@@ -165,4 +175,41 @@ public sealed class AnnotationResponse
     public required string? Name { get; init; }
 
     public required string? Text { get; init; }
+}
+
+public class FileFormatDetector
+{
+    private static readonly Dictionary<string, byte[]> Signatures = new()
+    {
+        { "PNG", new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A } },
+        { "JPEG", new byte[] { 0xFF, 0xD8, 0xFF } },
+        { "GIF", new byte[] { 0x47, 0x49, 0x46 } },
+        { "BMP", new byte[] { 0x42, 0x4D } },
+        { "PDF", new byte[] { 0x25, 0x50, 0x44, 0x46 } },
+        { "ZIP", new byte[] { 0x50, 0x4B, 0x03, 0x04 } },
+        { "DOCX", new byte[] { 0x50, 0x4B, 0x03, 0x04 } },
+        { "XLSX", new byte[] { 0x50, 0x4B, 0x03, 0x04 } },
+        { "PPTX", new byte[] { 0x50, 0x4B, 0x03, 0x04 } },
+        { "MP3", new byte[] { 0x49, 0x44, 0x33 } }, // ID3 tag
+        { "MP4", new byte[] { 0x66, 0x74, 0x79, 0x70 } }, // ftyp
+        { "EXE", new byte[] { 0x4D, 0x5A } }, // MZ
+        { "DLL", new byte[] { 0x4D, 0x5A } }  // MZ
+    };
+
+    public static string Detect(byte[] bytes)
+    {
+        if (bytes.Length < 4)
+            return "UNKNOWN";
+
+        foreach (var signature in Signatures)
+        {
+            if (bytes.Length >= signature.Value.Length && 
+                bytes.Take(signature.Value.Length).SequenceEqual(signature.Value))
+            {
+                return signature.Key;
+            }
+        }
+
+        return "UNKNOWN";
+    }
 }
