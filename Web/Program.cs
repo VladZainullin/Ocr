@@ -114,9 +114,11 @@ file sealed class Program
                 }
                 
                 image.Read(pdfImage.RawBytes);
+                image.AutoOrient();
+                image.Despeckle();
+                image.Grayscale();
                 var stream = new MemoryStream();
                 image.Write(stream);
-                stream.Seek(0, SeekOrigin.Begin);
                 
                 using var imageDocument = Pix.LoadFromMemory(stream.ToArray());
                 using var imagePage = engine.Process(imageDocument);
@@ -149,11 +151,4 @@ public sealed class PageResponse
 public sealed class ImageResponse
 {
     public required string Text { get; init; }
-}
-
-public sealed class AnnotationResponse
-{
-    public required string? Name { get; init; }
-
-    public required string? Text { get; init; }
 }
