@@ -113,7 +113,7 @@ file sealed class Program
                 ? new byte[stream.Length]
                 : ArrayPool<byte>.Shared.Rent((int)stream.Length);
             
-            await stream.ReadExactlyAsync(buffer);
+            await stream.ReadExactlyAsync(buffer, 0, (int)stream.Length);
             
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
             var objectPoolProvider = context.RequestServices.GetRequiredService<ObjectPoolProvider>();
