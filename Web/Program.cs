@@ -12,7 +12,7 @@ file sealed class Program
 {
     private static readonly ParallelOptions ParallelOptions = new()
     {
-        MaxDegreeOfParallelism = 1
+        MaxDegreeOfParallelism = Environment.ProcessorCount,
     };
 
     public static async Task Main(string[] args)
