@@ -109,12 +109,15 @@ file sealed class Program
 
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
 
-            var bytes = ArrayPool<byte>.Shared.Rent((int)stream.Length);
-            await stream.ReadExactlyAsync(bytes);
+            var buffer = stream.Length > int.MaxValue 
+                ? new byte[stream.Length]
+                : ArrayPool<byte>.Shared.Rent((int)stream.Length);
+            
+            await stream.ReadExactlyAsync(buffer);
             
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
             var objectPoolProvider = context.RequestServices.GetRequiredService<ObjectPoolProvider>();
-            var pdfDocumentObjectPool = objectPoolProvider.Create(new PdfDocumentPooledObjectPolicy(bytes));
+            var pdfDocumentObjectPool = objectPoolProvider.Create(new PdfDocumentPooledObjectPolicy(buffer));
             
             var pdfDocument = pdfDocumentObjectPool.Get();
             var pdfDocumentNumberOfPage = pdfDocument.NumberOfPages;
