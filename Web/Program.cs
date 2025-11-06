@@ -35,7 +35,9 @@ file sealed class Program
 
         app.MapPost("api/v1/documents", static async context =>
         {
-            if (context.Request.Form.Files.Count < 1)
+            if (context.Request.Form.Files.Count < 1
+                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
+                || context.Request.Form.Files[0].Length == 0)
             {
                 await context.Response.WriteAsJsonAsync(new Response
                 {
@@ -47,12 +49,12 @@ file sealed class Program
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
 
             using var pdfDocument = PdfDocument.Open(stream);
-            var pdfPages = pdfDocument.GetPages();
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var pageResponses = new PageResponse[pdfDocument.NumberOfPages + 1];
 
+            var pdfPages = pdfDocument.GetPages();
             foreach (var pdfPage in pdfPages)
             {
                 var pdfImages = pdfPage.GetImages();
@@ -74,7 +76,7 @@ file sealed class Program
                         tesseractEngineObjectPool.Return(engine);
                     }
                 }
-
+            
                 pageResponses[pdfPage.Number] = new PageResponse
                 {
                     Number = pdfPage.Number,
@@ -91,7 +93,7 @@ file sealed class Program
 
         app.MapPost("api/v2/documents", static async context =>
         {
-            if (context.Request.Form.Files.Count < 1 
+            if (context.Request.Form.Files.Count < 1
                 || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
                 || context.Request.Form.Files[0].Length == 0)
             {
@@ -104,22 +106,23 @@ file sealed class Program
 
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
 
-            var buffer = stream.Length > int.MaxValue 
+            var buffer = stream.Length > int.MaxValue
                 ? new byte[stream.Length]
                 : ArrayPool<byte>.Shared.Rent((int)stream.Length);
-            
+
             await stream.ReadExactlyAsync(buffer, 0, (int)stream.Length);
-            
+
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
             var objectPoolProvider = context.RequestServices.GetRequiredService<ObjectPoolProvider>();
-            var pdfDocumentObjectPool = objectPoolProvider.Create(new PdfDocumentPooledObjectPolicy(() => PdfDocument.Open(buffer)));
-            
+            var pdfDocumentObjectPool =
+                objectPoolProvider.Create(new PdfDocumentPooledObjectPolicy(() => PdfDocument.Open(buffer)));
+
             var pdfDocument = pdfDocumentObjectPool.Get();
             var pdfDocumentNumberOfPage = pdfDocument.NumberOfPages;
             pdfDocumentObjectPool.Return(pdfDocument);
 
             var pageResponses = new ConcurrentBag<PageResponse>();
-            
+
             Parallel.For(1, pdfDocumentNumberOfPage + 1, ParallelOptions, pdfPageNumber =>
             {
                 var pdfDocument = pdfDocumentObjectPool.Get();
@@ -145,7 +148,7 @@ file sealed class Program
                         tesseractEngineObjectPool.Return(engine);
                     }
                 }
-                
+
                 pageResponses.Add(new PageResponse
                 {
                     Number = pdfPage.Number,
@@ -154,7 +157,7 @@ file sealed class Program
                 });
                 pdfDocumentObjectPool.Return(pdfDocument);
             });
-            
+
             await context.Response.WriteAsJsonAsync(new Response
             {
                 Pages = pageResponses.OrderBy(static response => response.Number),
