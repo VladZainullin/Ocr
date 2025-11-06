@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
+using UglyToad.PdfPig.Content;
 
 namespace Web;
 
@@ -11,7 +12,7 @@ file sealed class Program
 {
     private static readonly ParallelOptions ParallelOptions = new()
     {
-        MaxDegreeOfParallelism = Environment.ProcessorCount
+        MaxDegreeOfParallelism = 1
     };
 
     public static async Task Main(string[] args)
@@ -126,12 +127,13 @@ file sealed class Program
                 var imageResponses = new ConcurrentBag<ImageResponse>();
                 foreach (var pdfImage in pdfImages)
                 {
-                    var bytes = PreparateImage(pdfImage.RawBytes);
-                    if (bytes.Length == 0) continue;
+                    var imageBytes = GetImageBytes(pdfImage);
+                    if (imageBytes.Length == 0) continue;
+                    var preparateImageBytes = PreparateImage(imageBytes);
                     var engine = tesseractEngineObjectPool.Get();
                     try
                     {
-                        using var imageDocument = Pix.LoadFromMemory(bytes);
+                        using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
                         using var imagePage = engine.Process(imageDocument);
                         var text = imagePage.GetText();
                         imageResponses.Add(new ImageResponse
@@ -163,26 +165,19 @@ file sealed class Program
         await app.RunAsync();
     }
 
-    private static void RecognitionTextFromImage(
-        ObjectPool<TesseractEngine> tesseractEngineObjectPool,
-        byte[] bytes,
-        ConcurrentBag<ImageResponse> imageResponses)
+    private static byte[] GetImageBytes(IPdfImage pdfImage)
     {
-        var engine = tesseractEngineObjectPool.Get();
-        try
+        if (pdfImage.TryGetPng(out var pngImageBytes))
         {
-            using var imageDocument = Pix.LoadFromMemory(bytes);
-            using var imagePage = engine.Process(imageDocument);
-            var text = imagePage.GetText();
-            imageResponses.Add(new ImageResponse
-            {
-                Text = text
-            });
+            return pngImageBytes;
         }
-        finally
+
+        if (pdfImage.TryGetBytesAsMemory(out var memory))
         {
-            tesseractEngineObjectPool.Return(engine);
+            return memory.Span.ToArray();
         }
+
+        return pdfImage.RawBytes.ToArray();
     }
 
     private static byte[] PreparateImage(Span<byte> bytes)
@@ -192,6 +187,7 @@ file sealed class Program
         {
             image.Read(bytes);
             image.AutoOrient();
+            image.AutoLevel();
             image.Despeckle();
             image.Grayscale();
             return image.ToByteArray();
