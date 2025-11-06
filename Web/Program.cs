@@ -165,7 +165,7 @@ file sealed class Program
         await app.RunAsync();
     }
 
-    private static byte[] GetImageBytes(IPdfImage pdfImage)
+    private static Span<byte> GetImageBytes(IPdfImage pdfImage)
     {
         if (pdfImage.TryGetPng(out var pngImageBytes))
         {
@@ -174,10 +174,10 @@ file sealed class Program
 
         if (pdfImage.TryGetBytesAsMemory(out var memory))
         {
-            return memory.Span.ToArray();
+            return memory.Span;
         }
 
-        return pdfImage.RawBytes.ToArray();
+        return pdfImage.RawBytes;
     }
 
     private static byte[] PreparateImage(Span<byte> bytes)
