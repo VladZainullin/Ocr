@@ -113,10 +113,12 @@ file sealed class Program
             var pdfDocumentObjectPool = objectPoolProvider.Create(new PdfDocumentPooledObjectPolicy(bytes));
             
             var pdfDocument = pdfDocumentObjectPool.Get();
+            var pdfDocumentNumberOfPage = pdfDocument.NumberOfPages;
+            pdfDocumentObjectPool.Return(pdfDocument);
 
             var pageResponses = new ConcurrentBag<PageResponse>();
             
-            Parallel.For(1, pdfDocument.NumberOfPages + 1, ParallelOptions, pdfPageNumber =>
+            Parallel.For(1, pdfDocumentNumberOfPage + 1, ParallelOptions, pdfPageNumber =>
             {
                 var pdfDocument = pdfDocumentObjectPool.Get();
                 var pdfPage = pdfDocument.GetPage(pdfPageNumber);
@@ -151,8 +153,6 @@ file sealed class Program
                 });
                 pdfDocumentObjectPool.Return(pdfDocument);
             });
-            
-            pdfDocumentObjectPool.Return(pdfDocument);
             
             await context.Response.WriteAsJsonAsync(new Response
             {
