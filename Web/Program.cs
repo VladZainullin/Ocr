@@ -46,20 +46,17 @@ file sealed class Program
 
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
 
-            var streamBytes = new byte[stream.Length];
-            await stream.ReadExactlyAsync(streamBytes);
-
-            using var pdfDocument = PdfDocument.Open(streamBytes);
+            using var pdfDocument = PdfDocument.Open(stream);
             var pdfPages = pdfDocument.GetPages();
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
-            var pageResponses = new ConcurrentBag<PageResponse>();
+            var pageResponses = new PageResponse[pdfDocument.NumberOfPages + 1];
 
             foreach (var pdfPage in pdfPages)
             {
                 var pdfImages = pdfPage.GetImages();
-                var imageResponses = new ConcurrentBag<ImageResponse>();
+                var imageResponses = new LinkedList<string>();
                 foreach (var pdfImage in pdfImages)
                 {
                     var bytes = PreparateImage(pdfImage.RawBytes);
@@ -70,10 +67,7 @@ file sealed class Program
                         using var imageDocument = Pix.LoadFromMemory(bytes);
                         using var imagePage = engine.Process(imageDocument);
                         var text = imagePage.GetText();
-                        imageResponses.Add(new ImageResponse
-                        {
-                            Text = text
-                        });
+                        imageResponses.AddLast(text);
                     }
                     finally
                     {
@@ -81,17 +75,17 @@ file sealed class Program
                     }
                 }
 
-                pageResponses.Add(new PageResponse
+                pageResponses[pdfPage.Number] = new PageResponse
                 {
                     Number = pdfPage.Number,
                     Text = pdfPage.Text,
-                    Images = imageResponses,
-                });
+                    Images = imageResponses
+                };
             }
 
             await context.Response.WriteAsJsonAsync(new Response
             {
-                Pages = pageResponses.OrderBy(static response => response.Number),
+                Pages = pageResponses,
             });
         });
 
@@ -131,7 +125,7 @@ file sealed class Program
                 var pdfDocument = pdfDocumentObjectPool.Get();
                 var pdfPage = pdfDocument.GetPage(pdfPageNumber);
                 var pdfImages = pdfPage.GetImages();
-                var imageResponses = new ConcurrentBag<ImageResponse>();
+                var imageResponses = new List<string>();
                 foreach (var pdfImage in pdfImages)
                 {
                     var imageBytes = GetImageBytes(pdfImage);
@@ -144,10 +138,7 @@ file sealed class Program
                         using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
                         using var imagePage = engine.Process(imageDocument);
                         var text = imagePage.GetText();
-                        imageResponses.Add(new ImageResponse
-                        {
-                            Text = text
-                        });
+                        imageResponses.Add(text);
                     }
                     finally
                     {
@@ -219,10 +210,5 @@ public sealed class PageResponse
 
     public required string Text { get; init; }
 
-    public required IEnumerable<ImageResponse> Images { get; init; }
-}
-
-public sealed class ImageResponse
-{
-    public required string Text { get; init; }
+    public required IEnumerable<string> Images { get; init; }
 }
