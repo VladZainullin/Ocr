@@ -117,7 +117,7 @@ file sealed class Program
             
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
             var objectPoolProvider = context.RequestServices.GetRequiredService<ObjectPoolProvider>();
-            var pdfDocumentObjectPool = objectPoolProvider.Create(new PdfDocumentPooledObjectPolicy(buffer));
+            var pdfDocumentObjectPool = objectPoolProvider.Create(new PdfDocumentPooledObjectPolicy(() => PdfDocument.Open(buffer)));
             
             var pdfDocument = pdfDocumentObjectPool.Get();
             var pdfDocumentNumberOfPage = pdfDocument.NumberOfPages;
