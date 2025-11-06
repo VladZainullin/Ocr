@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Net.Mime;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
@@ -95,7 +96,8 @@ file sealed class Program
 
         app.MapPost("api/v2/documents", static async context =>
         {
-            if (context.Request.Form.Files.Count < 1)
+            if (context.Request.Form.Files.Count < 1 
+                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf)
             {
                 await context.Response.WriteAsJsonAsync(new Response
                 {
