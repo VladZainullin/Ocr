@@ -1,3 +1,4 @@
+using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net.Mime;
 using ImageMagick;
@@ -107,8 +108,8 @@ file sealed class Program
             }
 
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
-            
-            var bytes = new byte[stream.Length];
+
+            var bytes = ArrayPool<byte>.Shared.Rent((int)stream.Length);
             await stream.ReadExactlyAsync(bytes);
             
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
