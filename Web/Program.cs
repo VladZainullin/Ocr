@@ -52,7 +52,7 @@ file sealed class Program
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
-            var pageResponses = new PageResponse[pdfDocument.NumberOfPages + 1];
+            var pageResponses = ArrayPool<PageResponse>.Shared.Rent(pdfDocument.NumberOfPages + 1);
 
             var pdfPages = pdfDocument.GetPages();
             foreach (var pdfPage in pdfPages)
@@ -61,12 +61,14 @@ file sealed class Program
                 var imageResponses = new LinkedList<string>();
                 foreach (var pdfImage in pdfImages)
                 {
-                    var bytes = PreparateImage(pdfImage.RawBytes);
-                    if (bytes.Length == 0) continue;
+                    var imageBytes = GetImageBytes(pdfImage);
+                    if (imageBytes.Length == 0) continue;
+                    var preparateImageBytes = PreparateImage(imageBytes);
                     var engine = tesseractEngineObjectPool.Get();
+                    if (preparateImageBytes.Length == 0) continue;
                     try
                     {
-                        using var imageDocument = Pix.LoadFromMemory(bytes);
+                        using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
                         using var imagePage = engine.Process(imageDocument);
                         var text = imagePage.GetText();
                         imageResponses.AddLast(text);
@@ -76,7 +78,7 @@ file sealed class Program
                         tesseractEngineObjectPool.Return(engine);
                     }
                 }
-            
+
                 pageResponses[pdfPage.Number] = new PageResponse
                 {
                     Number = pdfPage.Number,
