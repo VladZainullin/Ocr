@@ -136,6 +136,7 @@ file sealed class Program
                     var imageBytes = GetImageBytes(pdfImage);
                     if (imageBytes.Length == 0) continue;
                     var preparateImageBytes = PreparateImage(imageBytes);
+                    if (preparateImageBytes.Length == 0) continue;
                     var engine = tesseractEngineObjectPool.Get();
                     try
                     {
