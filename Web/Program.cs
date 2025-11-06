@@ -190,6 +190,7 @@ file sealed class Program
             image.AutoLevel();
             image.Despeckle();
             image.Grayscale();
+            image.Strip();
             return image.ToByteArray();
         }
         catch (MagickMissingDelegateErrorException)
