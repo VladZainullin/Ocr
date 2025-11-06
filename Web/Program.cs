@@ -98,7 +98,8 @@ file sealed class Program
         app.MapPost("api/v2/documents", static async context =>
         {
             if (context.Request.Form.Files.Count < 1 
-                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf)
+                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
+                || context.Request.Form.Files[0].Length == 0)
             {
                 await context.Response.WriteAsJsonAsync(new Response
                 {
