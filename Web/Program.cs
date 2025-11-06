@@ -46,7 +46,7 @@ file sealed class Program
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
-            var pageResponses = ArrayPool<PageResponse>.Shared.Rent(pdfDocument.NumberOfPages + 1);
+            var pageResponses = ArrayPool<PageResponse>.Shared.Rent(pdfDocument.NumberOfPages);
 
             var pdfPages = pdfDocument.GetPages();
             foreach (var pdfPage in pdfPages)
@@ -73,7 +73,7 @@ file sealed class Program
                     }
                 }
 
-                pageResponses[pdfPage.Number] = new PageResponse
+                pageResponses[pdfPage.Number - 1] = new PageResponse
                 {
                     Number = pdfPage.Number,
                     Text = pdfPage.Text,
