@@ -111,9 +111,6 @@ file sealed class Program
         try
         {
             image.Read(bytes);
-            image.AutoOrient();
-            image.AutoLevel();
-            image.Despeckle();
             image.Grayscale();
             image.Strip();
             return image.ToByteArray();
