@@ -1,5 +1,4 @@
 using System.Buffers;
-using System.Collections.Concurrent;
 using System.Net.Mime;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -12,11 +11,6 @@ namespace Web;
 
 file sealed class Program
 {
-    private static readonly ParallelOptions ParallelOptions = new()
-    {
-        MaxDegreeOfParallelism = Environment.ProcessorCount,
-    };
-
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -90,79 +84,6 @@ file sealed class Program
             await context.Response.WriteAsJsonAsync(new Response
             {
                 Pages = pageResponses,
-            });
-        });
-
-        app.MapPost("api/v2/documents", static async context =>
-        {
-            if (context.Request.Form.Files.Count < 1
-                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
-                || context.Request.Form.Files[0].Length == 0)
-            {
-                await context.Response.WriteAsJsonAsync(new Response
-                {
-                    Pages = [],
-                });
-                return;
-            }
-
-            await using var stream = context.Request.Form.Files[0].OpenReadStream();
-
-            var buffer = stream.Length > int.MaxValue
-                ? new byte[stream.Length]
-                : ArrayPool<byte>.Shared.Rent((int)stream.Length);
-
-            await stream.ReadExactlyAsync(buffer, 0, (int)stream.Length);
-
-            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
-            var objectPoolProvider = context.RequestServices.GetRequiredService<ObjectPoolProvider>();
-            var pdfDocumentObjectPool =
-                objectPoolProvider.Create(new PdfDocumentPooledObjectPolicy(() => PdfDocument.Open(buffer)));
-
-            var pdfDocument = pdfDocumentObjectPool.Get();
-            var pdfDocumentNumberOfPage = pdfDocument.NumberOfPages;
-            pdfDocumentObjectPool.Return(pdfDocument);
-
-            var pageResponses = new ConcurrentBag<PageResponse>();
-
-            Parallel.For(1, pdfDocumentNumberOfPage + 1, ParallelOptions, pdfPageNumber =>
-            {
-                var pdfDocument = pdfDocumentObjectPool.Get();
-                var pdfPage = pdfDocument.GetPage(pdfPageNumber);
-                var pdfImages = pdfPage.GetImages();
-                var imageResponses = new List<string>();
-                foreach (var pdfImage in pdfImages)
-                {
-                    var imageBytes = GetImageBytes(pdfImage);
-                    if (imageBytes.Length == 0) continue;
-                    var preparateImageBytes = PreparateImage(imageBytes);
-                    if (preparateImageBytes.Length == 0) continue;
-                    var engine = tesseractEngineObjectPool.Get();
-                    try
-                    {
-                        using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
-                        using var imagePage = engine.Process(imageDocument);
-                        var text = imagePage.GetText();
-                        imageResponses.Add(text);
-                    }
-                    finally
-                    {
-                        tesseractEngineObjectPool.Return(engine);
-                    }
-                }
-
-                pageResponses.Add(new PageResponse
-                {
-                    Number = pdfPage.Number,
-                    Text = pdfPage.Text,
-                    Images = imageResponses,
-                });
-                pdfDocumentObjectPool.Return(pdfDocument);
-            });
-
-            await context.Response.WriteAsJsonAsync(new Response
-            {
-                Pages = pageResponses.OrderBy(static response => response.Number),
             });
         });
 
