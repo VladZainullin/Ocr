@@ -64,7 +64,7 @@ file sealed class Program
                     await using var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write);
                     try
                     {
-                        await fileStream.WriteAsync(imageBytes);
+                        fileStream.Write(imageBytes);
                         imageResponses.Add(tempFilePath);
                     }
                     catch
@@ -161,7 +161,7 @@ file sealed class Program
                     {
                         var imageBytes = GetImageBytes(pdfImage);
                         if (imageBytes.Length == 0) continue;
-                        var preparateImageBytes = PreparateImage(imageBytes.Span);
+                        var preparateImageBytes = PreparateImage(imageBytes);
                         var engine = tesseractEngineObjectPool.Get();
                         if (preparateImageBytes.Length == 0) continue;
                         try
@@ -199,7 +199,7 @@ file sealed class Program
         await app.RunAsync();
     }
 
-    private static Memory<byte> GetImageBytes(IPdfImage pdfImage)
+    private static Span<byte> GetImageBytes(IPdfImage pdfImage)
     {
         if (pdfImage.TryGetPng(out var pngImageBytes))
         {
@@ -208,10 +208,10 @@ file sealed class Program
 
         if (pdfImage.TryGetBytesAsMemory(out var memory))
         {
-            return memory;
+            return memory.Span;
         }
 
-        return pdfImage.RawMemory;
+        return pdfImage.RawBytes;
     }
 
     private static byte[] PreparateImage(Span<byte> bytes)
