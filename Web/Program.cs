@@ -119,20 +119,20 @@ file sealed class Program
 
             foreach (var pdfPagesInChunk in pdfPages.Chunk(Environment.ProcessorCount))
             {
-                var chunk = new LinkedList<Buffer>();
+                var chunk = new List<Buffer>();
 
                 foreach (var pdfPage in pdfPagesInChunk)
                 {
                     var pdfImages = pdfPage.GetImages();
-                    var memories = new LinkedList<Memory<byte>>();
+                    var memories = new List<Memory<byte>>();
                     foreach (var pdfImage in pdfImages)
                     {
                         var imageBytes = GetImageBytes(pdfImage);
                         if (imageBytes.Length == 0) continue;
-                        memories.AddLast(imageBytes);
+                        memories.Add(imageBytes);
                     }
 
-                    chunk.AddLast(new Buffer
+                    chunk.Add(new Buffer
                     {
                         Number = pdfPage.Number,
                         Text = pdfPage.Text,
@@ -222,12 +222,12 @@ public sealed class Buffer
 
     public required string Text { get; set; }
 
-    public required LinkedList<Memory<byte>> Images { get; set; }
+    public required List<Memory<byte>> Images { get; set; }
 }
 
 public sealed class Response
 {
-    public required IEnumerable<PageResponse> Pages { get; init; }
+    public required IReadOnlyCollection<PageResponse> Pages { get; init; }
 }
 
 public sealed class PageResponse
