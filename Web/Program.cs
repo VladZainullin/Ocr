@@ -11,6 +11,11 @@ namespace Web;
 
 file sealed class Program
 {
+    public static readonly ParallelOptions ParallelOptions = new()
+    {
+        MaxDegreeOfParallelism = Environment.ProcessorCount
+    };
+
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -47,12 +52,18 @@ file sealed class Program
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var pdfPages = pdfDocument.GetPages();
-
-            var pageResponses = new PageResponse[pdfDocument.NumberOfPages];
+            
+            var searchTextBuffers = new SearchTextBuffer[pdfDocument.NumberOfPages];
+            var imageTextBuffers = new List<ImageTextBuffer>();
             foreach (var pdfPage in pdfPages)
             {
+                searchTextBuffers[pdfPage.Number - 1] = new SearchTextBuffer
+                {
+                    Number = pdfPage.Number,
+                    Text = pdfPage.Text,
+                };
+
                 var pdfImages = pdfPage.GetImages();
-                var imageResponses = new List<string>();
                 foreach (var pdfImage in pdfImages)
                 {
                     var imageBytes = GetImageBytes(pdfImage);
@@ -65,11 +76,14 @@ file sealed class Program
                     try
                     {
                         fileStream.Write(imageBytes);
-                        imageResponses.Add(tempFilePath);
+                        imageTextBuffers.Add(new ImageTextBuffer
+                        {
+                            Number = pdfPage.Number,
+                            Path = tempFilePath,
+                        });
                     }
                     catch
                     {
-                        fileStream.Close();
                         File.Delete(tempFilePath);
                         throw;
                     }
@@ -78,54 +92,90 @@ file sealed class Program
                         fileStream.Close();
                     }
                 }
-
-                pageResponses[pdfPage.Number - 1] = new PageResponse
-                {
-                    Number = pdfPage.Number,
-                    Text = pdfPage.Text,
-                    Images = imageResponses
-                };
             }
 
-            await Parallel.ForEachAsync(pageResponses, new ParallelOptions
+            var prepareImageTextBuffers = new ImageTextBuffer[imageTextBuffers.Count];
+            await Parallel.ForAsync(0, imageTextBuffers.Count, ParallelOptions, async (imageTextBufferIndex, cancellationToken) =>
             {
-                MaxDegreeOfParallelism = Environment.ProcessorCount
-            }, async (page, _) =>
-            {
-                var imageResponses = new List<string>();
-                foreach (var image in page.Images)
+                var imageTextBuffer = imageTextBuffers[imageTextBufferIndex];
+                await using var fileStream = new FileStream(imageTextBuffer.Path, FileMode.Open, FileAccess.Read);
+                try
                 {
-                    await using var fileStream = new FileStream(image, FileMode.Open, FileAccess.Read);
+                    var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                    tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
+                    await using var prepareFileStream = new FileStream(tempFilePath, FileMode.OpenOrCreate, FileAccess.Write);
                     try
                     {
-                        var preparateImageBytes = PreparateImage(fileStream);
-                        var engine = tesseractEngineObjectPool.Get();
-                        if (preparateImageBytes.Length == 0) continue;
                         try
                         {
-                            using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
+                            using var image = new MagickImage(fileStream);
+                            image.Grayscale();
+                            image.Strip();
+                            await image.WriteAsync(prepareFileStream, cancellationToken);
+                            prepareImageTextBuffers[imageTextBufferIndex] = new ImageTextBuffer
+                            {
+                                Number = imageTextBuffer.Number,
+                                Path = tempFilePath,
+                            };
+                        }
+                        catch (MagickMissingDelegateErrorException)
+                        {
+                            return;
+                        }
+                    }
+                    catch
+                    {
+                        File.Delete(tempFilePath);
+                        throw;
+                    }
+                }
+                finally
+                {
+                    File.Delete(imageTextBuffer.Path);
+                }
+            });
+            
+            
+            await Parallel.ForAsync(0, prepareImageTextBuffers.Length, ParallelOptions, async (imageTextBufferIndex, cancellationToken) =>
+            {
+                var imageTextBuffer = prepareImageTextBuffers[imageTextBufferIndex];
+                await using var fileStream = new FileStream(imageTextBuffer.Path, FileMode.Open, FileAccess.Read);
+                try
+                {
+                    var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                    tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
+                    await using var prepareFileStream = new FileStream(tempFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+                    try
+                    {
+                        var engine = tesseractEngineObjectPool.Get();
+                        try
+                        {
+                            using var imageDocument = Pix.LoadFromFile(imageTextBuffer.Path);
                             using var imagePage = engine.Process(imageDocument);
                             var text = imagePage.GetText();
-                            imageResponses.Add(text);
+                            if (text == string.Empty) return;
+                            searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(text);   
                         }
                         finally
                         {
                             tesseractEngineObjectPool.Return(engine);
                         }
                     }
-                    finally
+                    catch
                     {
-                        fileStream.Close();
-                        File.Delete(image);
+                        File.Delete(tempFilePath);
+                        throw;
                     }
                 }
-
-                page.Images = imageResponses;
+                finally
+                {
+                    File.Delete(imageTextBuffer.Path);
+                }
             });
 
-            await context.Response.WriteAsJsonAsync(new Response
+            await context.Response.WriteAsJsonAsync(new
             {
-                Pages = pageResponses,
+                Pages = searchTextBuffers,
             });
         });
 
@@ -176,7 +226,7 @@ file sealed class Program
                             tesseractEngineObjectPool.Return(engine);
                         }
                     }
-            
+
                     pageResponses[pdfPage.Number - 1] = new PageResponse
                     {
                         Number = pdfPage.Number,
@@ -184,7 +234,7 @@ file sealed class Program
                         Images = imageResponses
                     };
                 }
-                
+
                 await context.Response.WriteAsJsonAsync(new Response
                 {
                     Pages = pageResponses,
@@ -245,27 +295,25 @@ file sealed class Program
     }
 }
 
-public sealed class Buffer
+public sealed class SearchTextBuffer
 {
-    public required int Number { get; set; }
+    public required int Number { get; init; }
 
-    public required string Text { get; set; }
+    public required string Text { get; init; }
 
-    public required List<Memory<byte>> Images { get; set; }
+    public List<string> Images { get; } = [];
+}
+
+public sealed class ImageTextBuffer
+{
+    public required int Number { get; init; }
+
+    public required string Path { get; init; }
 }
 
 public sealed class Response
 {
     public required IReadOnlyCollection<PageResponse> Pages { get; init; }
-}
-
-public sealed class PageBuffer
-{
-    public required int Number { get; set; }
-
-    public required string Text { get; init; }
-
-    public required string Path { get; init; }
 }
 
 public sealed class PageResponse
@@ -274,5 +322,5 @@ public sealed class PageResponse
 
     public required string Text { get; init; }
 
-    public required IReadOnlyCollection<string> Images { get; set; }
+    public required List<string> Images { get; set; }
 }
