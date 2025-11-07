@@ -120,7 +120,7 @@ file sealed class Program
             foreach (var pdfPagesInChunk in pdfPages.Chunk(Environment.ProcessorCount))
             {
                 var chunk = new LinkedList<Buffer>();
-                
+
                 foreach (var pdfPage in pdfPagesInChunk)
                 {
                     var pdfImages = pdfPage.GetImages();
@@ -139,7 +139,7 @@ file sealed class Program
                         Images = memories
                     });
                 }
-                
+
                 Parallel.ForEach(
                     chunk,
                     new ParallelOptions
@@ -166,7 +166,7 @@ file sealed class Program
                                 tesseractEngineObjectPool.Return(engine);
                             }
                         }
-                        
+
                         pageResponses.AddLast(new PageResponse
                         {
                             Number = buffer.Number,
@@ -202,10 +202,9 @@ file sealed class Program
 
     private static byte[] PreparateImage(Span<byte> bytes)
     {
-        using var image = new MagickImage();
         try
         {
-            image.Read(bytes);
+            using var image = new MagickImage(bytes);
             image.Grayscale();
             image.Strip();
             return image.ToByteArray();
@@ -220,7 +219,7 @@ file sealed class Program
 public sealed class Buffer
 {
     public required int Number { get; set; }
-    
+
     public required string Text { get; set; }
 
     public required LinkedList<Memory<byte>> Images { get; set; }
