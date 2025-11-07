@@ -46,46 +46,52 @@ file sealed class Program
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
-            var pageResponses = ArrayPool<PageResponse>.Shared.Rent(pdfDocument.NumberOfPages);
-
             var pdfPages = pdfDocument.GetPages();
 
-            foreach (var pdfPage in pdfPages)
+            var pageResponses = ArrayPool<PageResponse>.Shared.Rent(pdfDocument.NumberOfPages);
+            try
             {
-                var pdfImages = pdfPage.GetImages();
-                var imageResponses = new LinkedList<string>();
-                foreach (var pdfImage in pdfImages)
+                foreach (var pdfPage in pdfPages)
                 {
-                    var imageBytes = GetImageBytes(pdfImage);
-                    if (imageBytes.Length == 0) continue;
-                    var preparateImageBytes = PreparateImage(imageBytes.Span);
-                    var engine = tesseractEngineObjectPool.Get();
-                    if (preparateImageBytes.Length == 0) continue;
-                    try
+                    var pdfImages = pdfPage.GetImages();
+                    var imageResponses = new List<string>();
+                    foreach (var pdfImage in pdfImages)
                     {
-                        using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
-                        using var imagePage = engine.Process(imageDocument);
-                        var text = imagePage.GetText();
-                        imageResponses.AddLast(text);
+                        var imageBytes = GetImageBytes(pdfImage);
+                        if (imageBytes.Length == 0) continue;
+                        var preparateImageBytes = PreparateImage(imageBytes.Span);
+                        var engine = tesseractEngineObjectPool.Get();
+                        if (preparateImageBytes.Length == 0) continue;
+                        try
+                        {
+                            using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
+                            using var imagePage = engine.Process(imageDocument);
+                            var text = imagePage.GetText();
+                            imageResponses.Add(text);
+                        }
+                        finally
+                        {
+                            tesseractEngineObjectPool.Return(engine);
+                        }
                     }
-                    finally
-                    {
-                        tesseractEngineObjectPool.Return(engine);
-                    }
-                }
             
-                pageResponses[pdfPage.Number - 1] = new PageResponse
+                    pageResponses[pdfPage.Number - 1] = new PageResponse
+                    {
+                        Number = pdfPage.Number,
+                        Text = pdfPage.Text,
+                        Images = imageResponses
+                    };
+                }
+                
+                await context.Response.WriteAsJsonAsync(new Response
                 {
-                    Number = pdfPage.Number,
-                    Text = pdfPage.Text,
-                    Images = imageResponses
-                };
+                    Pages = pageResponses,
+                });
             }
-
-            await context.Response.WriteAsJsonAsync(new Response
+            finally
             {
-                Pages = pageResponses,
-            });
+                ArrayPool<PageResponse>.Shared.Return(pageResponses);
+            }
         });
         
         app.MapPost("api/v1/documents", static async context =>
