@@ -122,6 +122,7 @@ file sealed class Program
                     foreach (var pdfImage in pdfImages)
                     {
                         var imageBytes = GetImageBytes(pdfImage);
+                        if (imageBytes.Length == 0) continue;
                         memories.AddLast(imageBytes);
                     }
 
@@ -144,7 +145,6 @@ file sealed class Program
                         var imageResponses = new LinkedList<string>();
                         foreach (var imageMemory in buffer.Images)
                         {
-                            if (imageMemory.Length == 0) continue;
                             var preparateImageBytes = PreparateImage(imageMemory);
                             if (preparateImageBytes.Length == 0) return;
                             var engine = tesseractEngineObjectPool.Get();
