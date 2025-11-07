@@ -58,7 +58,7 @@ file sealed class Program
                 {
                     var imageBytes = GetImageBytes(pdfImage);
                     if (imageBytes.Length == 0) continue;
-                    var preparateImageBytes = PreparateImage(imageBytes);
+                    var preparateImageBytes = PreparateImage(imageBytes.Span);
                     var engine = tesseractEngineObjectPool.Get();
                     if (preparateImageBytes.Length == 0) continue;
                     try
@@ -118,7 +118,7 @@ file sealed class Program
                 foreach (var pdfPage in pdfPagesInChunk)
                 {
                     var pdfImages = pdfPage.GetImages();
-                    var memories = new LinkedList<byte[]>();
+                    var memories = new LinkedList<Memory<byte>>();
                     foreach (var pdfImage in pdfImages)
                     {
                         var imageBytes = GetImageBytes(pdfImage);
@@ -145,7 +145,7 @@ file sealed class Program
                         var imageResponses = new LinkedList<string>();
                         foreach (var imageMemory in buffer.Images)
                         {
-                            var preparateImageBytes = PreparateImage(imageMemory);
+                            var preparateImageBytes = PreparateImage(imageMemory.Span);
                             if (preparateImageBytes.Length == 0) return;
                             var engine = tesseractEngineObjectPool.Get();
                             try
@@ -179,7 +179,7 @@ file sealed class Program
         await app.RunAsync();
     }
 
-    private static byte[] GetImageBytes(IPdfImage pdfImage)
+    private static Memory<byte> GetImageBytes(IPdfImage pdfImage)
     {
         if (pdfImage.TryGetPng(out var pngImageBytes))
         {
@@ -188,10 +188,10 @@ file sealed class Program
 
         if (pdfImage.TryGetBytesAsMemory(out var memory))
         {
-            return memory.ToArray();
+            return memory;
         }
 
-        return pdfImage.RawBytes.ToArray();
+        return pdfImage.RawMemory;
     }
 
     private static byte[] PreparateImage(Span<byte> bytes)
@@ -217,7 +217,7 @@ public sealed class Buffer
     
     public required string Text { get; set; }
 
-    public required LinkedList<byte[]> Images { get; set; }
+    public required LinkedList<Memory<byte>> Images { get; set; }
 }
 
 public sealed class Response
