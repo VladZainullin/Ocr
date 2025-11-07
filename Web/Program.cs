@@ -83,7 +83,7 @@ file sealed class Program
 
             await context.Response.WriteAsJsonAsync(new Response
             {
-                Pages = pageResponses,
+                Pages = pageResponses.AsSpan(0, pdfDocument.NumberOfPages).ToArray(),
             });
         });
 
