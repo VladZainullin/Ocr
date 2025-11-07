@@ -5,8 +5,10 @@
         <PackageReference Include="PdfPig" />
         <PackageReference Include="Tesseract"/>
     </ItemGroup>
-    <Target Name="CopyTesseractDlls" AfterTargets="AfterBuild">
-        <Exec Command="ln -sf /opt/homebrew/lib/libleptonica.dylib '$(TargetDir)/libleptonica-1.82.0.dylib'" />
-        <Exec Command="ln -sf /opt/homebrew/lib/libtesseract.dylib '$(TargetDir)/libtesseract50.dylib'" />
+    <Target Name="Copy tesseract dll" 
+            Condition="'$(PROCESSOR_ARCHITECTURE)' == 'ARM64'"
+            AfterTargets="AfterBuild">
+        <Exec Command="ln -sf /opt/homebrew/lib/libleptonica.dylib ./bin/Debug/net9.0/libleptonica-1.82.0.dylib"/>
+        <Exec Command="ln -sf /opt/homebrew/lib/libtesseract.dylib ./bin/Debug/net9.0/libtesseract50.dylib"/>
     </Target>
 </Project>
