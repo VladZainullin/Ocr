@@ -139,12 +139,12 @@ file sealed class Program
                     {
                         MaxDegreeOfParallelism = Environment.ProcessorCount,
                     },
-                    (buffer, state) =>
+                    buffer =>
                     {
                         var imageResponses = new LinkedList<string>();
                         foreach (var imageMemory in buffer.Images)
                         {
-                            if (imageMemory.Length == 0) return;
+                            if (imageMemory.Length == 0) continue;
                             var preparateImageBytes = PreparateImage(imageMemory);
                             if (preparateImageBytes.Length == 0) return;
                             var engine = tesseractEngineObjectPool.Get();
@@ -169,38 +169,6 @@ file sealed class Program
                         });
                     });
             }
-
-            // foreach (var pdfPage in pdfPages)
-            // {
-            //     var pdfImages = pdfPage.GetImages();
-            //     var imageResponses = new LinkedList<string>();
-            //     foreach (var pdfImage in pdfImages)
-            //     {
-            //         var imageBytes = GetImageBytes(pdfImage);
-            //         if (imageBytes.Length == 0) continue;
-            //         var preparateImageBytes = PreparateImage(imageBytes);
-            //         var engine = tesseractEngineObjectPool.Get();
-            //         if (preparateImageBytes.Length == 0) continue;
-            //         try
-            //         {
-            //             using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
-            //             using var imagePage = engine.Process(imageDocument);
-            //             var text = imagePage.GetText();
-            //             imageResponses.AddLast(text);
-            //         }
-            //         finally
-            //         {
-            //             tesseractEngineObjectPool.Return(engine);
-            //         }
-            //     }
-            //
-            //     pageResponses[pdfPage.Number - 1] = new PageResponse
-            //     {
-            //         Number = pdfPage.Number,
-            //         Text = pdfPage.Text,
-            //         Images = imageResponses
-            //     };
-            // }
 
             await context.Response.WriteAsJsonAsync(new Response
             {
