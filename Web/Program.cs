@@ -32,6 +32,107 @@ file sealed class Program
 
         await using var app = builder.Build();
 
+        app.MapPost("api/v3/documents", static async context =>
+        {
+            if (context.Request.Form.Files.Count < 1
+                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
+                || context.Request.Form.Files[0].Length == 0)
+            {
+                await context.Response.WriteAsJsonAsync(new Response
+                {
+                    Pages = [],
+                });
+                return;
+            }
+            
+            await using var stream = context.Request.Form.Files[0].OpenReadStream();
+            using var pdfDocument = PdfDocument.Open(stream);
+            
+            var searchTextBuffers = new SearchTextBuffer[pdfDocument.NumberOfPages];
+
+            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
+
+            const int batchSize = 50;
+            for (var batchStart = 0; batchStart < pdfDocument.NumberOfPages; batchStart += batchSize)
+            {
+                var imageTextBuffers = new List<ImageTextBuffer>(); 
+                var batchEnd = Math.Min(batchStart + batchSize, pdfDocument.NumberOfPages);
+                for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
+                {
+                    var pdfPage = pdfDocument.GetPage(pdfPageNumber);
+                    searchTextBuffers[pdfPage.Number - 1] = new SearchTextBuffer
+                    {
+                        Number = pdfPage.Number,
+                        Text = pdfPage.Text,
+                    };
+                    
+                    foreach (var pdfImage in pdfPage.GetImages())
+                    {
+                        var imageBytes = GetImageBytes(pdfImage);
+                        if (imageBytes.Length == 0) continue;
+
+                        var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+                        tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
+
+                        await using var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write);
+                        try
+                        {
+                            fileStream.Write(imageBytes);
+                            imageTextBuffers.Add(new ImageTextBuffer
+                            {
+                                Number = pdfPage.Number,
+                                Path = tempFilePath,
+                            });
+                        }
+                        catch
+                        {
+                            File.Delete(tempFilePath);
+                            throw;
+                        }
+                        finally
+                        {
+                            fileStream.Close();
+                        } 
+                    }
+                }
+
+                await Parallel.ForEachAsync(imageTextBuffers, new ParallelOptions
+                {
+                    MaxDegreeOfParallelism = Environment.ProcessorCount
+                }, async (imageTextBuffer, _) =>
+                {
+                    var fileStream = new FileStream(imageTextBuffer.Path, FileMode.Open, FileAccess.Read);
+                    try
+                    {
+                        var preparate = PreparateImage(fileStream);
+                        var engine = tesseractEngineObjectPool.Get();
+                        try
+                        {
+                            using var imageDocument = Pix.LoadFromMemory(preparate);
+                            using var imagePage = engine.Process(imageDocument);
+                            var text = imagePage.GetText();
+                            if (text == string.Empty) return;
+                            searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(text);   
+                        }
+                        finally
+                        {
+                            tesseractEngineObjectPool.Return(engine);
+                        } 
+                    }
+                    finally
+                    {
+                        await fileStream.DisposeAsync();
+                        File.Delete(imageTextBuffer.Path);
+                    }
+                });
+            }
+            
+            await context.Response.WriteAsJsonAsync(new
+            {
+                Pages = searchTextBuffers
+            });
+        });
+
         app.MapPost("api/v2/documents", static async context =>
         {
             if (context.Request.Form.Files.Count < 1
