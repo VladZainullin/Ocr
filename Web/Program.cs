@@ -52,7 +52,7 @@ file sealed class Program
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
-            const int batchSize = 50;
+            var batchSize = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16);
             for (var batchStart = 0; batchStart < pdfDocument.NumberOfPages; batchStart += batchSize)
             {
                 var imageTextBuffers = new List<ImageTextBuffer>(); 
@@ -99,7 +99,7 @@ file sealed class Program
                 await Parallel.ForEachAsync(imageTextBuffers, new ParallelOptions
                 {
                     CancellationToken = context.RequestAborted,
-                    MaxDegreeOfParallelism = Environment.ProcessorCount
+                    MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
                 }, async (imageTextBuffer, _) =>
                 {
                     var fileStream = new FileStream(imageTextBuffer.Path, FileMode.Open, FileAccess.Read);
