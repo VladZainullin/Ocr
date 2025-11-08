@@ -52,7 +52,7 @@ file sealed class Program
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
-            var batchSize = 1000;
+            var batchSize = 100;
             for (var batchStart = 0; batchStart < pdfDocument.NumberOfPages; batchStart += batchSize)
             {
                 var imageTextBuffers = new List<ImageTextBuffer>(); 
