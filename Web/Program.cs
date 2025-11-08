@@ -52,7 +52,7 @@ file sealed class Program
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
-            var batchSize = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16);
+            var batchSize = 1000;
             for (var batchStart = 0; batchStart < pdfDocument.NumberOfPages; batchStart += batchSize)
             {
                 var imageTextBuffers = new List<ImageTextBuffer>(); 
@@ -107,219 +107,219 @@ file sealed class Program
             });
         });
 
-        app.MapPost("api/v2/documents", static async context =>
-        {
-            if (context.Request.Form.Files.Count < 1
-                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
-                || context.Request.Form.Files[0].Length == 0)
-            {
-                await context.Response.WriteAsJsonAsync(new Response
-                {
-                    Pages = [],
-                });
-                return;
-            }
-
-            await using var stream = context.Request.Form.Files[0].OpenReadStream();
-
-            using var pdfDocument = PdfDocument.Open(stream);
-
-            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
-
-            var pdfPages = pdfDocument.GetPages();
-            
-            var searchTextBuffers = new SearchTextBuffer[pdfDocument.NumberOfPages];
-            var imageTextBuffers = new List<ImageTextBuffer>();
-            foreach (var pdfPage in pdfPages)
-            {
-                searchTextBuffers[pdfPage.Number - 1] = new SearchTextBuffer
-                {
-                    Number = pdfPage.Number,
-                    Text = pdfPage.Text,
-                };
-
-                var pdfImages = pdfPage.GetImages();
-                foreach (var pdfImage in pdfImages)
-                {
-                    var imageBytes = GetImageBytes(pdfImage);
-                    if (imageBytes.Length == 0) continue;
-
-                    var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                    tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
-
-                    await using var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write);
-                    try
-                    {
-                        fileStream.Write(imageBytes);
-                        imageTextBuffers.Add(new ImageTextBuffer
-                        {
-                            Number = pdfPage.Number,
-                            Path = tempFilePath,
-                        });
-                    }
-                    catch
-                    {
-                        File.Delete(tempFilePath);
-                        throw;
-                    }
-                    finally
-                    {
-                        fileStream.Close();
-                    }
-                }
-            }
-
-            var prepareImageTextBuffers = new ImageTextBuffer[imageTextBuffers.Count];
-            await Parallel.ForAsync(0, imageTextBuffers.Count, ParallelOptions, async (imageTextBufferIndex, cancellationToken) =>
-            {
-                var imageTextBuffer = imageTextBuffers[imageTextBufferIndex];
-                await using var fileStream = new FileStream(imageTextBuffer.Path, FileMode.Open, FileAccess.Read);
-                try
-                {
-                    var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                    tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
-                    await using var prepareFileStream = new FileStream(tempFilePath, FileMode.OpenOrCreate, FileAccess.Write);
-                    try
-                    {
-                        try
-                        {
-                            using var image = new MagickImage(fileStream);
-                            image.Grayscale();
-                            image.Strip();
-                            await image.WriteAsync(prepareFileStream, cancellationToken);
-                            prepareImageTextBuffers[imageTextBufferIndex] = new ImageTextBuffer
-                            {
-                                Number = imageTextBuffer.Number,
-                                Path = tempFilePath,
-                            };
-                        }
-                        catch (MagickMissingDelegateErrorException)
-                        {
-                            return;
-                        }
-                    }
-                    catch
-                    {
-                        File.Delete(tempFilePath);
-                        throw;
-                    }
-                }
-                finally
-                {
-                    File.Delete(imageTextBuffer.Path);
-                }
-            });
-            
-            
-            await Parallel.ForAsync(0, prepareImageTextBuffers.Length, ParallelOptions, async (imageTextBufferIndex, cancellationToken) =>
-            {
-                var imageTextBuffer = prepareImageTextBuffers[imageTextBufferIndex];
-                await using var fileStream = new FileStream(imageTextBuffer.Path, FileMode.Open, FileAccess.Read);
-                try
-                {
-                    var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                    tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
-                    await using var prepareFileStream = new FileStream(tempFilePath, FileMode.OpenOrCreate, FileAccess.Write);
-                    try
-                    {
-                        var engine = tesseractEngineObjectPool.Get();
-                        try
-                        {
-                            using var imageDocument = Pix.LoadFromFile(imageTextBuffer.Path);
-                            using var imagePage = engine.Process(imageDocument);
-                            var text = imagePage.GetText();
-                            if (text == string.Empty) return;
-                            searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(text);   
-                        }
-                        finally
-                        {
-                            tesseractEngineObjectPool.Return(engine);
-                        }
-                    }
-                    catch
-                    {
-                        File.Delete(tempFilePath);
-                        throw;
-                    }
-                }
-                finally
-                {
-                    File.Delete(imageTextBuffer.Path);
-                }
-            });
-
-            await context.Response.WriteAsJsonAsync(new
-            {
-                Pages = searchTextBuffers,
-            });
-        });
-
-        app.MapPost("api/v1/documents", static async context =>
-        {
-            if (context.Request.Form.Files.Count < 1
-                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
-                || context.Request.Form.Files[0].Length == 0)
-            {
-                await context.Response.WriteAsJsonAsync(new Response
-                {
-                    Pages = [],
-                });
-                return;
-            }
-
-            await using var stream = context.Request.Form.Files[0].OpenReadStream();
-
-            using var pdfDocument = PdfDocument.Open(stream);
-
-            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
-
-            var pdfPages = pdfDocument.GetPages();
-
-            var pageResponses = ArrayPool<PageResponse>.Shared.Rent(pdfDocument.NumberOfPages);
-            try
-            {
-                foreach (var pdfPage in pdfPages)
-                {
-                    var pdfImages = pdfPage.GetImages();
-                    var imageResponses = new List<string>();
-                    foreach (var pdfImage in pdfImages)
-                    {
-                        var imageBytes = GetImageBytes(pdfImage);
-                        if (imageBytes.Length == 0) continue;
-                        var preparateImageBytes = PreparateImage(imageBytes);
-                        if (preparateImageBytes.Length == 0) continue;
-                        using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
-                        var engine = tesseractEngineObjectPool.Get();
-                        try
-                        {
-                            using var imagePage = engine.Process(imageDocument);
-                            var text = imagePage.GetText();
-                            imageResponses.Add(text);
-                        }
-                        finally
-                        {
-                            tesseractEngineObjectPool.Return(engine);
-                        }
-                    }
-
-                    pageResponses[pdfPage.Number - 1] = new PageResponse
-                    {
-                        Number = pdfPage.Number,
-                        Text = pdfPage.Text,
-                        Images = imageResponses
-                    };
-                }
-
-                await context.Response.WriteAsJsonAsync(new Response
-                {
-                    Pages = pageResponses,
-                });
-            }
-            finally
-            {
-                ArrayPool<PageResponse>.Shared.Return(pageResponses);
-            }
-        });
+        // app.MapPost("api/v2/documents", static async context =>
+        // {
+        //     if (context.Request.Form.Files.Count < 1
+        //         || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
+        //         || context.Request.Form.Files[0].Length == 0)
+        //     {
+        //         await context.Response.WriteAsJsonAsync(new Response
+        //         {
+        //             Pages = [],
+        //         });
+        //         return;
+        //     }
+        //
+        //     await using var stream = context.Request.Form.Files[0].OpenReadStream();
+        //
+        //     using var pdfDocument = PdfDocument.Open(stream);
+        //
+        //     var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
+        //
+        //     var pdfPages = pdfDocument.GetPages();
+        //     
+        //     var searchTextBuffers = new SearchTextBuffer[pdfDocument.NumberOfPages];
+        //     var imageTextBuffers = new List<ImageTextBuffer>();
+        //     foreach (var pdfPage in pdfPages)
+        //     {
+        //         searchTextBuffers[pdfPage.Number - 1] = new SearchTextBuffer
+        //         {
+        //             Number = pdfPage.Number,
+        //             Text = pdfPage.Text,
+        //         };
+        //
+        //         var pdfImages = pdfPage.GetImages();
+        //         foreach (var pdfImage in pdfImages)
+        //         {
+        //             var imageBytes = GetImageBytes(pdfImage);
+        //             if (imageBytes.Length == 0) continue;
+        //
+        //             var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        //             tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
+        //
+        //             await using var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write);
+        //             try
+        //             {
+        //                 fileStream.Write(imageBytes);
+        //                 imageTextBuffers.Add(new ImageTextBuffer
+        //                 {
+        //                     Number = pdfPage.Number,
+        //                     Memory = tempFilePath,
+        //                 });
+        //             }
+        //             catch
+        //             {
+        //                 File.Delete(tempFilePath);
+        //                 throw;
+        //             }
+        //             finally
+        //             {
+        //                 fileStream.Close();
+        //             }
+        //         }
+        //     }
+        //
+        //     var prepareImageTextBuffers = new ImageTextBuffer[imageTextBuffers.Count];
+        //     await Parallel.ForAsync(0, imageTextBuffers.Count, ParallelOptions, async (imageTextBufferIndex, cancellationToken) =>
+        //     {
+        //         var imageTextBuffer = imageTextBuffers[imageTextBufferIndex];
+        //         await using var fileStream = new FileStream(imageTextBuffer.Memory, FileMode.Open, FileAccess.Read);
+        //         try
+        //         {
+        //             var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        //             tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
+        //             await using var prepareFileStream = new FileStream(tempFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+        //             try
+        //             {
+        //                 try
+        //                 {
+        //                     using var image = new MagickImage(fileStream);
+        //                     image.Grayscale();
+        //                     image.Strip();
+        //                     await image.WriteAsync(prepareFileStream, cancellationToken);
+        //                     prepareImageTextBuffers[imageTextBufferIndex] = new ImageTextBuffer
+        //                     {
+        //                         Number = imageTextBuffer.Number,
+        //                         Memory = tempFilePath,
+        //                     };
+        //                 }
+        //                 catch (MagickMissingDelegateErrorException)
+        //                 {
+        //                     return;
+        //                 }
+        //             }
+        //             catch
+        //             {
+        //                 File.Delete(tempFilePath);
+        //                 throw;
+        //             }
+        //         }
+        //         finally
+        //         {
+        //             File.Delete(imageTextBuffer.Memory);
+        //         }
+        //     });
+        //     
+        //     
+        //     await Parallel.ForAsync(0, prepareImageTextBuffers.Length, ParallelOptions, async (imageTextBufferIndex, cancellationToken) =>
+        //     {
+        //         var imageTextBuffer = prepareImageTextBuffers[imageTextBufferIndex];
+        //         await using var fileStream = new FileStream(imageTextBuffer.Memory, FileMode.Open, FileAccess.Read);
+        //         try
+        //         {
+        //             var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
+        //             tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
+        //             await using var prepareFileStream = new FileStream(tempFilePath, FileMode.OpenOrCreate, FileAccess.Write);
+        //             try
+        //             {
+        //                 var engine = tesseractEngineObjectPool.Get();
+        //                 try
+        //                 {
+        //                     using var imageDocument = Pix.LoadFromFile(imageTextBuffer.Memory);
+        //                     using var imagePage = engine.Process(imageDocument);
+        //                     var text = imagePage.GetText();
+        //                     if (text == string.Empty) return;
+        //                     searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(text);   
+        //                 }
+        //                 finally
+        //                 {
+        //                     tesseractEngineObjectPool.Return(engine);
+        //                 }
+        //             }
+        //             catch
+        //             {
+        //                 File.Delete(tempFilePath);
+        //                 throw;
+        //             }
+        //         }
+        //         finally
+        //         {
+        //             File.Delete(imageTextBuffer.Memory);
+        //         }
+        //     });
+        //
+        //     await context.Response.WriteAsJsonAsync(new
+        //     {
+        //         Pages = searchTextBuffers,
+        //     });
+        // });
+        //
+        // app.MapPost("api/v1/documents", static async context =>
+        // {
+        //     if (context.Request.Form.Files.Count < 1
+        //         || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
+        //         || context.Request.Form.Files[0].Length == 0)
+        //     {
+        //         await context.Response.WriteAsJsonAsync(new Response
+        //         {
+        //             Pages = [],
+        //         });
+        //         return;
+        //     }
+        //
+        //     await using var stream = context.Request.Form.Files[0].OpenReadStream();
+        //
+        //     using var pdfDocument = PdfDocument.Open(stream);
+        //
+        //     var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
+        //
+        //     var pdfPages = pdfDocument.GetPages();
+        //
+        //     var pageResponses = ArrayPool<PageResponse>.Shared.Rent(pdfDocument.NumberOfPages);
+        //     try
+        //     {
+        //         foreach (var pdfPage in pdfPages)
+        //         {
+        //             var pdfImages = pdfPage.GetImages();
+        //             var imageResponses = new List<string>();
+        //             foreach (var pdfImage in pdfImages)
+        //             {
+        //                 var imageBytes = GetImageBytes(pdfImage);
+        //                 if (imageBytes.Length == 0) continue;
+        //                 var preparateImageBytes = PreparateImage(imageBytes);
+        //                 if (preparateImageBytes.Length == 0) continue;
+        //                 using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
+        //                 var engine = tesseractEngineObjectPool.Get();
+        //                 try
+        //                 {
+        //                     using var imagePage = engine.Process(imageDocument);
+        //                     var text = imagePage.GetText();
+        //                     imageResponses.Add(text);
+        //                 }
+        //                 finally
+        //                 {
+        //                     tesseractEngineObjectPool.Return(engine);
+        //                 }
+        //             }
+        //
+        //             pageResponses[pdfPage.Number - 1] = new PageResponse
+        //             {
+        //                 Number = pdfPage.Number,
+        //                 Text = pdfPage.Text,
+        //                 Images = imageResponses
+        //             };
+        //         }
+        //
+        //         await context.Response.WriteAsJsonAsync(new Response
+        //         {
+        //             Pages = pageResponses,
+        //         });
+        //     }
+        //     finally
+        //     {
+        //         ArrayPool<PageResponse>.Shared.Return(pageResponses);
+        //     }
+        // });
 
         await app.RunAsync();
     }
@@ -383,7 +383,7 @@ public sealed class ImageTextBuffer
 {
     public required int Number { get; init; }
 
-    public required string Path { get; init; }
+    public required byte[] Memory { get; init; }
 }
 
 public sealed class Response
