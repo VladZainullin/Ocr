@@ -71,60 +71,33 @@ file sealed class Program
                         var imageBytes = GetImageBytes(pdfImage);
                         if (imageBytes.Length == 0) continue;
 
-                        var tempFilePath = Path.Combine(Path.GetTempPath(), Path.GetRandomFileName());
-                        tempFilePath = Path.ChangeExtension(tempFilePath, ".tmp");
-
-                        await using var fileStream = new FileStream(tempFilePath, FileMode.Create, FileAccess.Write);
-                        try
+                        imageTextBuffers.Add(new ImageTextBuffer
                         {
-                            fileStream.Write(imageBytes);
-                            imageTextBuffers.Add(new ImageTextBuffer
-                            {
-                                Number = pdfPage.Number,
-                                Path = tempFilePath,
-                            });
-                        }
-                        catch
-                        {
-                            File.Delete(tempFilePath);
-                            throw;
-                        }
-                        finally
-                        {
-                            fileStream.Close();
-                        } 
+                            Number = pdfPage.Number,
+                            Memory = imageBytes.ToArray(),
+                        });
                     }
                 }
 
-                await Parallel.ForEachAsync(imageTextBuffers, new ParallelOptions
+                Parallel.ForEach(imageTextBuffers, new ParallelOptions
                 {
                     CancellationToken = context.RequestAborted,
                     MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
-                }, async (imageTextBuffer, _) =>
+                }, imageTextBuffer =>
                 {
-                    var fileStream = new FileStream(imageTextBuffer.Path, FileMode.Open, FileAccess.Read);
+                    var engine = tesseractEngineObjectPool.Get();
                     try
                     {
-                        var preparate = PreparateImage(fileStream);
-                        var engine = tesseractEngineObjectPool.Get();
-                        try
-                        {
-                            using var imageDocument = Pix.LoadFromMemory(preparate);
-                            using var imagePage = engine.Process(imageDocument);
-                            var text = imagePage.GetText();
-                            if (text == string.Empty) return;
-                            searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(text);   
-                        }
-                        finally
-                        {
-                            tesseractEngineObjectPool.Return(engine);
-                        } 
+                        using var imageDocument = Pix.LoadFromMemory(imageTextBuffer.Memory);
+                        using var imagePage = engine.Process(imageDocument);
+                        var text = imagePage.GetText();
+                        if (text == string.Empty) return;
+                        searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(text);   
                     }
                     finally
                     {
-                        await fileStream.DisposeAsync();
-                        File.Delete(imageTextBuffer.Path);
-                    }
+                        tesseractEngineObjectPool.Return(engine);
+                    } 
                 });
             }
             
