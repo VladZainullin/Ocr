@@ -98,6 +98,7 @@ file sealed class Program
 
                 await Parallel.ForEachAsync(imageTextBuffers, new ParallelOptions
                 {
+                    CancellationToken = context.RequestAborted,
                     MaxDegreeOfParallelism = Environment.ProcessorCount
                 }, async (imageTextBuffer, _) =>
                 {
