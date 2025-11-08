@@ -212,11 +212,11 @@ file sealed class Program
                         var imageBytes = GetImageBytes(pdfImage);
                         if (imageBytes.Length == 0) continue;
                         var preparateImageBytes = PreparateImage(imageBytes);
-                        var engine = tesseractEngineObjectPool.Get();
                         if (preparateImageBytes.Length == 0) continue;
+                        using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
+                        var engine = tesseractEngineObjectPool.Get();
                         try
                         {
-                            using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
                             using var imagePage = engine.Process(imageDocument);
                             var text = imagePage.GetText();
                             imageResponses.Add(text);
