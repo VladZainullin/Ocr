@@ -26,7 +26,7 @@ file sealed class Program
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {
             var provider = serviceProvider.GetRequiredService<ObjectPoolProvider>();
-            var policy = new TesseractEnginePooledObjectPolicy("./tesseract", "rus");
+            var policy = new TesseractEnginePooledObjectPolicy("./tesseract", "rus+eng");
             return provider.Create(policy);
         });
 
