@@ -35,11 +35,17 @@ file sealed class Program
             using var image = new MagickImage(imageStream);
             
             image.AutoOrient();
-            
             image.Trim();
             
-            image.Resize(new Percentage(200), FilterType.Cubic); // Увеличение в 2 раза
-            image.Density = new Density(300, 300);
+            image.Grayscale();
+            
+            image.MedianFilter(1);
+            
+            // image.Deskew(new Percentage(40));
+            //
+            // image.Resize(new Percentage(200));
+            //
+            // image.Density = new Density(300, 300);
             
             var bytes = image.ToByteArray();
             
@@ -47,7 +53,7 @@ file sealed class Program
             var pix = Pix.LoadFromMemory(bytes);
             var a = tesseract.Process(pix);
             Console.WriteLine(a.GetMeanConfidence());
-            
+            Console.WriteLine(a.GetText());
             
             context.Response.ContentType = "image/jpeg";
             context.Response.Headers.ContentDisposition = "attachment";
