@@ -95,6 +95,7 @@ file sealed class Program
                         if (text == string.Empty) return;
                         searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
                         {
+                            Confidence = imagePage.GetMeanConfidence(),
                             Blocks = blocks,
                         });
                     }
@@ -255,6 +256,7 @@ file sealed class Program
 
 public sealed class ImageResponse
 {
+    public required float Confidence { get; set; }
     public required List<BlockResponse> Blocks { get; set; }
 }
 
