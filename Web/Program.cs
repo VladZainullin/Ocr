@@ -28,6 +28,34 @@ file sealed class Program
 
         await using var app = builder.Build();
 
+        app.MapPost("api/v3/images", static async context =>
+        {
+            await using var imageStream = context.Request.Form.Files[0].OpenReadStream();
+            
+            using var image = new MagickImage(imageStream);
+            
+            image.AutoOrient();
+            
+            image.Trim();
+            
+            image.Resize(new Percentage(200), FilterType.Cubic); // Увеличение в 2 раза
+            image.Density = new Density(300, 300);
+            
+            var bytes = image.ToByteArray();
+            
+            using var tesseract = new TesseractEngine("./tesseract", "eng+rus");
+            var pix = Pix.LoadFromMemory(bytes);
+            var a = tesseract.Process(pix);
+            Console.WriteLine(a.GetMeanConfidence());
+            
+            
+            context.Response.ContentType = "image/jpeg";
+            context.Response.Headers.ContentDisposition = "attachment";
+            
+            await image.WriteAsync(context.Response.Body);
+            
+        });
+
         app.MapPost("api/v3/documents", static async context =>
         {
             if (context.Request.Form.Files.Count < 1
