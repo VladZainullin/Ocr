@@ -6,20 +6,12 @@ using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 using Page = Tesseract.Page;
 
 namespace Web;
 
 file sealed class Program
 {
-    public static readonly ParallelOptions ParallelOptions = new()
-    {
-        MaxDegreeOfParallelism = Environment.ProcessorCount
-    };
-
     public static async Task Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
@@ -252,21 +244,6 @@ file sealed class Program
             // 8. Установка DPI
             image.Density = new Density(300, 300);
 
-            return image.ToByteArray();
-        }
-        catch (MagickMissingDelegateErrorException)
-        {
-            return [];
-        }
-    }
-
-    private static byte[] PreparateImage(Stream stream)
-    {
-        try
-        {
-            using var image = new MagickImage(stream);
-            image.Grayscale();
-            image.Strip();
             return image.ToByteArray();
         }
         catch (MagickMissingDelegateErrorException)
