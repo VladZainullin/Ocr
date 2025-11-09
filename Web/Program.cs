@@ -6,6 +6,9 @@ using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
+using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
+using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
+using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 using Page = Tesseract.Page;
 
 namespace Web;
@@ -61,6 +64,7 @@ file sealed class Program
                 for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
                 {
                     var pdfPage = pdfDocument.GetPage(pdfPageNumber);
+                    
                     searchTextBuffers[pdfPage.Number - 1] = new SearchTextBuffer
                     {
                         Number = pdfPage.Number,
@@ -97,7 +101,10 @@ file sealed class Program
                         var blocks = ExtractLayoutFromPage(imagePage);
                         var text = imagePage.GetText();
                         if (text == string.Empty) return;
-                        searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(text);
+                        searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
+                        {
+                            Blocks = blocks,
+                        });
                     }
                     finally
                     {
@@ -290,7 +297,7 @@ public sealed class SearchTextBuffer
 
     public required string Text { get; init; }
 
-    public List<string> Images { get; } = [];
+    public List<ImageResponse> Images { get; } = [];
 }
 
 public sealed class ImageTextBuffer
