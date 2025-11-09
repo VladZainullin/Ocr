@@ -31,35 +31,86 @@ file sealed class Program
         app.MapPost("api/v3/images", static async context =>
         {
             await using var imageStream = context.Request.Form.Files[0].OpenReadStream();
-            
+
             using var image = new MagickImage(imageStream);
-            
+
             image.AutoOrient();
             image.Trim();
-            
+
             image.Grayscale();
-            
+
             image.MedianFilter(1);
-            
-            // image.Deskew(new Percentage(40));
-            //
-            // image.Resize(new Percentage(200));
-            //
-            // image.Density = new Density(300, 300);
-            
+
             var bytes = image.ToByteArray();
-            
+
             using var tesseract = new TesseractEngine("./tesseract", "eng+rus");
             var pix = Pix.LoadFromMemory(bytes);
-            var a = tesseract.Process(pix);
-            Console.WriteLine(a.GetMeanConfidence());
-            Console.WriteLine(a.GetText());
-            
+            var page = tesseract.Process(pix);
+            var blocks = ExtractLayoutFromPage(page);
+
+            int blockCount = 0;
+            using (var iter = page.GetIterator())
+            {
+                iter.Begin();
+                do
+                {
+                    if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
+                    {
+                        Console.WriteLine("<block>");
+                    }
+
+                    do
+                    {
+                        if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
+                        {
+                            Console.WriteLine("  <paragraph>");
+                        }
+
+                        do
+                        {
+                            do
+                            {
+                                if (iter.IsAtBeginningOf(PageIteratorLevel.Word))
+                                {
+                                    Console.Write("    <word>");
+                                }
+
+                                string word = iter.GetText(PageIteratorLevel.Word);
+                                if (!string.IsNullOrEmpty(word))
+                                {
+                                    Console.Write(word);
+                                }
+
+                                if (iter.IsAtFinalOf(PageIteratorLevel.Word, PageIteratorLevel.Word))
+                                {
+                                    Console.Write("</word> ");
+                                }
+                            } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
+
+                            if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
+                            {
+                                Console.WriteLine("\n  </paragraph>");
+                            }
+                        } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
+                    } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
+
+                    if (iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Block))
+                    {
+                        Console.WriteLine("</block>\n");
+                    }
+                } while (iter.Next(PageIteratorLevel.Block));
+            }
+
+            Console.WriteLine(blockCount);
+
             context.Response.ContentType = "image/jpeg";
             context.Response.Headers.ContentDisposition = "attachment";
-            
-            await image.WriteAsync(context.Response.Body);
-            
+
+            await context.Response.WriteAsJsonAsync(new ImageResponse
+            {
+                Confidence = page.GetMeanConfidence(),
+                Blocks = blocks
+            });
         });
 
         app.MapPost("api/v3/documents", static async context =>
@@ -90,7 +141,7 @@ file sealed class Program
                 for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
                 {
                     var pdfPage = pdfDocument.GetPage(pdfPageNumber);
-                    
+
                     searchTextBuffers[pdfPage.Number - 1] = new SearchTextBuffer
                     {
                         Number = pdfPage.Number,
@@ -224,22 +275,37 @@ file sealed class Program
         do
         {
             var block = new BlockResponse();
+
             do
             {
                 var paragraph = new ParagraphResponse();
+
                 do
                 {
-                    var text = iter.GetText(PageIteratorLevel.TextLine);
-                    paragraph.Lines.Add(text);
-                } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
-                block.Paragraphs.Add(paragraph);
-            } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
+                    var line = new LineResponse();
 
-            blocks.Add(block);
+                    do
+                    {
+                        var word = iter.GetText(PageIteratorLevel.Word);
+                        if (!string.IsNullOrEmpty(word))
+                            line.Words.Add(word);
+                    } while (iter.Next(PageIteratorLevel.Word));
+
+                    if (line.Words.Count > 0)
+                        paragraph.Lines.Add(line);
+                } while (iter.Next(PageIteratorLevel.TextLine));
+
+                if (paragraph.Lines.Count > 0)
+                    block.Paragraphs.Add(paragraph);
+            } while (iter.Next(PageIteratorLevel.Para));
+
+            if (block.Paragraphs.Count > 0)
+                blocks.Add(block);
         } while (iter.Next(PageIteratorLevel.Block));
 
         return blocks;
     }
+
 
     private static Span<byte> GetImageBytes(IPdfImage pdfImage)
     {
@@ -301,7 +367,12 @@ public sealed class BlockResponse
 
 public sealed class ParagraphResponse
 {
-    public List<string> Lines { get; } = [];
+    public List<LineResponse> Lines { get; } = [];
+}
+
+public sealed class LineResponse
+{
+    public List<string> Words { get; } = [];
 }
 
 public sealed class SearchTextBuffer
