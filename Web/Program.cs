@@ -6,6 +6,7 @@ using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
+using Page = Tesseract.Page;
 
 namespace Web;
 
@@ -44,10 +45,10 @@ file sealed class Program
                 });
                 return;
             }
-            
+
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
             using var pdfDocument = PdfDocument.Open(stream);
-            
+
             var searchTextBuffers = new SearchTextBuffer[pdfDocument.NumberOfPages];
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
@@ -55,7 +56,7 @@ file sealed class Program
             var batchSize = 100;
             for (var batchStart = 0; batchStart < pdfDocument.NumberOfPages; batchStart += batchSize)
             {
-                var imageTextBuffers = new List<ImageTextBuffer>(); 
+                var imageTextBuffers = new List<ImageTextBuffer>();
                 var batchEnd = Math.Min(batchStart + batchSize, pdfDocument.NumberOfPages);
                 for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
                 {
@@ -65,7 +66,7 @@ file sealed class Program
                         Number = pdfPage.Number,
                         Text = pdfPage.Text,
                     };
-                    
+
                     foreach (var pdfImage in pdfPage.GetImages())
                     {
                         var imageBytes = GetImageBytes(pdfImage);
@@ -93,23 +94,24 @@ file sealed class Program
                         using var imageDocument = Pix.LoadFromMemory(preparateImage);
                         using var imagePage = engine.Process(imageDocument);
                         Console.WriteLine(imagePage.GetMeanConfidence());
+                        var blocks = ExtractLayoutFromPage(imagePage);
                         var text = imagePage.GetText();
                         if (text == string.Empty) return;
-                        searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(text);   
+                        searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(text);
                     }
                     finally
                     {
                         tesseractEngineObjectPool.Return(engine);
-                    } 
+                    }
                 });
             }
-            
+
             await context.Response.WriteAsJsonAsync(new
             {
                 Pages = searchTextBuffers
             });
         });
-        
+
         app.MapPost("api/v1/documents", static async context =>
         {
             if (context.Request.Form.Files.Count < 1
@@ -122,15 +124,15 @@ file sealed class Program
                 });
                 return;
             }
-        
+
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
-        
+
             using var pdfDocument = PdfDocument.Open(stream);
-        
+
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
-        
+
             var pdfPages = pdfDocument.GetPages();
-        
+
             var pageResponses = ArrayPool<PageResponse>.Shared.Rent(pdfDocument.NumberOfPages);
             try
             {
@@ -149,15 +151,14 @@ file sealed class Program
                         try
                         {
                             using var imagePage = engine.Process(imageDocument);
-                            var text = imagePage.GetText();
-                            imageResponses.Add(text);
+                            var blocks = ExtractLayoutFromPage(imagePage);
                         }
                         finally
                         {
                             tesseractEngineObjectPool.Return(engine);
                         }
                     }
-        
+
                     pageResponses[pdfPage.Number - 1] = new PageResponse
                     {
                         Number = pdfPage.Number,
@@ -165,7 +166,7 @@ file sealed class Program
                         Images = imageResponses
                     };
                 }
-        
+
                 await context.Response.WriteAsJsonAsync(new Response
                 {
                     Pages = pageResponses,
@@ -178,6 +179,32 @@ file sealed class Program
         });
 
         await app.RunAsync();
+    }
+
+    private static List<BlockResponse> ExtractLayoutFromPage(Page page)
+    {
+        var blocks = new List<BlockResponse>();
+        using var iter = page.GetIterator();
+        iter.Begin();
+
+        do
+        {
+            var block = new BlockResponse();
+            do
+            {
+                var paragraph = new ParagraphResponse();
+                do
+                {
+                    var text = iter.GetText(PageIteratorLevel.TextLine);
+                    paragraph.Lines.Add(text);
+                } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
+                block.Paragraphs.Add(paragraph);
+            } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
+
+            blocks.Add(block);
+        } while (iter.Next(PageIteratorLevel.Block));
+
+        return blocks;
     }
 
     private static Span<byte> GetImageBytes(IPdfImage pdfImage)
@@ -202,22 +229,22 @@ file sealed class Program
             using var image = new MagickImage(bytes);
             // 1. Конвертация в оттенки серого
             image.Grayscale();
-        
+
             // 2. Увеличение разрешения (если нужно)
             image.Resize(new Percentage(200)); // Увеличение в 2 раза
-        
+
             // 3. Выравнивание изображения (автоматическая ориентация)
             image.AutoOrient();
-        
+
             // 4. Удаление шумов
             image.Despeckle();
-        
+
             // 7. Обрезка пустых полей
             image.Trim();
-        
+
             // 8. Установка DPI
             image.Density = new Density(300, 300);
-            
+
             return image.ToByteArray();
         }
         catch (MagickMissingDelegateErrorException)
@@ -240,6 +267,21 @@ file sealed class Program
             return [];
         }
     }
+}
+
+public sealed class ImageResponse
+{
+    public required List<BlockResponse> Blocks { get; set; }
+}
+
+public sealed class BlockResponse
+{
+    public List<ParagraphResponse> Paragraphs { get; } = [];
+}
+
+public sealed class ParagraphResponse
+{
+    public List<string> Lines { get; } = [];
 }
 
 public sealed class SearchTextBuffer
