@@ -270,23 +270,13 @@ file sealed class Program
         try
         {
             using var image = new MagickImage(bytes);
-            // 1. Конвертация в оттенки серого
-            image.Grayscale();
-
-            // 2. Увеличение разрешения (если нужно)
-            image.Resize(new Percentage(200)); // Увеличение в 2 раза
-
-            // 3. Выравнивание изображения (автоматическая ориентация)
+            
             image.AutoOrient();
-
-            // 4. Удаление шумов
-            image.Despeckle();
-
-            // 7. Обрезка пустых полей
             image.Trim();
 
-            // 8. Установка DPI
-            image.Density = new Density(300, 300);
+            image.Grayscale();
+
+            image.MedianFilter(1);
 
             return image.ToByteArray();
         }
