@@ -72,7 +72,7 @@ file sealed class Program
                 for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
                 {
                     var pdfPage = pdfDocument.GetPage(pdfPageNumber);
-                    
+
                     var words = pdfPage.GetWords(NearestNeighbourWordExtractor.Instance);
                     var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
                     var orderedBlocks = UnsupervisedReadingOrderDetector.Instance.Get(blocks);
@@ -99,7 +99,7 @@ file sealed class Program
                             blockResponses.Add(paragraph);
                         }
                     }
-                    
+
 
                     pageResponses[pdfPage.Number - 1] = new PageResponse
                     {
@@ -158,15 +158,15 @@ file sealed class Program
 
         await app.RunAsync();
     }
-
     private static List<BlockResponse> ExtractLayoutFromPage(Page page)
     {
         var blocks = new List<BlockResponse>();
         using var iter = page.GetIterator();
         iter.Begin();
+
         BlockResponse currentBlock = null!;
         LineResponse currentLine = null!;
-                
+
         do
         {
             if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
@@ -177,19 +177,26 @@ file sealed class Program
             if (iter.IsAtBeginningOf(PageIteratorLevel.TextLine))
             {
                 currentLine = new LineResponse();
-                currentBlock.Lines.Add(currentLine);
             }
 
             if (iter.IsAtBeginningOf(PageIteratorLevel.Word))
             {
                 var word = iter.GetText(PageIteratorLevel.Word);
-                currentLine.Words.Add(word);
+                if (!string.IsNullOrWhiteSpace(word))
+                {
+                    currentLine.Words.Add(word);
+                }
             }
 
-            if (!iter.IsAtFinalOf(PageIteratorLevel.Word, PageIteratorLevel.Word)) continue;
-            if (!iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word)) continue;
-            if (!iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Para)) continue;
-            blocks.Add(currentBlock);
+            if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && currentLine.Words.Count > 0)
+            {
+                currentBlock.Lines.Add(currentLine);
+            }
+
+            if (iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && currentBlock.Lines.Count > 0)
+            {
+                blocks.Add(currentBlock);
+            }
         } while (iter.Next(PageIteratorLevel.Word));
 
         return blocks;
@@ -216,7 +223,7 @@ file sealed class Program
         try
         {
             using var image = new MagickImage(bytes);
-            
+
             image.AutoOrient();
             image.Trim();
 
@@ -231,13 +238,13 @@ file sealed class Program
             return [];
         }
     }
-    
+
     private static byte[] PreparateImage(Stream stream)
     {
         try
         {
             using var image = new MagickImage(stream);
-            
+
             image.AutoOrient();
             image.Trim();
 
