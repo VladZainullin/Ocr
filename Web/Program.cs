@@ -76,10 +76,10 @@ file sealed class Program
                     var words = pdfPage.GetWords(NearestNeighbourWordExtractor.Instance);
                     var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
                     var orderedBlocks = UnsupervisedReadingOrderDetector.Instance.Get(blocks);
-                    var paragraphs = new List<ParagraphResponse>();
+                    var blockResponses = new List<BlockResponse>();
                     foreach (var block in orderedBlocks)
                     {
-                        var paragraph = new ParagraphResponse();
+                        var paragraph = new BlockResponse();
                         foreach (var textLine in block.TextLines)
                         {
                             var line = new LineResponse();
@@ -96,7 +96,7 @@ file sealed class Program
 
                         if (paragraph.Lines.Count > 0)
                         {
-                            paragraphs.Add(paragraph);
+                            blockResponses.Add(paragraph);
                         }
                     }
                     
@@ -105,7 +105,7 @@ file sealed class Program
                     {
                         Number = pdfPage.Number,
                         Text = pdfPage.Text,
-                        Blocks = paragraphs,
+                        Blocks = blockResponses,
                     };
 
                     foreach (var pdfImage in pdfPage.GetImages())
@@ -165,26 +165,19 @@ file sealed class Program
         using var iter = page.GetIterator();
         iter.Begin();
         BlockResponse currentBlock = null!;
-        ParagraphResponse currentParagraph = null!;
         LineResponse currentLine = null!;
                 
         do
         {
             if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
             {
-                currentParagraph = new ParagraphResponse();
+                currentBlock = new BlockResponse();
             }
-
-            // if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
-            // {
-            //     currentParagraph = new ParagraphResponse();
-            //     currentBlock.Paragraphs.Add(currentParagraph);
-            // }
 
             if (iter.IsAtBeginningOf(PageIteratorLevel.TextLine))
             {
                 currentLine = new LineResponse();
-                currentParagraph.Lines.Add(currentLine);
+                currentBlock.Lines.Add(currentLine);
             }
 
             if (iter.IsAtBeginningOf(PageIteratorLevel.Word))
@@ -195,7 +188,6 @@ file sealed class Program
 
             if (!iter.IsAtFinalOf(PageIteratorLevel.Word, PageIteratorLevel.Word)) continue;
             if (!iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word)) continue;
-            // if (!iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine)) continue;
             if (!iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Para)) continue;
             blocks.Add(currentBlock);
         } while (iter.Next(PageIteratorLevel.Word));
@@ -270,11 +262,6 @@ public sealed class ImageResponse
 
 public sealed class BlockResponse
 {
-    public List<ParagraphResponse> Paragraphs { get; } = [];
-}
-
-public sealed class ParagraphResponse
-{
     public List<LineResponse> Lines { get; } = [];
 }
 
@@ -289,7 +276,7 @@ public sealed class PageResponse
 
     public required string Text { get; init; }
 
-    public required List<ParagraphResponse> Blocks { get; set; }
+    public required List<BlockResponse> Blocks { get; set; }
 
     public List<ImageResponse> Images { get; } = [];
 }
