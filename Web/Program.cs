@@ -46,62 +46,47 @@ file sealed class Program
             using var tesseract = new TesseractEngine("./tesseract", "eng+rus");
             var pix = Pix.LoadFromMemory(bytes);
             var page = tesseract.Process(pix);
-            var blocks = ExtractLayoutFromPage(page);
+            var blocks = new List<BlockResponse>();
 
-            int blockCount = 0;
             using (var iter = page.GetIterator())
             {
                 iter.Begin();
+                BlockResponse currentBlock = null!;
+                ParagraphResponse currentParagraph = null!;
+                LineResponse currentLine = null!;
+                
                 do
                 {
                     if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
                     {
-                        Console.WriteLine("<block>");
+                        currentBlock = new BlockResponse();
                     }
 
-                    do
+                    if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
                     {
-                        if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
-                        {
-                            Console.WriteLine("  <paragraph>");
-                        }
-
-                        do
-                        {
-                            do
-                            {
-                                if (iter.IsAtBeginningOf(PageIteratorLevel.Word))
-                                {
-                                    Console.Write("    <word>");
-                                }
-
-                                string word = iter.GetText(PageIteratorLevel.Word);
-                                if (!string.IsNullOrEmpty(word))
-                                {
-                                    Console.Write(word);
-                                }
-
-                                if (iter.IsAtFinalOf(PageIteratorLevel.Word, PageIteratorLevel.Word))
-                                {
-                                    Console.Write("</word> ");
-                                }
-                            } while (iter.Next(PageIteratorLevel.TextLine, PageIteratorLevel.Word));
-
-                            if (iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine))
-                            {
-                                Console.WriteLine("\n  </paragraph>");
-                            }
-                        } while (iter.Next(PageIteratorLevel.Para, PageIteratorLevel.TextLine));
-                    } while (iter.Next(PageIteratorLevel.Block, PageIteratorLevel.Para));
-
-                    if (iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Block))
-                    {
-                        Console.WriteLine("</block>\n");
+                        currentParagraph = new ParagraphResponse();
+                        currentBlock.Paragraphs.Add(currentParagraph);
                     }
-                } while (iter.Next(PageIteratorLevel.Block));
+
+                    if (iter.IsAtBeginningOf(PageIteratorLevel.TextLine))
+                    {
+                        currentLine = new LineResponse();
+                        currentParagraph.Lines.Add(currentLine);
+                    }
+
+                    if (iter.IsAtBeginningOf(PageIteratorLevel.Word))
+                    {
+                        var word = iter.GetText(PageIteratorLevel.Word);
+                        currentLine.Words.Add(word);
+                    }
+
+                    if (!iter.IsAtFinalOf(PageIteratorLevel.Word, PageIteratorLevel.Word)) continue;
+                    if (!iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word)) continue;
+                    if (!iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine)) continue;
+                    if (!iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Para)) continue;
+                    blocks.Add(currentBlock);
+                } while (iter.Next(PageIteratorLevel.Word));
             }
-
-            Console.WriteLine(blockCount);
 
             context.Response.ContentType = "image/jpeg";
             context.Response.Headers.ContentDisposition = "attachment";
