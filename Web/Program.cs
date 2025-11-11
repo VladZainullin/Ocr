@@ -164,8 +164,8 @@ file sealed class Program
         using var iter = page.GetIterator();
         iter.Begin();
 
-        BlockResponse currentBlock = null!;
-        LineResponse currentLine = null!;
+        BlockResponse? currentBlock = null;
+        LineResponse? currentLine = null;
 
         do
         {
@@ -184,16 +184,16 @@ file sealed class Program
                 var word = iter.GetText(PageIteratorLevel.Word);
                 if (!string.IsNullOrWhiteSpace(word))
                 {
-                    currentLine.Words.Add(word);
+                    currentLine?.Words.Add(word);
                 }
             }
 
-            if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && currentLine.Words.Count > 0)
+            if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && currentLine?.Words.Count > 0)
             {
-                currentBlock.Lines.Add(currentLine);
+                currentBlock?.Lines.Add(currentLine);
             }
 
-            if (iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && currentBlock.Lines.Count > 0)
+            if (iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && currentBlock?.Lines.Count > 0)
             {
                 blocks.Add(currentBlock);
             }
@@ -225,7 +225,6 @@ file sealed class Program
             using var image = new MagickImage(bytes);
 
             image.AutoOrient();
-            image.Trim();
 
             image.Grayscale();
 
