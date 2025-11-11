@@ -5,6 +5,9 @@ using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
+using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
+using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
+using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 using Page = Tesseract.Page;
 
 namespace Web;
@@ -71,11 +74,40 @@ file sealed class Program
                 for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
                 {
                     var pdfPage = pdfDocument.GetPage(pdfPageNumber);
+                    
+                    var words = pdfPage.GetWords(NearestNeighbourWordExtractor.Instance);
+                    var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
+                    var orderedBlocks = UnsupervisedReadingOrderDetector.Instance.Get(blocks);
+                    var paragraphs = new List<ParagraphResponse>();
+                    foreach (var block in orderedBlocks)
+                    {
+                        var paragraph = new ParagraphResponse();
+                        foreach (var textLine in block.TextLines)
+                        {
+                            var line = new LineResponse();
+                            foreach (var word in textLine.Words)
+                            {
+                                line.Words.Add(word.Text);
+                            }
+
+                            if (line.Words.Count > 0)
+                            {
+                                paragraph.Lines.Add(line);
+                            }
+                        }
+
+                        if (paragraph.Lines.Count > 0)
+                        {
+                            paragraphs.Add(paragraph);
+                        }
+                    }
+                    
 
                     pageResponses[pdfPage.Number - 1] = new PageResponse
                     {
                         Number = pdfPage.Number,
                         Text = pdfPage.Text,
+                        Blocks = paragraphs,
                     };
 
                     foreach (var pdfImage in pdfPage.GetImages())
@@ -258,6 +290,8 @@ public sealed class PageResponse
     public required int Number { get; init; }
 
     public required string Text { get; init; }
+
+    public required List<ParagraphResponse> Blocks { get; set; }
 
     public List<ImageResponse> Images { get; } = [];
 }
