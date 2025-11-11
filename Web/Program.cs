@@ -34,8 +34,6 @@ file sealed class Program
         {
             await using var imageStream = context.Request.Form.Files[0].OpenReadStream();
 
-            using var image = new MagickImage(imageStream);
-
             var bytes = PreparateImage(imageStream);
 
             using var tesseract = new TesseractEngine("./tesseract", "eng+rus");
