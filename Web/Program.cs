@@ -59,7 +59,7 @@ file sealed class Program
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
             using var pdfDocument = PdfDocument.Open(stream);
 
-            var searchTextBuffers = new PageResponse[pdfDocument.NumberOfPages];
+            var pageResponses = new PageResponse[pdfDocument.NumberOfPages];
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
@@ -72,7 +72,7 @@ file sealed class Program
                 {
                     var pdfPage = pdfDocument.GetPage(pdfPageNumber);
 
-                    searchTextBuffers[pdfPage.Number - 1] = new PageResponse
+                    pageResponses[pdfPage.Number - 1] = new PageResponse
                     {
                         Number = pdfPage.Number,
                         Text = pdfPage.Text,
@@ -107,7 +107,7 @@ file sealed class Program
                         var blocks = ExtractLayoutFromPage(imagePage);
                         var text = imagePage.GetText();
                         if (text == string.Empty) return;
-                        searchTextBuffers[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
+                        pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
                         {
                             Confidence = imagePage.GetMeanConfidence(),
                             Blocks = blocks,
@@ -122,7 +122,7 @@ file sealed class Program
 
             await context.Response.WriteAsJsonAsync(new
             {
-                Pages = searchTextBuffers
+                Pages = pageResponses
             });
         });
 
