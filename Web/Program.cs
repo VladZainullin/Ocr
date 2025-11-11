@@ -46,56 +46,13 @@ file sealed class Program
             using var tesseract = new TesseractEngine("./tesseract", "eng+rus");
             var pix = Pix.LoadFromMemory(bytes);
             var page = tesseract.Process(pix);
-            var blocks = new List<BlockResponse>();
-
-            using (var iter = page.GetIterator())
-            {
-                iter.Begin();
-                BlockResponse currentBlock = null!;
-                ParagraphResponse currentParagraph = null!;
-                LineResponse currentLine = null!;
-                
-                do
-                {
-                    if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
-                    {
-                        currentBlock = new BlockResponse();
-                    }
-
-                    if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
-                    {
-                        currentParagraph = new ParagraphResponse();
-                        currentBlock.Paragraphs.Add(currentParagraph);
-                    }
-
-                    if (iter.IsAtBeginningOf(PageIteratorLevel.TextLine))
-                    {
-                        currentLine = new LineResponse();
-                        currentParagraph.Lines.Add(currentLine);
-                    }
-
-                    if (iter.IsAtBeginningOf(PageIteratorLevel.Word))
-                    {
-                        var word = iter.GetText(PageIteratorLevel.Word);
-                        currentLine.Words.Add(word);
-                    }
-
-                    if (!iter.IsAtFinalOf(PageIteratorLevel.Word, PageIteratorLevel.Word)) continue;
-                    if (!iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word)) continue;
-                    if (!iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine)) continue;
-                    if (!iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Para)) continue;
-                    blocks.Add(currentBlock);
-                } while (iter.Next(PageIteratorLevel.Word));
-            }
+            var text = page.GetText();
+            var blocks = ExtractLayoutFromPage(page);
 
             context.Response.ContentType = "image/jpeg";
             context.Response.Headers.ContentDisposition = "attachment";
 
-            await context.Response.WriteAsJsonAsync(new ImageResponse
-            {
-                Confidence = page.GetMeanConfidence(),
-                Blocks = blocks
-            });
+            await context.Response.WriteAsJsonAsync(blocks);
         });
 
         app.MapPost("api/v3/documents", static async context =>
@@ -256,37 +213,41 @@ file sealed class Program
         var blocks = new List<BlockResponse>();
         using var iter = page.GetIterator();
         iter.Begin();
-
+        BlockResponse currentBlock = null!;
+        ParagraphResponse currentParagraph = null!;
+        LineResponse currentLine = null!;
+                
         do
         {
-            var block = new BlockResponse();
-
-            do
+            if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
             {
-                var paragraph = new ParagraphResponse();
+                currentBlock = new BlockResponse();
+            }
 
-                do
-                {
-                    var line = new LineResponse();
+            if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
+            {
+                currentParagraph = new ParagraphResponse();
+                currentBlock.Paragraphs.Add(currentParagraph);
+            }
 
-                    do
-                    {
-                        var word = iter.GetText(PageIteratorLevel.Word);
-                        if (!string.IsNullOrEmpty(word))
-                            line.Words.Add(word);
-                    } while (iter.Next(PageIteratorLevel.Word));
+            if (iter.IsAtBeginningOf(PageIteratorLevel.TextLine))
+            {
+                currentLine = new LineResponse();
+                currentParagraph.Lines.Add(currentLine);
+            }
 
-                    if (line.Words.Count > 0)
-                        paragraph.Lines.Add(line);
-                } while (iter.Next(PageIteratorLevel.TextLine));
+            if (iter.IsAtBeginningOf(PageIteratorLevel.Word))
+            {
+                var word = iter.GetText(PageIteratorLevel.Word);
+                currentLine.Words.Add(word);
+            }
 
-                if (paragraph.Lines.Count > 0)
-                    block.Paragraphs.Add(paragraph);
-            } while (iter.Next(PageIteratorLevel.Para));
-
-            if (block.Paragraphs.Count > 0)
-                blocks.Add(block);
-        } while (iter.Next(PageIteratorLevel.Block));
+            if (!iter.IsAtFinalOf(PageIteratorLevel.Word, PageIteratorLevel.Word)) continue;
+            if (!iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word)) continue;
+            if (!iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine)) continue;
+            if (!iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Para)) continue;
+            blocks.Add(currentBlock);
+        } while (iter.Next(PageIteratorLevel.Word));
 
         return blocks;
     }
