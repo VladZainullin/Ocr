@@ -49,9 +49,6 @@ file sealed class Program
             var text = page.GetText();
             var blocks = ExtractLayoutFromPage(page);
 
-            context.Response.ContentType = "image/jpeg";
-            context.Response.Headers.ContentDisposition = "attachment";
-
             await context.Response.WriteAsJsonAsync(blocks);
         });
 
