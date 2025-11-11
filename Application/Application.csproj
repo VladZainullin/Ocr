@@ -1,0 +1,12 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+      <PackageReference Include="Magick.NET-Q16-AnyCPU" />
+      <PackageReference Include="MediatR" />
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+      <PackageReference Include="PdfPig" />
+      <PackageReference Include="Tesseract" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Application.Contracts\Application.Contracts.csproj" />
+    </ItemGroup>
+</Project>
