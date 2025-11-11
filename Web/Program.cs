@@ -172,14 +172,14 @@ file sealed class Program
         {
             if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
             {
-                currentBlock = new BlockResponse();
+                currentParagraph = new ParagraphResponse();
             }
 
-            if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
-            {
-                currentParagraph = new ParagraphResponse();
-                currentBlock.Paragraphs.Add(currentParagraph);
-            }
+            // if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
+            // {
+            //     currentParagraph = new ParagraphResponse();
+            //     currentBlock.Paragraphs.Add(currentParagraph);
+            // }
 
             if (iter.IsAtBeginningOf(PageIteratorLevel.TextLine))
             {
@@ -195,7 +195,7 @@ file sealed class Program
 
             if (!iter.IsAtFinalOf(PageIteratorLevel.Word, PageIteratorLevel.Word)) continue;
             if (!iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word)) continue;
-            if (!iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine)) continue;
+            // if (!iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine)) continue;
             if (!iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Para)) continue;
             blocks.Add(currentBlock);
         } while (iter.Next(PageIteratorLevel.Word));
