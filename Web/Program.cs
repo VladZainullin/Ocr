@@ -1,4 +1,3 @@
-using System.Buffers;
 using System.Net.Mime;
 using ImageMagick;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -34,19 +33,11 @@ file sealed class Program
 
             using var image = new MagickImage(imageStream);
 
-            image.AutoOrient();
-            image.Trim();
-
-            image.Grayscale();
-
-            image.MedianFilter(1);
-
-            var bytes = image.ToByteArray();
+            var bytes = PreparateImage(imageStream);
 
             using var tesseract = new TesseractEngine("./tesseract", "eng+rus");
             var pix = Pix.LoadFromMemory(bytes);
             var page = tesseract.Process(pix);
-            var text = page.GetText();
             var blocks = ExtractLayoutFromPage(page);
 
             await context.Response.WriteAsJsonAsync(blocks);
@@ -58,9 +49,9 @@ file sealed class Program
                 || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
                 || context.Request.Form.Files[0].Length == 0)
             {
-                await context.Response.WriteAsJsonAsync(new Response
+                await context.Response.WriteAsJsonAsync(new
                 {
-                    Pages = [],
+                    Pages = Array.Empty<PageResponse>(),
                 });
                 return;
             }
@@ -68,7 +59,7 @@ file sealed class Program
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
             using var pdfDocument = PdfDocument.Open(stream);
 
-            var searchTextBuffers = new SearchTextBuffer[pdfDocument.NumberOfPages];
+            var searchTextBuffers = new PageResponse[pdfDocument.NumberOfPages];
 
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
@@ -81,7 +72,7 @@ file sealed class Program
                 {
                     var pdfPage = pdfDocument.GetPage(pdfPageNumber);
 
-                    searchTextBuffers[pdfPage.Number - 1] = new SearchTextBuffer
+                    searchTextBuffers[pdfPage.Number - 1] = new PageResponse
                     {
                         Number = pdfPage.Number,
                         Text = pdfPage.Text,
@@ -113,7 +104,6 @@ file sealed class Program
                         if (preparateImage.Length == 0) return;
                         using var imageDocument = Pix.LoadFromMemory(preparateImage);
                         using var imagePage = engine.Process(imageDocument);
-                        Console.WriteLine(imagePage.GetMeanConfidence());
                         var blocks = ExtractLayoutFromPage(imagePage);
                         var text = imagePage.GetText();
                         if (text == string.Empty) return;
@@ -134,72 +124,6 @@ file sealed class Program
             {
                 Pages = searchTextBuffers
             });
-        });
-
-        app.MapPost("api/v1/documents", static async context =>
-        {
-            if (context.Request.Form.Files.Count < 1
-                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
-                || context.Request.Form.Files[0].Length == 0)
-            {
-                await context.Response.WriteAsJsonAsync(new Response
-                {
-                    Pages = [],
-                });
-                return;
-            }
-
-            await using var stream = context.Request.Form.Files[0].OpenReadStream();
-
-            using var pdfDocument = PdfDocument.Open(stream);
-
-            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
-
-            var pdfPages = pdfDocument.GetPages();
-
-            var pageResponses = ArrayPool<PageResponse>.Shared.Rent(pdfDocument.NumberOfPages);
-            try
-            {
-                foreach (var pdfPage in pdfPages)
-                {
-                    var pdfImages = pdfPage.GetImages();
-                    var imageResponses = new List<string>();
-                    foreach (var pdfImage in pdfImages)
-                    {
-                        var imageBytes = GetImageBytes(pdfImage);
-                        if (imageBytes.Length == 0) continue;
-                        var preparateImageBytes = PreparateImage(imageBytes);
-                        if (preparateImageBytes.Length == 0) continue;
-                        using var imageDocument = Pix.LoadFromMemory(preparateImageBytes);
-                        var engine = tesseractEngineObjectPool.Get();
-                        try
-                        {
-                            using var imagePage = engine.Process(imageDocument);
-                            var blocks = ExtractLayoutFromPage(imagePage);
-                        }
-                        finally
-                        {
-                            tesseractEngineObjectPool.Return(engine);
-                        }
-                    }
-
-                    pageResponses[pdfPage.Number - 1] = new PageResponse
-                    {
-                        Number = pdfPage.Number,
-                        Text = pdfPage.Text,
-                        Images = imageResponses
-                    };
-                }
-
-                await context.Response.WriteAsJsonAsync(new Response
-                {
-                    Pages = pageResponses,
-                });
-            }
-            finally
-            {
-                ArrayPool<PageResponse>.Shared.Return(pageResponses);
-            }
         });
 
         await app.RunAsync();
@@ -285,6 +209,27 @@ file sealed class Program
             return [];
         }
     }
+    
+    private static byte[] PreparateImage(Stream stream)
+    {
+        try
+        {
+            using var image = new MagickImage(stream);
+            
+            image.AutoOrient();
+            image.Trim();
+
+            image.Grayscale();
+
+            image.MedianFilter(1);
+
+            return image.ToByteArray();
+        }
+        catch (MagickMissingDelegateErrorException)
+        {
+            return [];
+        }
+    }
 }
 
 public sealed class ImageResponse
@@ -308,7 +253,7 @@ public sealed class LineResponse
     public List<string> Words { get; } = [];
 }
 
-public sealed class SearchTextBuffer
+public sealed class PageResponse
 {
     public required int Number { get; init; }
 
@@ -322,18 +267,4 @@ public sealed class ImageTextBuffer
     public required int Number { get; init; }
 
     public required byte[] Memory { get; init; }
-}
-
-public sealed class Response
-{
-    public required IReadOnlyCollection<PageResponse> Pages { get; init; }
-}
-
-public sealed class PageResponse
-{
-    public required int Number { get; init; }
-
-    public required string Text { get; init; }
-
-    public required List<string> Images { get; set; }
 }
