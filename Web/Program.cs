@@ -153,7 +153,7 @@ file sealed class Program
                 Parallel.ForEach(imageTextBuffers, new ParallelOptions
                 {
                     CancellationToken = context.RequestAborted,
-                    MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
+                    MaxDegreeOfParallelism = 1,
                 }, imageTextBuffer =>
                 {
                     var engine = tesseractEngineObjectPool.Get();
@@ -218,11 +218,7 @@ file sealed class Program
                         Text = word
                     };
                     
-                    currentLine?.Words.Add(new WordResponse
-                    {
-                        BoundingBox = new BoundingBoxResponse(),
-                        Text = word
-                    });
+                    currentLine?.Words.Add(wordResponse);
                     
                     if (iter.TryGetBoundingBox(PageIteratorLevel.Word, out var wordBoundingBox))
                     {
