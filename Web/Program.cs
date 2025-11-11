@@ -34,6 +34,8 @@ file sealed class Program
         {
             await using var imageStream = context.Request.Form.Files[0].OpenReadStream();
 
+            using var image = new MagickImage(imageStream);
+
             var bytes = PreparateImage(imageStream);
 
             using var tesseract = new TesseractEngine("./tesseract", "eng+rus");
@@ -172,14 +174,14 @@ file sealed class Program
         {
             if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
             {
-                currentParagraph = new ParagraphResponse();
+                currentBlock = new BlockResponse();
             }
 
-            // if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
-            // {
-            //     currentParagraph = new ParagraphResponse();
-            //     currentBlock.Paragraphs.Add(currentParagraph);
-            // }
+            if (iter.IsAtBeginningOf(PageIteratorLevel.Para))
+            {
+                currentParagraph = new ParagraphResponse();
+                currentBlock.Paragraphs.Add(currentParagraph);
+            }
 
             if (iter.IsAtBeginningOf(PageIteratorLevel.TextLine))
             {
@@ -195,7 +197,7 @@ file sealed class Program
 
             if (!iter.IsAtFinalOf(PageIteratorLevel.Word, PageIteratorLevel.Word)) continue;
             if (!iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word)) continue;
-            // if (!iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine)) continue;
+            if (!iter.IsAtFinalOf(PageIteratorLevel.Para, PageIteratorLevel.TextLine)) continue;
             if (!iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Para)) continue;
             blocks.Add(currentBlock);
         } while (iter.Next(PageIteratorLevel.Word));
