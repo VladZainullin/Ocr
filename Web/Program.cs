@@ -85,7 +85,36 @@ file sealed class Program
                             var line = new LineResponse();
                             foreach (var word in textLine.Words)
                             {
-                                line.Words.Add(word.Text);
+                                line.Words.Add(new WordResponse
+                                {
+                                    BoundingBox = new BoundingBoxResponse
+                                    {
+                                        Vertices =
+                                        {
+                                            new VertexResponse
+                                            {
+                                                X = word.BoundingBox.BottomLeft.X,
+                                                Y = word.BoundingBox.BottomLeft.X
+                                            },
+                                            new VertexResponse
+                                            {
+                                                X = word.BoundingBox.TopLeft.X,
+                                                Y = word.BoundingBox.TopLeft.Y
+                                            },
+                                            new VertexResponse
+                                            {
+                                                X = word.BoundingBox.TopRight.X,
+                                                Y = word.BoundingBox.TopRight.X
+                                            },
+                                            new VertexResponse
+                                            {
+                                                X = word.BoundingBox.BottomRight.X,
+                                                Y = word.BoundingBox.BottomRight.Y
+                                            },
+                                        }
+                                    },
+                                    Text = word.Text
+                                });
                             }
 
                             if (line.Words.Count > 0)
@@ -183,7 +212,36 @@ file sealed class Program
                 var word = iter.GetText(PageIteratorLevel.Word);
                 if (!string.IsNullOrWhiteSpace(word))
                 {
-                    currentLine?.Words.Add(word);
+                    var wordResponse = new WordResponse
+                    {
+                        BoundingBox = new BoundingBoxResponse(),
+                        Text = word
+                    };
+                    
+                    currentLine?.Words.Add(new WordResponse
+                    {
+                        BoundingBox = new BoundingBoxResponse(),
+                        Text = word
+                    });
+                    
+                    if (iter.TryGetBoundingBox(PageIteratorLevel.Word, out var wordBoundingBox))
+                    {
+                        var v1 = new VertexResponse
+                        {
+                            X = wordBoundingBox.X1,
+                            Y = wordBoundingBox.Y1,
+                        };
+                        
+                        var v2 = new VertexResponse
+                        {
+                            X = wordBoundingBox.X2,
+                            Y = wordBoundingBox.Y2,
+                        };
+                        
+
+                        wordResponse.BoundingBox.Vertices.Add(v1);
+                        wordResponse.BoundingBox.Vertices.Add(v2);
+                    }
                 }
             }
 
@@ -259,6 +317,18 @@ file sealed class Program
     }
 }
 
+public sealed class BoundingBoxResponse
+{
+    public List<VertexResponse> Vertices { get; } = [];
+}
+
+public sealed class VertexResponse
+{
+    public required double X { get; init; }
+
+    public required double Y { get; init; }
+}
+
 public sealed class ImageResponse
 {
     public required List<BlockResponse> Blocks { get; set; }
@@ -271,7 +341,14 @@ public sealed class BlockResponse
 
 public sealed class LineResponse
 {
-    public List<string> Words { get; } = [];
+    public List<WordResponse> Words { get; } = [];
+}
+
+public sealed class WordResponse
+{
+    public required BoundingBoxResponse BoundingBox { get; init; }
+    
+    public required string Text { get; init; }
 }
 
 public sealed class PageResponse
