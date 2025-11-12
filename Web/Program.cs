@@ -30,6 +30,67 @@ file sealed class Program
 
         await using var app = builder.Build();
 
+        app.MapPost("api/v4/documents", static async context =>
+        {
+            await using var stream = context.Request.Form.Files[0].OpenReadStream();
+            using var pdfDocument = PdfDocument.Open(stream);
+
+            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
+
+            var pageResponses = pdfDocument.GetPages()
+                .Chunk(1000)
+                .SelectMany(pdfPageChunk =>
+                {
+                    var pdfPages = pdfPageChunk
+                        .SelectMany(pdfPage => pdfPage
+                            .GetImages()
+                            .Select(pdfImage => new
+                            {
+                                pdfPage.Number,
+                                Bytes = GetImageBytes(pdfImage),
+                                Images = new List<ImageResponse>()
+                            }))
+                        .ToList();
+
+                    return pdfPages
+                        .AsParallel()
+                        .AsOrdered()
+                        .WithCancellation(context.RequestAborted)
+                        .WithDegreeOfParallelism(Environment.ProcessorCount)
+                        .Select(imageTextBuffer =>
+                        {
+                            var engine = tesseractEngineObjectPool.Get();
+                            try
+                            {
+                                var preparateImage = PreparateImage(imageTextBuffer.Bytes);
+                                if (preparateImage.Length == 0)
+                                    return new ImageResponse
+                                    {
+                                        Blocks = [],
+                                    };
+                                ;
+                                using var imageDocument = Pix.LoadFromMemory(preparateImage);
+                                using var imagePage = engine.Process(imageDocument);
+                                var blocks = ExtractLayoutFromPage(imagePage);
+                                return new ImageResponse
+                                {
+                                    Blocks = blocks,
+                                };
+                            }
+                            finally
+                            {
+                                tesseractEngineObjectPool.Return(engine);
+                            }
+                        });
+                })
+                .ToList();
+            
+            await context.Response.WriteAsJsonAsync(new
+            {
+                Pages = pageResponses
+            });
+        });
+
         app.MapPost("api/v3/documents", static async context =>
         {
             if (context.Request.Form.Files.Count < 1
@@ -53,7 +114,7 @@ file sealed class Program
             using var pdfDocument = PdfDocument.Open(stream);
 
             var pageResponses = new PageResponse[pdfDocument.NumberOfPages];
-            
+
             var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
 
             var batchSize = 100;
@@ -64,7 +125,7 @@ file sealed class Program
                 for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
                 {
                     var pdfPage = pdfDocument.GetPage(pdfPageNumber);
-
+            
                     var words = pdfPage.GetWords(NearestNeighbourWordExtractor.Instance);
                     var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
                     var orderedBlocks = UnsupervisedReadingOrderDetector.Instance.Get(blocks);
@@ -187,7 +248,7 @@ file sealed class Program
     }
 
 
-    private static Span<byte> GetImageBytes(IPdfImage pdfImage)
+    private static byte[] GetImageBytes(IPdfImage pdfImage)
     {
         if (pdfImage.TryGetPng(out var pngImageBytes))
         {
@@ -196,10 +257,10 @@ file sealed class Program
 
         if (pdfImage.TryGetBytesAsMemory(out var memory))
         {
-            return memory.Span;
+            return memory.ToArray();
         }
 
-        return pdfImage.RawBytes;
+        return pdfImage.RawBytes.ToArray();
     }
 
     private static byte[] PreparateImage(Span<byte> bytes)
