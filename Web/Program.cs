@@ -137,8 +137,6 @@ file sealed class Program
                         using var imageDocument = Pix.LoadFromMemory(preparateImage);
                         using var imagePage = engine.Process(imageDocument);
                         var blocks = ExtractLayoutFromPage(imagePage);
-                        var text = imagePage.GetText();
-                        if (text == string.Empty) return;
                         pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
                         {
                             Blocks = blocks,
