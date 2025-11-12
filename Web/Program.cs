@@ -57,6 +57,12 @@ file sealed class Program
                 return;
             }
 
+            var parallelOptions = new ParallelOptions
+            {
+                CancellationToken = context.RequestAborted,
+                MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
+            };
+
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
             using var pdfDocument = PdfDocument.Open(stream);
 
@@ -121,11 +127,7 @@ file sealed class Program
                     }
                 }
 
-                Parallel.ForEach(imageTextBuffers, new ParallelOptions
-                {
-                    CancellationToken = context.RequestAborted,
-                    MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
-                }, imageTextBuffer =>
+                Parallel.ForEach(imageTextBuffers, parallelOptions, imageTextBuffer =>
                 {
                     var engine = tesseractEngineObjectPool.Get();
                     try
