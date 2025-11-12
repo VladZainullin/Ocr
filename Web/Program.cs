@@ -71,7 +71,7 @@ file sealed class Program
                     var blockResponses = new List<BlockResponse>();
                     foreach (var block in orderedBlocks)
                     {
-                        var paragraph = new BlockResponse();
+                        var blockResponse = new BlockResponse();
                         foreach (var textLine in block.TextLines)
                         {
                             var line = new LineResponse();
@@ -82,13 +82,13 @@ file sealed class Program
 
                             if (line.Words.Count > 0)
                             {
-                                paragraph.Lines.Add(line);
+                                blockResponse.Lines.Add(line);
                             }
                         }
 
-                        if (paragraph.Lines.Count > 0)
+                        if (blockResponse.Lines.Count > 0)
                         {
-                            blockResponses.Add(paragraph);
+                            blockResponses.Add(blockResponse);
                         }
                     }
 
