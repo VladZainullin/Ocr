@@ -96,7 +96,6 @@ file sealed class Program
                     pageResponses[pdfPage.Number - 1] = new PageResponse
                     {
                         Number = pdfPage.Number,
-                        Text = pdfPage.Text,
                         Blocks = blockResponses,
                     };
 
@@ -263,8 +262,6 @@ public sealed class LineResponse
 public sealed class PageResponse
 {
     public required int Number { get; init; }
-
-    public required string Text { get; init; }
 
     public required List<BlockResponse> Blocks { get; set; }
 
