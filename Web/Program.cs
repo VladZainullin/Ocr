@@ -30,20 +30,6 @@ file sealed class Program
 
         await using var app = builder.Build();
 
-        app.MapPost("api/v3/images", static async context =>
-        {
-            await using var imageStream = context.Request.Form.Files[0].OpenReadStream();
-
-            var bytes = PreparateImage(imageStream);
-
-            using var tesseract = new TesseractEngine("./tesseract", "eng+rus");
-            var pix = Pix.LoadFromMemory(bytes);
-            var page = tesseract.Process(pix);
-            var blocks = ExtractLayoutFromPage(page);
-
-            await context.Response.WriteAsJsonAsync(blocks);
-        });
-
         app.MapPost("api/v3/documents", static async context =>
         {
             if (context.Request.Form.Files.Count < 1
