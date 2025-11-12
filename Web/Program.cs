@@ -153,7 +153,7 @@ file sealed class Program
                 Parallel.ForEach(imageTextBuffers, new ParallelOptions
                 {
                     CancellationToken = context.RequestAborted,
-                    MaxDegreeOfParallelism = 1,
+                    MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
                 }, imageTextBuffer =>
                 {
                     var engine = tesseractEngineObjectPool.Get();
