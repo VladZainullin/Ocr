@@ -1,5 +1,4 @@
 using System.Net.Mime;
-using ImageMagick;
 using Microsoft.AspNetCore.HttpOverrides;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
@@ -49,6 +48,7 @@ file sealed class Program
             var pageResponses = new PageResponse[pdfDocument.NumberOfPages];
 
             var ocr = context.RequestServices.GetRequiredService<OcrService>();
+            var imageService = context.RequestServices.GetRequiredService<ImageService>();
 
             var batchSize = 100;
             for (var batchStart = 0; batchStart < pdfDocument.NumberOfPages; batchStart += batchSize)
@@ -108,7 +108,7 @@ file sealed class Program
 
                 Parallel.ForEach(imageTextBuffers, parallelOptions, imageTextBuffer =>
                 {
-                    var preparateImage = PreparateImage(imageTextBuffer.Memory);
+                    var preparateImage = imageService.Recognition(imageTextBuffer.Memory);
                     if (preparateImage.Length == 0) return;
                     var blocks = ocr.Process(preparateImage);
                     pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
@@ -141,26 +141,6 @@ file sealed class Program
         }
 
         return pdfImage.RawBytes.ToArray();
-    }
-
-    private static byte[] PreparateImage(Span<byte> bytes)
-    {
-        try
-        {
-            using var image = new MagickImage(bytes);
-
-            image.AutoOrient();
-
-            image.Grayscale();
-
-            image.MedianFilter(1);
-
-            return image.ToByteArray();
-        }
-        catch (MagickMissingDelegateErrorException)
-        {
-            return [];
-        }
     }
 }
 
