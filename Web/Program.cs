@@ -101,14 +101,14 @@ file sealed class Program
                         imageTextBuffers.Add(new ImageTextBuffer
                         {
                             Number = pdfPage.Number,
-                            Memory = imageBytes.ToArray(),
+                            Bytes = imageBytes
                         });
                     }
                 }
 
                 Parallel.ForEach(imageTextBuffers, parallelOptions, imageTextBuffer =>
                 {
-                    var preparateImage = imageService.Recognition(imageTextBuffer.Memory);
+                    var preparateImage = imageService.Recognition(imageTextBuffer.Bytes);
                     if (preparateImage.Length == 0) return;
                     var blocks = ocr.Process(preparateImage);
                     pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
@@ -172,5 +172,5 @@ public sealed class ImageTextBuffer
 {
     public required int Number { get; init; }
 
-    public required byte[] Memory { get; init; }
+    public required byte[] Bytes { get; init; }
 }
