@@ -24,6 +24,8 @@ public static class DependencyInjection
             return provider.Create(policy);
         });
         
+        builder.Services.TryAddSingleton<OcrService>();
+        
         return builder;
     }
 }
