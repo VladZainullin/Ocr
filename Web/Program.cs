@@ -30,67 +30,6 @@ file sealed class Program
 
         await using var app = builder.Build();
 
-        app.MapPost("api/v4/documents", static async context =>
-        {
-            await using var stream = context.Request.Form.Files[0].OpenReadStream();
-            using var pdfDocument = PdfDocument.Open(stream);
-
-            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
-
-            var pageResponses = pdfDocument.GetPages()
-                .Chunk(1000)
-                .SelectMany(pdfPageChunk =>
-                {
-                    var pdfPages = pdfPageChunk
-                        .SelectMany(pdfPage => pdfPage
-                            .GetImages()
-                            .Select(pdfImage => new
-                            {
-                                pdfPage.Number,
-                                Bytes = GetImageBytes(pdfImage),
-                                Images = new List<ImageResponse>()
-                            }))
-                        .ToList();
-
-                    return pdfPages
-                        .AsParallel()
-                        .AsOrdered()
-                        .WithCancellation(context.RequestAborted)
-                        .WithDegreeOfParallelism(Environment.ProcessorCount)
-                        .Select(imageTextBuffer =>
-                        {
-                            var engine = tesseractEngineObjectPool.Get();
-                            try
-                            {
-                                var preparateImage = PreparateImage(imageTextBuffer.Bytes);
-                                if (preparateImage.Length == 0)
-                                    return new ImageResponse
-                                    {
-                                        Blocks = [],
-                                    };
-                                ;
-                                using var imageDocument = Pix.LoadFromMemory(preparateImage);
-                                using var imagePage = engine.Process(imageDocument);
-                                var blocks = ExtractLayoutFromPage(imagePage);
-                                return new ImageResponse
-                                {
-                                    Blocks = blocks,
-                                };
-                            }
-                            finally
-                            {
-                                tesseractEngineObjectPool.Return(engine);
-                            }
-                        });
-                })
-                .ToList();
-            
-            await context.Response.WriteAsJsonAsync(new
-            {
-                Pages = pageResponses
-            });
-        });
-
         app.MapPost("api/v3/documents", static async context =>
         {
             if (context.Request.Form.Files.Count < 1
