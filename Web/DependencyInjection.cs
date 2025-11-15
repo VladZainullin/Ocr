@@ -16,6 +16,8 @@ public static class DependencyInjection
 
         builder.WebHost.ConfigureKestrel(static options => options.Limits.MaxRequestBodySize = 100 * 1024 * 1024);
 
+        builder.Services.TryAddSingleton<ImageService>();
+        
         builder.Services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {
