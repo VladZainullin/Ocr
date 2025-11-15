@@ -1,14 +1,11 @@
 using System.Net.Mime;
 using ImageMagick;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.ObjectPool;
-using Tesseract;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
-using Page = Tesseract.Page;
 
 namespace Web;
 
@@ -51,7 +48,7 @@ file sealed class Program
 
             var pageResponses = new PageResponse[pdfDocument.NumberOfPages];
 
-            var tesseractEngineObjectPool = context.RequestServices.GetRequiredService<ObjectPool<TesseractEngine>>();
+            var ocr = context.RequestServices.GetRequiredService<OcrService>();
 
             var batchSize = 100;
             for (var batchStart = 0; batchStart < pdfDocument.NumberOfPages; batchStart += batchSize)
@@ -111,23 +108,13 @@ file sealed class Program
 
                 Parallel.ForEach(imageTextBuffers, parallelOptions, imageTextBuffer =>
                 {
-                    var engine = tesseractEngineObjectPool.Get();
-                    try
+                    var preparateImage = PreparateImage(imageTextBuffer.Memory);
+                    if (preparateImage.Length == 0) return;
+                    var blocks = ocr.Process(preparateImage);
+                    pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
                     {
-                        var preparateImage = PreparateImage(imageTextBuffer.Memory);
-                        if (preparateImage.Length == 0) return;
-                        using var imageDocument = Pix.LoadFromMemory(preparateImage);
-                        using var imagePage = engine.Process(imageDocument);
-                        var blocks = ExtractLayoutFromPage(imagePage);
-                        pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
-                        {
-                            Blocks = blocks,
-                        });
-                    }
-                    finally
-                    {
-                        tesseractEngineObjectPool.Return(engine);
-                    }
+                        Blocks = blocks,
+                    });
                 });
             }
 
@@ -138,46 +125,6 @@ file sealed class Program
         });
 
         await app.RunAsync();
-    }
-    private static IEnumerable<BlockResponse> ExtractLayoutFromPage(Page page)
-    {
-        using var iter = page.GetIterator();
-        iter.Begin();
-
-        BlockResponse? currentBlock = null;
-        LineResponse? currentLine = null;
-
-        do
-        {
-            if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
-            {
-                currentBlock = new BlockResponse();
-            }
-
-            if (iter.IsAtBeginningOf(PageIteratorLevel.TextLine))
-            {
-                currentLine = new LineResponse();
-            }
-
-            if (iter.IsAtBeginningOf(PageIteratorLevel.Word))
-            {
-                var word = iter.GetText(PageIteratorLevel.Word);
-                if (!string.IsNullOrWhiteSpace(word))
-                {
-                    currentLine?.Words.Add(word);
-                }
-            }
-
-            if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && currentLine?.Words.Count > 0)
-            {
-                currentBlock?.Lines.Add(currentLine);
-            }
-
-            if (iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && currentBlock?.Lines.Count > 0)
-            {
-                yield return currentBlock;
-            }
-        } while (iter.Next(PageIteratorLevel.Word));
     }
 
 

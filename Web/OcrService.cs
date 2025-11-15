@@ -11,7 +11,7 @@ internal sealed class OcrService(ObjectPool<TesseractEngine> pool)
         try
         {
             var pix = Pix.LoadFromMemory(bytes);
-            var page = tesseractEngine.Process(pix);
+            using var page = tesseractEngine.Process(pix);
             using var iterator = page.GetIterator();
             
             BlockResponse? currentBlock = null;
