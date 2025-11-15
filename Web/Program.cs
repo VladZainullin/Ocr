@@ -19,6 +19,12 @@ file sealed class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
+        builder.Host.UseDefaultServiceProvider(options =>
+        {
+            options.ValidateScopes = true;
+            options.ValidateOnBuild = true;
+        });
+
         builder.WebHost.ConfigureKestrel(static options => options.Limits.MaxRequestBodySize = 100 * 1024 * 1024);
 
         builder.Services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
