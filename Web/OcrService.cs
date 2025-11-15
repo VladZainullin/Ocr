@@ -54,45 +54,4 @@ internal sealed class OcrService(ObjectPool<TesseractEngine> pool)
             pool.Return(tesseractEngine);
         }
     }
-    
-    private IEnumerable<BlockResponse> ExtractLayoutFromPage(Page page)
-    {
-        using var iter = page.GetIterator();
-        iter.Begin();
-
-        BlockResponse? currentBlock = null;
-        LineResponse? currentLine = null;
-
-        do
-        {
-            if (iter.IsAtBeginningOf(PageIteratorLevel.Block))
-            {
-                currentBlock = new BlockResponse();
-            }
-
-            if (iter.IsAtBeginningOf(PageIteratorLevel.TextLine))
-            {
-                currentLine = new LineResponse();
-            }
-
-            if (iter.IsAtBeginningOf(PageIteratorLevel.Word))
-            {
-                var word = iter.GetText(PageIteratorLevel.Word);
-                if (!string.IsNullOrWhiteSpace(word))
-                {
-                    currentLine?.Words.Add(word);
-                }
-            }
-
-            if (iter.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && currentLine?.Words.Count > 0)
-            {
-                currentBlock?.Lines.Add(currentLine);
-            }
-
-            if (iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && currentBlock?.Lines.Count > 0)
-            {
-                yield return currentBlock;
-            }
-        } while (iter.Next(PageIteratorLevel.Word));
-    }
 }
