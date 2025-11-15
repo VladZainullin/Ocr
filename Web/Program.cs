@@ -1,5 +1,6 @@
 using System.Net.Mime;
 using ImageMagick;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
@@ -29,6 +30,11 @@ file sealed class Program
         });
 
         await using var app = builder.Build();
+        
+        app.UseForwardedHeaders(new ForwardedHeadersOptions
+        {
+            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+        });
 
         app.MapPost("api/v3/documents", static async context =>
         {
