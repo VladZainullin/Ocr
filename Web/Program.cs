@@ -139,9 +139,8 @@ file sealed class Program
 
         await app.RunAsync();
     }
-    private static List<BlockResponse> ExtractLayoutFromPage(Page page)
+    private static IEnumerable<BlockResponse> ExtractLayoutFromPage(Page page)
     {
-        var blocks = new List<BlockResponse>();
         using var iter = page.GetIterator();
         iter.Begin();
 
@@ -176,11 +175,9 @@ file sealed class Program
 
             if (iter.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && currentBlock?.Lines.Count > 0)
             {
-                blocks.Add(currentBlock);
+                yield return currentBlock;
             }
         } while (iter.Next(PageIteratorLevel.Word));
-
-        return blocks;
     }
 
 
@@ -222,7 +219,7 @@ file sealed class Program
 
 public sealed class ImageResponse
 {
-    public required List<BlockResponse> Blocks { get; set; }
+    public required IEnumerable<BlockResponse> Blocks { get; set; }
 }
 
 public sealed class BlockResponse
