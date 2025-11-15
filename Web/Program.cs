@@ -218,27 +218,6 @@ file sealed class Program
             return [];
         }
     }
-
-    private static byte[] PreparateImage(Stream stream)
-    {
-        try
-        {
-            using var image = new MagickImage(stream);
-
-            image.AutoOrient();
-            image.Trim();
-
-            image.Grayscale();
-
-            image.MedianFilter(1);
-
-            return image.ToByteArray();
-        }
-        catch (MagickMissingDelegateErrorException)
-        {
-            return [];
-        }
-    }
 }
 
 public sealed class ImageResponse
