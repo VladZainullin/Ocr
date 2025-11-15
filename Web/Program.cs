@@ -31,7 +31,7 @@ file sealed class Program
             {
                 await context.Response.WriteAsJsonAsync(new
                 {
-                    Pages = Array.Empty<PageResponse>(),
+                    Pages = Array.Empty<Page>(),
                 });
                 return;
             }
@@ -45,7 +45,7 @@ file sealed class Program
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
             using var pdfDocument = PdfDocument.Open(stream);
 
-            var pageResponses = new PageResponse[pdfDocument.NumberOfPages];
+            var pageResponses = new Page[pdfDocument.NumberOfPages];
 
             var ocr = context.RequestServices.GetRequiredService<OcrService>();
             var imageService = context.RequestServices.GetRequiredService<ImageService>();
@@ -62,13 +62,13 @@ file sealed class Program
                     var words = pdfPage.GetWords(NearestNeighbourWordExtractor.Instance);
                     var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
                     var orderedBlocks = UnsupervisedReadingOrderDetector.Instance.Get(blocks);
-                    var blockResponses = new List<BlockResponse>();
+                    var blockResponses = new List<Block>();
                     foreach (var block in orderedBlocks)
                     {
-                        var blockResponse = new BlockResponse();
+                        var blockResponse = new Block();
                         foreach (var textLine in block.TextLines)
                         {
-                            var line = new LineResponse();
+                            var line = new Line();
                             foreach (var word in textLine.Words)
                             {
                                 line.Words.Add(word.Text);
@@ -87,7 +87,7 @@ file sealed class Program
                     }
 
 
-                    pageResponses[pdfPage.Number - 1] = new PageResponse
+                    pageResponses[pdfPage.Number - 1] = new Page
                     {
                         Number = pdfPage.Number,
                         Blocks = blockResponses,
@@ -111,7 +111,7 @@ file sealed class Program
                     var preparateImage = imageService.Recognition(imageTextBuffer.Bytes);
                     if (preparateImage.Length == 0) return;
                     var blocks = ocr.Process(preparateImage);
-                    pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageResponse
+                    pageResponses[imageTextBuffer.Number - 1].Images.Add(new Image
                     {
                         Blocks = blocks,
                     });
@@ -144,28 +144,28 @@ file sealed class Program
     }
 }
 
-public sealed class ImageResponse
+public sealed class Image
 {
-    public required IEnumerable<BlockResponse> Blocks { get; set; }
+    public required IEnumerable<Block> Blocks { get; set; }
 }
 
-public sealed class BlockResponse
+public sealed class Block
 {
-    public List<LineResponse> Lines { get; } = [];
+    public List<Line> Lines { get; } = [];
 }
 
-public sealed class LineResponse
+public sealed class Line
 {
     public List<string> Words { get; } = [];
 }
 
-public sealed class PageResponse
+public sealed class Page
 {
     public required int Number { get; init; }
 
-    public required List<BlockResponse> Blocks { get; set; }
+    public required List<Block> Blocks { get; set; }
 
-    public List<ImageResponse> Images { get; } = [];
+    public List<Image> Images { get; } = [];
 }
 
 public sealed class ImageTextBuffer
