@@ -5,6 +5,7 @@
     <ItemGroup>
         <PackageReference Include="Magick.NET-Q16-AnyCPU" />
         <PackageReference Include="Microsoft.Extensions.ObjectPool" />
+        <PackageReference Include="Minio" />
         <PackageReference Include="PdfPig" />
         <PackageReference Include="Tesseract"/>
     </ItemGroup>
