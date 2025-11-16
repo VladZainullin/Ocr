@@ -22,11 +22,21 @@ file sealed class Program
             ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
         });
 
-        app.MapPost("api/v3/documents", static async context =>
+        app.MapPost("api/v3/documents", static async (HttpContext context, Body body) =>
         {
-            if (context.Request.Form.Files.Count < 1
-                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
-                || context.Request.Form.Files[0].Length == 0)
+            var parallelOptions = new ParallelOptions
+            {
+                CancellationToken = context.RequestAborted,
+                MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
+            };
+           
+            var httpClientFactory = context.RequestServices.GetRequiredService<IHttpClientFactory>();
+            using var httpClient = httpClientFactory.CreateClient();
+            
+            var response = await httpClient.SendAsync(new HttpRequestMessage(HttpMethod.Head, body.Url));
+            if (!response.IsSuccessStatusCode ||
+                response.Content.Headers.ContentType?.MediaType != MediaTypeNames.Application.Pdf
+                || response.Content.Headers.ContentLength == 0)
             {
                 await context.Response.WriteAsJsonAsync(new
                 {
@@ -34,14 +44,8 @@ file sealed class Program
                 });
                 return;
             }
-
-            var parallelOptions = new ParallelOptions
-            {
-                CancellationToken = context.RequestAborted,
-                MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
-            };
-
-            await using var stream = context.Request.Form.Files[0].OpenReadStream();
+            
+            await using var stream = await httpClient.GetStreamAsync(body.Url);
             using var pdfDocument = PdfDocument.Open(stream);
 
             var pageResponses = new Page[pdfDocument.NumberOfPages];
@@ -125,6 +129,11 @@ file sealed class Program
 
         await app.RunAsync();
     }
+}
+
+public sealed class Body
+{
+    public required string Url { get; init; }
 }
 
 public sealed class Image
