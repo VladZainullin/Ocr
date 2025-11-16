@@ -107,9 +107,9 @@ file sealed class Program
 
                 Parallel.ForEach(imageTextBuffers, parallelOptions, imageTextBuffer =>
                 {
-                    var preparateImage = imageService.Recognition(imageTextBuffer.Memory);
-                    if (preparateImage.Length == 0) return;
-                    var blocks = ocr.Process(preparateImage);
+                    var bytes = imageService.Recognition(imageTextBuffer.Memory);
+                    if (bytes.Length == 0) return;
+                    var blocks = ocr.Process(bytes);
                     pageResponses[imageTextBuffer.Number - 1].Images.Add(new Image
                     {
                         Blocks = blocks,
