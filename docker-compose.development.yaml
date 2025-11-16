@@ -1,6 +1,6 @@
 ﻿services:
   s3:
-    image: quay.io/minio/minio:RELEASE.2025-07-23T15-54-02Z
+    image: quay.io/minio/minio:RELEASE.2025-04-22T22-12-26Z
     container_name: s3
     command: server /data --console-address ":9001"
     ports:
