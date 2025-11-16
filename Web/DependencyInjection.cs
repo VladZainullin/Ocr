@@ -16,7 +16,6 @@ public static class DependencyInjection
 
         builder.WebHost.ConfigureKestrel(static options => options.Limits.MaxRequestBodySize = 100 * 1024 * 1024);
 
-        builder.Services.AddHttpClient();
         builder.Services.TryAddSingleton<ImageService>();
         
         builder.Services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
