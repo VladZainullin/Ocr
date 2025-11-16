@@ -95,20 +95,20 @@ file sealed class Program
 
                     foreach (var pdfImage in pdfPage.GetImages())
                     {
-                        var imageBytes = GetImageBytes(pdfImage);
-                        if (imageBytes.Length == 0) continue;
+                        var memory = GetMemory(pdfImage);
+                        if (memory.Length == 0) continue;
 
                         imageTextBuffers.Add(new ImageTextBuffer
                         {
                             Number = pdfPage.Number,
-                            Bytes = imageBytes
+                            Memory = memory
                         });
                     }
                 }
 
                 Parallel.ForEach(imageTextBuffers, parallelOptions, imageTextBuffer =>
                 {
-                    var preparateImage = imageService.Recognition(imageTextBuffer.Bytes);
+                    var preparateImage = imageService.Recognition(imageTextBuffer.Memory);
                     if (preparateImage.Length == 0) return;
                     var blocks = ocr.Process(preparateImage);
                     pageResponses[imageTextBuffer.Number - 1].Images.Add(new Image
@@ -128,7 +128,7 @@ file sealed class Program
     }
 
 
-    private static byte[] GetImageBytes(IPdfImage pdfImage)
+    private static Memory<byte> GetMemory(IPdfImage pdfImage)
     {
         if (pdfImage.TryGetPng(out var pngImageBytes))
         {
@@ -137,10 +137,10 @@ file sealed class Program
 
         if (pdfImage.TryGetBytesAsMemory(out var memory))
         {
-            return memory.ToArray();
+            return memory;
         }
 
-        return pdfImage.RawBytes.ToArray();
+        return pdfImage.RawMemory;
     }
 }
 
@@ -172,5 +172,5 @@ public sealed class ImageTextBuffer
 {
     public required int Number { get; init; }
 
-    public required byte[] Bytes { get; init; }
+    public required Memory<byte> Memory { get; init; }
 }

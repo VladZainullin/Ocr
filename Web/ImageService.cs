@@ -4,11 +4,11 @@ namespace Web;
 
 internal sealed class ImageService
 {
-    public byte[] Recognition(byte[] bytes)
+    public byte[] Recognition(Memory<byte> bytes)
     {
         try
         {
-            using var image = new MagickImage(bytes);
+            using var image = new MagickImage(bytes.Span);
 
             image.AutoOrient();
 
