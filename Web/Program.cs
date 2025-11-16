@@ -1,7 +1,6 @@
 using System.Net.Mime;
 using Microsoft.AspNetCore.HttpOverrides;
 using UglyToad.PdfPig;
-using UglyToad.PdfPig.Content;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
@@ -95,7 +94,7 @@ file sealed class Program
 
                     foreach (var pdfImage in pdfPage.GetImages())
                     {
-                        var memory = GetMemory(pdfImage);
+                        var memory = pdfImage.Memory();
                         if (memory.Length == 0) continue;
 
                         imageTextBuffers.Add(new ImageTextBuffer
@@ -125,22 +124,6 @@ file sealed class Program
         });
 
         await app.RunAsync();
-    }
-
-
-    private static Memory<byte> GetMemory(IPdfImage pdfImage)
-    {
-        if (pdfImage.TryGetPng(out var pngImageBytes))
-        {
-            return pngImageBytes;
-        }
-
-        if (pdfImage.TryGetBytesAsMemory(out var memory))
-        {
-            return memory;
-        }
-
-        return pdfImage.RawMemory;
     }
 }
 
