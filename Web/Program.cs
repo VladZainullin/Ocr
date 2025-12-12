@@ -5,6 +5,7 @@ using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 using Web.Models;
+using Web.Services;
 
 namespace Web;
 

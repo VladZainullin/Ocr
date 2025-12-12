@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
+using Web.Services;
 
 namespace Web;
 

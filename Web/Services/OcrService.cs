@@ -2,7 +2,7 @@ using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 using Web.Models;
 
-namespace Web;
+namespace Web.Services;
 
 internal sealed class OcrService(ObjectPool<TesseractEngine> pool)
 {

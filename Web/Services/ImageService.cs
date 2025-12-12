@@ -1,6 +1,6 @@
 using ImageMagick;
 
-namespace Web;
+namespace Web.Services;
 
 internal sealed class ImageService
 {
