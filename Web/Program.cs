@@ -1,5 +1,4 @@
 using System.Net.Mime;
-using Microsoft.AspNetCore.HttpOverrides;
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
@@ -18,11 +17,6 @@ file sealed class Program
         builder.AddWeb();
 
         await using var app = builder.Build();
-        
-        app.UseForwardedHeaders(new ForwardedHeadersOptions
-        {
-            ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-        });
 
         app.MapPost("api/v3/documents", static async context =>
         {
