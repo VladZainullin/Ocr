@@ -4,6 +4,7 @@ using UglyToad.PdfPig;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
+using Web.Models;
 
 namespace Web;
 
@@ -125,35 +126,4 @@ file sealed class Program
 
         await app.RunAsync();
     }
-}
-
-public sealed class Image
-{
-    public required IEnumerable<Block> Blocks { get; set; }
-}
-
-public sealed class Block
-{
-    public List<Line> Lines { get; } = [];
-}
-
-public sealed class Line
-{
-    public List<string> Words { get; } = [];
-}
-
-public sealed class Page
-{
-    public required int Number { get; init; }
-
-    public required List<Block> Blocks { get; set; }
-
-    public List<Image> Images { get; } = [];
-}
-
-public sealed class ImageTextBuffer
-{
-    public required int Number { get; init; }
-
-    public required Memory<byte> Memory { get; init; }
 }
