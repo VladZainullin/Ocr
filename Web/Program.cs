@@ -1,8 +1,6 @@
 using System.Net.Mime;
 using UglyToad.PdfPig;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
+using Web.Extensions;
 using Web.Models;
 using Web.Services;
 
@@ -53,34 +51,8 @@ file sealed class Program
                 for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
                 {
                     var pdfPage = pdfDocument.GetPage(pdfPageNumber);
-            
-                    var words = pdfPage.GetWords(NearestNeighbourWordExtractor.Instance);
-                    var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
-                    var orderedBlocks = UnsupervisedReadingOrderDetector.Instance.Get(blocks);
-                    var blockResponses = new List<Block>();
-                    foreach (var block in orderedBlocks)
-                    {
-                        var blockResponse = new Block();
-                        foreach (var textLine in block.TextLines)
-                        {
-                            var line = new Line();
-                            foreach (var word in textLine.Words)
-                            {
-                                line.Words.Add(word.Text);
-                            }
 
-                            if (line.Words.Count > 0)
-                            {
-                                blockResponse.Lines.Add(line);
-                            }
-                        }
-
-                        if (blockResponse.Lines.Count > 0)
-                        {
-                            blockResponses.Add(blockResponse);
-                        }
-                    }
-
+                    var blockResponses = pdfPage.GetBlocks();
 
                     pageResponses[pdfPage.Number - 1] = new Page
                     {

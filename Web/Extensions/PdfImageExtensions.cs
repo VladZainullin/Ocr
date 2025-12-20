@@ -1,6 +1,6 @@
 using UglyToad.PdfPig.Content;
 
-namespace Web;
+namespace Web.Extensions;
 
 public static class PdfImageExtensions
 {
