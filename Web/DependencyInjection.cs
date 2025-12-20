@@ -11,6 +11,8 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
         builder.Services.AddSerilog();
+
+        builder.Services.AddHealthChecks();
         
         builder.Host.UseDefaultServiceProvider(options =>
         {

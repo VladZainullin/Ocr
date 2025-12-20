@@ -50,6 +50,8 @@ file sealed class Program
                 await context.Response.WriteAsJsonAsync(response);
             });
 
+            app.MapHealthChecks("/health");
+
             await app.RunAsync();
         }
         catch (Exception e)
