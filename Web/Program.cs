@@ -1,6 +1,4 @@
 using System.Net.Mime;
-using UglyToad.PdfPig;
-using Web.Extensions;
 using Web.Models;
 using Web.Services;
 
@@ -24,7 +22,7 @@ file sealed class Program
             {
                 await context.Response.WriteAsJsonAsync(new
                 {
-                    Pages = Array.Empty<Page>(),
+                    Pages = Array.Empty<PageModel>(),
                 });
                 return;
             }
@@ -35,60 +33,12 @@ file sealed class Program
                 MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
             };
 
+            var pdfService = context.RequestServices.GetRequiredService<PdfService>();
+
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
-            using var pdfDocument = PdfDocument.Open(stream);
+            var response = pdfService.Process(stream, parallelOptions);
 
-            var pageResponses = new Page[pdfDocument.NumberOfPages];
-
-            var ocr = context.RequestServices.GetRequiredService<OcrService>();
-            var imageService = context.RequestServices.GetRequiredService<ImageService>();
-
-            var batchSize = 100;
-            for (var batchStart = 0; batchStart < pdfDocument.NumberOfPages; batchStart += batchSize)
-            {
-                var imageTextBuffers = new List<ImageTextBuffer>();
-                var batchEnd = Math.Min(batchStart + batchSize, pdfDocument.NumberOfPages);
-                for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
-                {
-                    var pdfPage = pdfDocument.GetPage(pdfPageNumber);
-
-                    var blockResponses = pdfPage.GetBlocks();
-
-                    pageResponses[pdfPage.Number - 1] = new Page
-                    {
-                        Number = pdfPage.Number,
-                        Blocks = blockResponses,
-                    };
-
-                    foreach (var pdfImage in pdfPage.GetImages())
-                    {
-                        var memory = pdfImage.Memory();
-                        if (memory.Length == 0) continue;
-
-                        imageTextBuffers.Add(new ImageTextBuffer
-                        {
-                            Number = pdfPage.Number,
-                            Memory = memory
-                        });
-                    }
-                }
-
-                Parallel.ForEach(imageTextBuffers, parallelOptions, imageTextBuffer =>
-                {
-                    var bytes = imageService.Recognition(imageTextBuffer.Memory);
-                    if (bytes.Length == 0) return;
-                    var blocks = ocr.Process(bytes);
-                    pageResponses[imageTextBuffer.Number - 1].Images.Add(new Image
-                    {
-                        Blocks = blocks,
-                    });
-                });
-            }
-
-            await context.Response.WriteAsJsonAsync(new
-            {
-                Pages = pageResponses
-            });
+            await context.Response.WriteAsJsonAsync(response);
         });
 
         await app.RunAsync();

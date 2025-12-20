@@ -8,18 +8,18 @@ namespace Web.Extensions;
 
 public static class PdfPageExtensions
 {
-    public static Block[] GetBlocks(this Page page)
+    public static BlockModel[] GetBlocks(this Page page)
     {
         var words = page.GetWords(NearestNeighbourWordExtractor.Instance);
         var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
         var orderedBlocks = UnsupervisedReadingOrderDetector.Instance.Get(blocks);
-        var blockResponses = new List<Block>();
+        var blockResponses = new List<BlockModel>();
         foreach (var block in orderedBlocks)
         {
-            var blockResponse = new Block();
+            var blockResponse = new BlockModel();
             foreach (var textLine in block.TextLines)
             {
-                var line = new Line();
+                var line = new LineModel();
                 foreach (var word in textLine.Words)
                 {
                     line.Words.Add(word.Text);

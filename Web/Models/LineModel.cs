@@ -1,6 +1,6 @@
 namespace Web.Models;
 
-public sealed class Line
+public sealed class LineModel
 {
     public List<string> Words { get; } = [];
 }

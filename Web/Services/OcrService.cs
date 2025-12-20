@@ -6,7 +6,7 @@ namespace Web.Services;
 
 internal sealed class OcrService(ObjectPool<TesseractEngine> pool)
 {
-    public IEnumerable<Block> Process(byte[] bytes)
+    public IEnumerable<BlockModel> Process(byte[] bytes)
     {
         var tesseractEngine = pool.Get();
         try
@@ -15,19 +15,19 @@ internal sealed class OcrService(ObjectPool<TesseractEngine> pool)
             using var page = tesseractEngine.Process(pix);
             using var iterator = page.GetIterator();
             
-            Block? currentBlock = null;
-            Line? currentLine = null;
+            BlockModel? currentBlock = null;
+            LineModel? currentLine = null;
             
             do
             {
                 if (iterator.IsAtBeginningOf(PageIteratorLevel.Block))
                 {
-                    currentBlock = new Block();
+                    currentBlock = new BlockModel();
                 }
 
                 if (iterator.IsAtBeginningOf(PageIteratorLevel.TextLine))
                 {
-                    currentLine = new Line();
+                    currentLine = new LineModel();
                 }
 
                 if (iterator.IsAtBeginningOf(PageIteratorLevel.Word))

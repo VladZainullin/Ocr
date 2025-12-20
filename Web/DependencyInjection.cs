@@ -28,6 +28,7 @@ public static class DependencyInjection
         });
         
         builder.Services.TryAddSingleton<OcrService>();
+        builder.Services.TryAddSingleton<PdfService>();
         
         return builder;
     }
