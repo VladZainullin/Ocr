@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
+using Serilog;
 using Tesseract;
 using Web.Services;
 
@@ -9,6 +10,8 @@ public static class DependencyInjection
 {
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
+        builder.Services.AddSerilog();
+        
         builder.Host.UseDefaultServiceProvider(options =>
         {
             options.ValidateScopes = true;

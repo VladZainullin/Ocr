@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using Serilog;
 using Web.Models;
 using Web.Services;
 
@@ -10,37 +11,54 @@ file sealed class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        builder.AddWeb();
+        Log.Logger = new LoggerConfiguration()
+            .ReadFrom.Configuration(builder.Configuration)
+            .CreateLogger();
 
-        await using var app = builder.Build();
-
-        app.MapPost("api/v3/documents", static async context =>
+        try
         {
-            if (context.Request.Form.Files.Count < 1
-                || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
-                || context.Request.Form.Files[0].Length == 0)
+            builder.AddWeb();
+
+            await using var app = builder.Build();
+
+            app.UseSerilogRequestLogging();
+
+            app.MapPost("api/v3/documents", static async context =>
             {
-                await context.Response.WriteAsJsonAsync(new
+                if (context.Request.Form.Files.Count < 1
+                    || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
+                    || context.Request.Form.Files[0].Length == 0)
                 {
-                    Pages = Array.Empty<PageModel>(),
-                });
-                return;
-            }
+                    await context.Response.WriteAsJsonAsync(new
+                    {
+                        Pages = Array.Empty<PageModel>(),
+                    });
+                    return;
+                }
 
-            var parallelOptions = new ParallelOptions
-            {
-                CancellationToken = context.RequestAborted,
-                MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
-            };
+                var parallelOptions = new ParallelOptions
+                {
+                    CancellationToken = context.RequestAborted,
+                    MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
+                };
 
-            var pdfService = context.RequestServices.GetRequiredService<PdfService>();
+                var pdfService = context.RequestServices.GetRequiredService<PdfService>();
 
-            await using var stream = context.Request.Form.Files[0].OpenReadStream();
-            var response = pdfService.Process(stream, parallelOptions);
+                await using var stream = context.Request.Form.Files[0].OpenReadStream();
+                var response = pdfService.Process(stream, parallelOptions);
 
-            await context.Response.WriteAsJsonAsync(response);
-        });
+                await context.Response.WriteAsJsonAsync(response);
+            });
 
-        await app.RunAsync();
+            await app.RunAsync();
+        }
+        catch (Exception e)
+        {
+            Log.Fatal(e, "Application terminated unexpectedly");
+        }
+        finally
+        {
+            await Log.CloseAndFlushAsync();
+        }
     }
 }

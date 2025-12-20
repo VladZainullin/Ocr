@@ -7,7 +7,13 @@
       "launchBrowser": false,
       "applicationUrl": "https://localhost:7207;",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        
+        "Serilog__Using__0": "Serilog.Sinks.Console",
+        "Serilog__MinimumLevel__Default": "Debug",
+        "Serilog__WriteTo__0__Name": "Console",
+        "Serilog__WriteTo__0__Args__theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Code, Serilog.Sinks.Console",
+        "Serilog__Properties__ApplicationName": "Store"
       }
     }
   }
