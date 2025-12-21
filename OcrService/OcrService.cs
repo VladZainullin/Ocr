@@ -1,10 +1,11 @@
 using Domain;
 using Microsoft.Extensions.ObjectPool;
+using OcrService.Contracts;
 using Tesseract;
 
 namespace OcrService;
 
-internal sealed class OcrService(ObjectPool<TesseractEngine> pool)
+internal sealed class OcrService(ObjectPool<TesseractEngine> pool) : IOcrService
 {
     public IEnumerable<BlockModel> Process(byte[] bytes)
     {

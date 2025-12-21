@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.ObjectPool;
+using OcrService.Contracts;
 using Tesseract;
 
 namespace OcrService;
@@ -32,7 +33,7 @@ public static class DependencyInjection
                 return provider.Create(policy);
             });
         
-            builder.Services.TryAddSingleton<OcrService>();
+            builder.Services.TryAddSingleton<IOcrService, OcrService>();
             
             return builder;
         }
