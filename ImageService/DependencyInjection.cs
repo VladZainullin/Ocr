@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+﻿using ImageService.Contracts;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 
 namespace ImageService;
@@ -9,7 +10,7 @@ public static class DependencyInjection
     {
         public IHostApplicationBuilder AddImageService()
         {
-            builder.Services.TryAddSingleton<ImageService>();
+            builder.Services.TryAddSingleton<IImageService, ImageService>();
             
             return builder;
         }

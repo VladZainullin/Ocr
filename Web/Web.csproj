@@ -3,7 +3,6 @@
       <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
     <ItemGroup>
-        <PackageReference Include="Magick.NET-Q16-AnyCPU" />
         <PackageReference Include="PdfPig" />
         <PackageReference Include="Serilog.AspNetCore" />
         <PackageReference Include="Tesseract"/>
