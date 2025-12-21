@@ -5,7 +5,6 @@
     <ItemGroup>
         <PackageReference Include="PdfPig" />
         <PackageReference Include="Serilog.AspNetCore" />
-        <PackageReference Include="Tesseract"/>
     </ItemGroup>
     <ItemGroup>
       <Content Include="..\.dockerignore">
@@ -15,8 +14,9 @@
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\ImageService\ImageService.csproj" />
+      <ProjectReference Include="..\Ocr\Ocr.csproj" />
     </ItemGroup>
-    <Target Name="TesseractCopyDlls" Condition="'$(PROCESSOR_ARCHITECTURE)' == 'ARM64'" AfterTargets="AfterBuild">
+    <Target Name="TesseractCopyDlls" AfterTargets="AfterBuild">
         <Exec Command="ln -sf /opt/homebrew/lib/libleptonica.dylib $(OutDir)x64/libleptonica-1.82.0.dylib"/>
         <Exec Command="ln -sf /opt/homebrew/lib/libtesseract.dylib $(OutDir)x64/libtesseract50.dylib"/>
     </Target>

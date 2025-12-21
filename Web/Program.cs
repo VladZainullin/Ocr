@@ -1,6 +1,7 @@
 using System.Net.Mime;
 using Domain;
 using ImageService;
+using Ocr;
 using Serilog;
 using Web.Services;
 
@@ -18,6 +19,8 @@ file sealed class Program
 
         try
         {
+            builder.AddOcr();
+            
             builder
                 .AddWeb()
                 .AddImageService();

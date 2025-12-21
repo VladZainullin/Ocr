@@ -1,7 +1,7 @@
 ﻿using Microsoft.Extensions.ObjectPool;
 using Tesseract;
 
-namespace Web;
+namespace Ocr;
 
 internal sealed class TesseractEnginePooledObjectPolicy(string path, string language)
     : PooledObjectPolicy<TesseractEngine>

@@ -1,5 +1,6 @@
 using Domain;
 using ImageService.Contracts;
+using Ocr;
 using UglyToad.PdfPig;
 using Web.Extensions;
 

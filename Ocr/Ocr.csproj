@@ -1,0 +1,11 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
+      <PackageReference Include="Microsoft.Extensions.ObjectPool" />
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
+      <PackageReference Include="Tesseract" />
+    </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Domain\Domain.csproj" />
+    </ItemGroup>
+</Project>

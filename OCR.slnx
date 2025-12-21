@@ -16,5 +16,6 @@
   </Folder>
   <Folder Name="/src/infrastructure/">
     <Project Path="ImageService/ImageService.csproj" />
+    <Project Path="Ocr/Ocr.csproj" />
   </Folder>
 </Solution>
