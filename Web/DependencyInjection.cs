@@ -22,6 +22,17 @@ public static class DependencyInjection
 
         builder.WebHost.ConfigureKestrel(static options => options.Limits.MaxRequestBodySize = 100 * 1024 * 1024);
         
+        builder.Services
+            .AddOptions<TesseractOptions>()
+            .BindConfiguration("Tesseract")
+            .Validate(
+                static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Language), 
+                """Tesseract Language is required. Add "Tesseract__Language" to environment variables""")
+            .Validate(
+                static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Language), 
+                """Tesseract Path is required. Add "Tesseract__Path" to environment variables""")
+            .ValidateOnStart();
+        
         builder.Services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {
