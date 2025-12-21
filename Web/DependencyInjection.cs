@@ -8,11 +8,6 @@ public static class DependencyInjection
 {
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
-        builder.Services.ConfigureHttpJsonOptions(static options =>
-        {
-            options.SerializerOptions.TypeInfoResolver = AppJsonContext.Default;
-        });
-        
         builder.Services.AddSerilog();
 
         builder.Services.AddHealthChecks();
