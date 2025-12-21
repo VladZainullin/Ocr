@@ -1,7 +1,7 @@
 using System.Net.Mime;
+using Domain;
 using ImageService;
 using Serilog;
-using Web.Models;
 using Web.Services;
 
 namespace Web;

@@ -13,6 +13,7 @@
       </Content>
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\ImageService\ImageService.csproj" />
     </ItemGroup>
     <Target Name="TesseractCopyDlls" Condition="'$(PROCESSOR_ARCHITECTURE)' == 'ARM64'" AfterTargets="AfterBuild">

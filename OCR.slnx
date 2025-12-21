@@ -8,6 +8,7 @@
     <File Path="docker-compose.development.yaml" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="Domain/Domain.csproj" />
     <Project Path="Web/Web.csproj" />
   </Folder>
   <Folder Name="/src/contracts/">

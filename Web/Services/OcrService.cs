@@ -1,6 +1,6 @@
+using Domain;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
-using Web.Models;
 
 namespace Web.Services;
 

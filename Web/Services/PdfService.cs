@@ -1,7 +1,7 @@
+using Domain;
 using ImageService.Contracts;
 using UglyToad.PdfPig;
 using Web.Extensions;
-using Web.Models;
 
 namespace Web.Services;
 
