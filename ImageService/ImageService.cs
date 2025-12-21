@@ -1,9 +1,10 @@
 using ImageMagick;
 using ImageService.Contracts;
+using Microsoft.Extensions.Logging;
 
 namespace ImageService;
 
-internal sealed class ImageService : IImageService
+internal sealed class ImageService(ILogger<ImageService> logger) : IImageService
 {
     public byte[] Recognition(ReadOnlySpan<byte> bytes)
     {
@@ -19,8 +20,9 @@ internal sealed class ImageService : IImageService
 
             return image.ToByteArray();
         }
-        catch (MagickMissingDelegateErrorException)
+        catch (MagickMissingDelegateErrorException e)
         {
+            logger.LogError(e, "Magick missing delegate error");
             return [];
         }
     }
