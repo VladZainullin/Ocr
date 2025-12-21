@@ -37,7 +37,7 @@ public static class DependencyInjection
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {
             var provider = serviceProvider.GetRequiredService<ObjectPoolProvider>();
-            var policy = new TesseractEnginePooledObjectPolicy("/Users/vadislavzainullin/RiderProjects/OCR/Web/bin/Debug/net10.0/tesseract", "rus+eng");
+            var policy = new TesseractEnginePooledObjectPolicy("/Users/vadislavzainullin/Downloads/tesseract", "rus+eng");
             return provider.Create(policy);
         });
         
