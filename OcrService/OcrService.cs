@@ -12,7 +12,7 @@ internal sealed class OcrService(ObjectPool<TesseractEngine> pool) : IOcrService
         var tesseractEngine = pool.Get();
         try
         {
-            var pix = Pix.LoadFromMemory(bytes);
+            using var pix = Pix.LoadFromMemory(bytes);
             using var page = tesseractEngine.Process(pix);
             using var iterator = page.GetIterator();
             
