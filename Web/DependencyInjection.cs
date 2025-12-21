@@ -1,4 +1,3 @@
-using System.Net.Mime;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
@@ -14,9 +13,7 @@ public static class DependencyInjection
 
         builder.Services.AddResponseCompression(static options =>
         {
-            options.MimeTypes = ResponseCompressionDefaults.MimeTypes.Concat([
-                MediaTypeNames.Application.Json,
-            ]);
+            options.MimeTypes = ResponseCompressionDefaults.MimeTypes;
             
             options.Providers.Add<GzipCompressionProvider>();
             options.Providers.Add<BrotliCompressionProvider>();
