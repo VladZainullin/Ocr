@@ -2,7 +2,7 @@ namespace Web;
 
 public sealed record TesseractOptions
 {
-    public string Path { get; init; } = null!;
+    public required string Path { get; init; }
 
-    public string Language { get; init; } = null!;
+    public required string Language { get; init; }
 }
