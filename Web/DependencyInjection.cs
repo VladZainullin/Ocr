@@ -12,7 +12,7 @@ public static class DependencyInjection
 
         builder.Services.AddHealthChecks();
         
-        builder.Host.UseDefaultServiceProvider(options =>
+        builder.Host.UseDefaultServiceProvider(static options =>
         {
             options.ValidateScopes = true;
             options.ValidateOnBuild = true;
