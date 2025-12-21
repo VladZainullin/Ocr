@@ -14,7 +14,7 @@
     <ItemGroup>
       <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\ImageService\ImageService.csproj" />
-      <ProjectReference Include="..\Ocr\Ocr.csproj" />
+      <ProjectReference Include="..\OcrService\OcrService.csproj" />
     </ItemGroup>
     <Target Name="TesseractCopyDlls" AfterTargets="AfterBuild">
         <Exec Command="ln -sf /opt/homebrew/lib/libleptonica.dylib $(OutDir)x64/libleptonica-1.82.0.dylib"/>

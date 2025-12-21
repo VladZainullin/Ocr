@@ -1,6 +1,6 @@
-namespace Web;
+namespace OcrService;
 
-public sealed record TesseractOptions
+internal sealed record TesseractOptions
 {
     public required string Path { get; init; }
 

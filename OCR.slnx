@@ -13,9 +13,10 @@
   </Folder>
   <Folder Name="/src/contracts/">
     <Project Path="ImageService.Contracts/ImageService.Contracts.csproj" />
+    <Project Path="OcrService.Contracts/OcrService.Contracts.csproj" />
   </Folder>
   <Folder Name="/src/infrastructure/">
     <Project Path="ImageService/ImageService.csproj" />
-    <Project Path="Ocr/Ocr.csproj" />
+    <Project Path="OcrService\OcrService.csproj" />
   </Folder>
 </Solution>

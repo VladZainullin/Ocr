@@ -1,12 +1,12 @@
 using Domain;
 using ImageService.Contracts;
-using Ocr;
+using OcrService.Contracts;
 using UglyToad.PdfPig;
 using Web.Extensions;
 
 namespace Web.Services;
 
-internal sealed class PdfService(OcrService ocr, IImageService imageService)
+internal sealed class PdfService(IOcrService ocr, IImageService imageService)
 {
     public ResponseModel Process(Stream stream, ParallelOptions parallelOptions)
     {

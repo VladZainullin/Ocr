@@ -3,9 +3,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.ObjectPool;
 using Tesseract;
-using Web;
 
-namespace Ocr;
+namespace OcrService;
 
 public static class DependencyInjection
 {
@@ -25,10 +24,11 @@ public static class DependencyInjection
                 .ValidateOnStart();
         
             builder.Services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
+            builder.Services.TryAddSingleton<TesseractEnginePooledObjectPolicy>();
             builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
             {
                 var provider = serviceProvider.GetRequiredService<ObjectPoolProvider>();
-                var policy = new TesseractEnginePooledObjectPolicy("/Users/vadislavzainullin/Downloads/tesseract", "rus+eng");
+                var policy = serviceProvider.GetRequiredService<TesseractEnginePooledObjectPolicy>();
                 return provider.Create(policy);
             });
         

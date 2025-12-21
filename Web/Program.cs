@@ -1,7 +1,7 @@
 using System.Net.Mime;
 using Domain;
 using ImageService;
-using Ocr;
+using OcrService;
 using Serilog;
 using Web.Services;
 
