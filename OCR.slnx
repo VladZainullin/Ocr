@@ -8,6 +8,8 @@
     <File Path="docker-compose.development.yaml" />
   </Folder>
   <Folder Name="/src/">
+    <Project Path="ImageService.Contracts/ImageService.Contracts.csproj" />
+    <Project Path="ImageService/ImageService.csproj" />
     <Project Path="Web/Web.csproj" />
   </Folder>
 </Solution>

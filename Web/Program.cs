@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using ImageService;
 using Serilog;
 using Web.Models;
 using Web.Services;
@@ -17,7 +18,9 @@ file sealed class Program
 
         try
         {
-            builder.AddWeb();
+            builder
+                .AddWeb()
+                .AddImageService();
 
             await using var app = builder.Build();
 

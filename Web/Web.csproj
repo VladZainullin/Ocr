@@ -13,6 +13,9 @@
         <Link>.dockerignore</Link>
       </Content>
     </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\ImageService\ImageService.csproj" />
+    </ItemGroup>
     <Target Name="TesseractCopyDlls" Condition="'$(PROCESSOR_ARCHITECTURE)' == 'ARM64'" AfterTargets="AfterBuild">
         <Exec Command="ln -sf /opt/homebrew/lib/libleptonica.dylib $(OutDir)x64/libleptonica-1.82.0.dylib"/>
         <Exec Command="ln -sf /opt/homebrew/lib/libtesseract.dylib $(OutDir)x64/libtesseract50.dylib"/>
