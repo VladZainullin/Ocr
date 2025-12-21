@@ -1,10 +1,11 @@
+using ImageService.Contracts;
 using UglyToad.PdfPig;
 using Web.Extensions;
 using Web.Models;
 
 namespace Web.Services;
 
-internal sealed class PdfService(OcrService ocr, ImageService imageService)
+internal sealed class PdfService(OcrService ocr, IImageService imageService)
 {
     public ResponseModel Process(Stream stream, ParallelOptions parallelOptions)
     {
@@ -44,7 +45,7 @@ internal sealed class PdfService(OcrService ocr, ImageService imageService)
 
             Parallel.ForEach(imageTextBuffers, parallelOptions, imageTextBuffer =>
             {
-                var bytes = imageService.Recognition(imageTextBuffer.Memory);
+                var bytes = imageService.Recognition(imageTextBuffer.Memory.Span);
                 if (bytes.Length == 0) return;
                 var blocks = ocr.Process(bytes);
                 pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageModel
