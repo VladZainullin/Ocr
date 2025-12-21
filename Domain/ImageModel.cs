@@ -2,5 +2,5 @@ namespace Domain;
 
 public sealed class ImageModel
 {
-    public required IEnumerable<BlockModel> Blocks { get; set; }
+    public required List<BlockModel> Blocks { get; set; }
 }

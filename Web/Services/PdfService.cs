@@ -48,7 +48,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
             {
                 var bytes = imageService.Recognition(imageTextBuffer.Memory.Span);
                 if (bytes.Length == 0) return;
-                var blocks = ocr.Process(bytes);
+                var blocks = ocr.Process(bytes).ToList();
                 pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageModel
                 {
                     Blocks = blocks,
