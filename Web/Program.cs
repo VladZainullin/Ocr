@@ -27,6 +27,8 @@ file sealed class Program
 
             await using var app = builder.Build();
 
+            app.UseForwardedHeaders();
+            
             app.UseSerilogRequestLogging();
 
             app.UseResponseCompression();

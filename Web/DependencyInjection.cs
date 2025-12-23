@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
@@ -10,7 +11,14 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
         builder.Services.AddSerilog();
-        
+
+        builder.Services.Configure<ForwardedHeadersOptions>(static options =>
+        {
+            options.ForwardedHeaders =
+                ForwardedHeaders.XForwardedFor |
+                ForwardedHeaders.XForwardedProto;
+        });
+
         builder.Services.AddCors(static options =>
         {
             options.AddDefaultPolicy(static policy =>
@@ -23,7 +31,7 @@ public static class DependencyInjection
         builder.Services.AddResponseCompression(static options =>
         {
             options.MimeTypes = ResponseCompressionDefaults.MimeTypes;
-            
+
             options.Providers.Add<GzipCompressionProvider>();
             options.Providers.Add<BrotliCompressionProvider>();
         });
