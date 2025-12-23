@@ -11,6 +11,13 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
         builder.Services.AddSerilog();
+        
+        builder.Services.AddHsts(static options =>
+        {
+            options.Preload = true;
+            options.IncludeSubDomains = true;
+            options.MaxAge = TimeSpan.FromDays(365);
+        });
 
         builder.Services.Configure<ForwardedHeadersOptions>(static options =>
         {

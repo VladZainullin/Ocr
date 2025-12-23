@@ -32,6 +32,9 @@ file sealed class Program
             app.UseSerilogRequestLogging();
 
             app.UseResponseCompression();
+            
+            app.UseHttpsRedirection();
+            app.UseHsts();
 
             app.MapPost("api/v3/documents", static async context =>
             {
