@@ -10,6 +10,15 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
         builder.Services.AddSerilog();
+        
+        builder.Services.AddCors(static options =>
+        {
+            options.AddDefaultPolicy(static policy =>
+                policy
+                    .AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader());
+        });
 
         builder.Services.AddResponseCompression(static options =>
         {
