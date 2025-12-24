@@ -27,11 +27,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
 
         var maxOcr = Math.Max(1, Environment.ProcessorCount / 2);
 
-        var imageChannel = Channel.CreateBounded<ImageTask>(
-            new BoundedChannelOptions(maxOcr)
-            {
-                FullMode = BoundedChannelFullMode.Wait
-            });
+        var imageChannel = Channel.CreateBounded<ImageTask>(maxOcr);
 
         var aggregatorChannel = Channel.CreateUnbounded<AggregatedTask>();
         
