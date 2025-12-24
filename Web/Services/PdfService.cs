@@ -9,17 +9,17 @@ namespace Web.Services;
 
 internal sealed class PdfService(IOcrService ocr, IImageService imageService)
 {
-    public async Task<ResponseModel> Process(Stream stream)
+    public async Task<ResponseModel> ProcessAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         using var pdf = PdfDocument.Open(stream);
 
         var pages = new PageModel[pdf.NumberOfPages];
 
-        // 1️⃣ Создаём страницы сразу (без concurrency)
-        for (int pdfPageNumber = 1; pdfPageNumber <= pdf.NumberOfPages; pdfPageNumber++)
+        // 1️⃣ Инициализация PageModel
+        for (int i = 1; i <= pdf.NumberOfPages; i++)
         {
-            var page = pdf.GetPage(pdfPageNumber);
-            pages[pdfPageNumber - 1] = new PageModel
+            var page = pdf.GetPage(i);
+            pages[i - 1] = new PageModel
             {
                 Number = page.Number,
                 Blocks = page.GetBlocks(),
@@ -27,9 +27,8 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
             };
         }
 
-        // 2️⃣ Bounded channel = контроль памяти
+        // 2️⃣ Создаём bounded channel
         var maxOcr = Math.Max(1, Environment.ProcessorCount / 2);
-
         var channel = Channel.CreateBounded<ImageTask>(
             new BoundedChannelOptions(maxOcr)
             {
@@ -42,14 +41,14 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
         {
             workers[i] = Task.Run(async () =>
             {
-                await foreach (var task in channel.Reader.ReadAllAsync())
+                await foreach (var task in channel.Reader.ReadAllAsync(cancellationToken))
                 {
-                    ProcessImage(task, pages);
+                    await ProcessImageAsync(task, pages, cancellationToken);
                 }
-            });
+            }, cancellationToken);
         }
 
-        // 4️⃣ Producer — строго последовательно
+        // 4️⃣ Producer: читаем PDF последовательно
         for (int pageNumber = 1; pageNumber <= pdf.NumberOfPages; pageNumber++)
         {
             var page = pdf.GetPage(pageNumber);
@@ -57,18 +56,16 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
             foreach (var pdfImage in page.GetImages())
             {
                 var memory = pdfImage.Memory();
-                if (memory.Length == 0)
-                    continue;
+                if (memory.Length == 0) continue;
 
                 await channel.Writer.WriteAsync(
-                    new ImageTask(page.Number, memory)
-                );
+                    new ImageTask(page.Number, memory), cancellationToken);
             }
         }
 
         // 5️⃣ Завершаем pipeline
         channel.Writer.Complete();
-        Task.WaitAll(workers);
+        await Task.WhenAll(workers);
 
         return new ResponseModel
         {
@@ -76,22 +73,25 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
         };
     }
 
-    private void ProcessImage(ImageTask task, PageModel[] pages)
+    private async Task ProcessImageAsync(
+        ImageTask task,
+        PageModel[] pages,
+        CancellationToken cancellationToken)
     {
-        var bytes = imageService.Recognition(task.Image.Span);
-        if (bytes.Length == 0)
-            return;
+        // OCR / Recognition могут быть CPU или IO bound
+        var bytes = await Task.Run(() => imageService.Recognition(task.Image.Span), cancellationToken);
 
-        var blocks = ocr.Process(bytes).ToList();
+        if (bytes.Length == 0) return;
 
-        // 👇 только одна точка записи, без lock
-        pages[task.PageNumber - 1].Images.Add(
-            new ImageModel { Blocks = blocks }
-        );
+        var blocks = await Task.Run(() => ocr.Process(bytes).ToList(), cancellationToken);
+
+        // Добавление результата — критическая секция на странице
+        lock (pages[task.PageNumber - 1])
+        {
+            pages[task.PageNumber - 1].Images.Add(
+                new ImageModel { Blocks = blocks });
+        }
     }
-}
 
-internal sealed record ImageTask(
-    int PageNumber,
-    ReadOnlyMemory<byte> Image
-);
+    private sealed record ImageTask(int PageNumber, ReadOnlyMemory<byte> Image);
+}
