@@ -52,7 +52,7 @@ file sealed class Program
                 var pdfService = context.RequestServices.GetRequiredService<PdfService>();
 
                 await using var stream = context.Request.Form.Files[0].OpenReadStream();
-                var response = pdfService.Process(stream);
+                var response = await pdfService.Process(stream);
                 
                 await context.Response.WriteAsJsonAsync(response);
             });
