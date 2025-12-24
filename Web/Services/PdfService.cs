@@ -13,9 +13,8 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
     {
         using var pdf = PdfDocument.Open(stream);
 
-        var pages = new PageModel[pdf.NumberOfPages];
-
         // 1️⃣ Инициализация PageModel
+        var pages = new PageModel[pdf.NumberOfPages];
         for (int i = 1; i <= pdf.NumberOfPages; i++)
         {
             var page = pdf.GetPage(i);
@@ -27,28 +26,48 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
             };
         }
 
-        // 2️⃣ Создаём bounded channel
+        // 2️⃣ Каналы: один для изображений, один для aggregator
         var maxOcr = Math.Max(1, Environment.ProcessorCount / 2);
-        var channel = Channel.CreateBounded<ImageTask>(
+
+        var imageChannel = Channel.CreateBounded<ImageTask>(
             new BoundedChannelOptions(maxOcr)
             {
                 FullMode = BoundedChannelFullMode.Wait
             });
 
-        // 3️⃣ OCR workers
+        var aggregatorChannel = Channel.CreateUnbounded<AggregatedTask>();
+
+        // 3️⃣ Aggregator task
+        var aggregatorTask = Task.Run(async () =>
+        {
+            await foreach (var aggTask in aggregatorChannel.Reader.ReadAllAsync(cancellationToken))
+            {
+                // без lock, т.к. только aggregator пишет в PageModel
+                pages[aggTask.PageNumber - 1].Images.Add(aggTask.ImageModel);
+            }
+        }, cancellationToken);
+
+        // 4️⃣ OCR worker tasks
         var workers = new Task[maxOcr];
         for (int i = 0; i < maxOcr; i++)
         {
             workers[i] = Task.Run(async () =>
             {
-                await foreach (var task in channel.Reader.ReadAllAsync(cancellationToken))
+                await foreach (var task in imageChannel.Reader.ReadAllAsync(cancellationToken))
                 {
-                    await ProcessImageAsync(task, pages, cancellationToken);
+                    var bytes = await Task.Run(() => imageService.Recognition(task.Image.Span), cancellationToken);
+                    if (bytes.Length == 0) continue;
+
+                    var blocks = await Task.Run(() => ocr.Process(bytes).ToList(), cancellationToken);
+
+                    // Отправляем в aggregator
+                    var aggregated = new AggregatedTask(task.PageNumber, new ImageModel { Blocks = blocks });
+                    await aggregatorChannel.Writer.WriteAsync(aggregated, cancellationToken);
                 }
             }, cancellationToken);
         }
 
-        // 4️⃣ Producer: читаем PDF последовательно
+        // 5️⃣ Producer: читаем PDF последовательно
         for (int pageNumber = 1; pageNumber <= pdf.NumberOfPages; pageNumber++)
         {
             var page = pdf.GetPage(pageNumber);
@@ -58,14 +77,17 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
                 var memory = pdfImage.Memory();
                 if (memory.Length == 0) continue;
 
-                await channel.Writer.WriteAsync(
+                await imageChannel.Writer.WriteAsync(
                     new ImageTask(page.Number, memory), cancellationToken);
             }
         }
 
-        // 5️⃣ Завершаем pipeline
-        channel.Writer.Complete();
+        // 6️⃣ Завершаем каналы
+        imageChannel.Writer.Complete();
         await Task.WhenAll(workers);
+
+        aggregatorChannel.Writer.Complete();
+        await aggregatorTask;
 
         return new ResponseModel
         {
@@ -73,25 +95,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
         };
     }
 
-    private async Task ProcessImageAsync(
-        ImageTask task,
-        PageModel[] pages,
-        CancellationToken cancellationToken)
-    {
-        // OCR / Recognition могут быть CPU или IO bound
-        var bytes = await Task.Run(() => imageService.Recognition(task.Image.Span), cancellationToken);
-
-        if (bytes.Length == 0) return;
-
-        var blocks = await Task.Run(() => ocr.Process(bytes).ToList(), cancellationToken);
-
-        // Добавление результата — критическая секция на странице
-        lock (pages[task.PageNumber - 1])
-        {
-            pages[task.PageNumber - 1].Images.Add(
-                new ImageModel { Blocks = blocks });
-        }
-    }
-
+    // DTO для OCR pipeline
     private sealed record ImageTask(int PageNumber, ReadOnlyMemory<byte> Image);
+    private sealed record AggregatedTask(int PageNumber, ImageModel ImageModel);
 }
