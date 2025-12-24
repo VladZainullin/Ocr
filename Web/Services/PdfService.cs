@@ -50,6 +50,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
                     if (bytes.Length == 0) continue;
 
                     var blocks = await Task.Run(() => ocr.Process(bytes), cancellationToken);
+                    if (blocks.Count == 0) continue;
                     
                     var aggregated = new AggregatedTask(task.PageNumber, new ImageModel { Blocks = blocks });
                     await aggregatorChannel.Writer.WriteAsync(aggregated, cancellationToken);
