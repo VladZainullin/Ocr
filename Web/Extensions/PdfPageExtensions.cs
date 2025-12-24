@@ -16,25 +16,21 @@ public static class PdfPageExtensions
         var blockResponses = new List<BlockModel>();
         foreach (var block in orderedBlocks)
         {
+            if (block.TextLines.Count == 0) continue;
+            
             var blockResponse = new BlockModel();
             foreach (var textLine in block.TextLines)
             {
+                if (textLine.Words.Count == 0) continue;
+                
                 var line = new LineModel();
                 foreach (var word in textLine.Words)
                 {
                     line.Words.Add(word.Text);
                 }
-
-                if (line.Words.Count > 0)
-                {
-                    blockResponse.Lines.Add(line);
-                }
+                blockResponse.Lines.Add(line);
             }
-
-            if (blockResponse.Lines.Count > 0)
-            {
-                blockResponses.Add(blockResponse);
-            }
+            blockResponses.Add(blockResponse);
         }
         
         return blockResponses.ToArray();
