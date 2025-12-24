@@ -49,17 +49,11 @@ file sealed class Program
                     return;
                 }
 
-                var parallelOptions = new ParallelOptions
-                {
-                    CancellationToken = context.RequestAborted,
-                    MaxDegreeOfParallelism = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16),
-                };
-
                 var pdfService = context.RequestServices.GetRequiredService<PdfService>();
 
                 await using var stream = context.Request.Form.Files[0].OpenReadStream();
-                var response = pdfService.Process(stream, parallelOptions);
-
+                var response = pdfService.Process(stream);
+                
                 await context.Response.WriteAsJsonAsync(response);
             });
 

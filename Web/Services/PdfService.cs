@@ -8,58 +8,70 @@ namespace Web.Services;
 
 internal sealed class PdfService(IOcrService ocr, IImageService imageService)
 {
-    public ResponseModel Process(Stream stream, ParallelOptions parallelOptions)
+    public ResponseModel Process(Stream stream)
     {
-        using var pdfDocument = PdfDocument.Open(stream);
+        using var pdf = PdfDocument.Open(stream);
+
+        var pages = new PageModel[pdf.NumberOfPages];
         
-        var pageResponses = new PageModel[pdfDocument.NumberOfPages];
+        var maxOcr = Math.Min(Math.Max(1, Environment.ProcessorCount - 1), 16);
 
-        var batchSize = 100;
-        for (var batchStart = 0; batchStart < pdfDocument.NumberOfPages; batchStart += batchSize)
+        var runningTasks = new List<Task>();
+
+        for (var pdfPageNumber = 1; pdfPageNumber <= pdf.NumberOfPages; pdfPageNumber++)
         {
-            var imageTextBuffers = new List<ImageTextBuffer>();
-            var batchEnd = Math.Min(batchStart + batchSize, pdfDocument.NumberOfPages);
-            for (var pdfPageNumber = batchStart + 1; pdfPageNumber <= batchEnd; pdfPageNumber++)
+            var page = pdf.GetPage(pdfPageNumber);
+
+            var pageModel = new PageModel
             {
-                var pdfPage = pdfDocument.GetPage(pdfPageNumber);
+                Number = page.Number,
+                Blocks = page.GetBlocks(),
+                Images = []
+            };
 
-                var blockResponses = pdfPage.GetBlocks();
+            pages[page.Number - 1] = pageModel;
 
-                pageResponses[pdfPage.Number - 1] = new PageModel
-                {
-                    Number = pdfPage.Number,
-                    Blocks = blockResponses,
-                };
+            foreach (var pdfImage in page.GetImages())
+            {
+                var memory = pdfImage.Memory();
+                if (memory.Length == 0)
+                    continue;
+                
+                var task = Task.Run(() => { ProcessImage(memory, pageModel); });
 
-                foreach (var pdfImage in pdfPage.GetImages())
-                {
-                    var memory = pdfImage.Memory();
-                    if (memory.Length == 0) continue;
+                runningTasks.Add(task);
 
-                    imageTextBuffers.Add(new ImageTextBuffer
-                    {
-                        Number = pdfPage.Number,
-                        Memory = memory
-                    });
-                }
+                if (runningTasks.Count < maxOcr) continue;
+                
+                var finished = Task.WaitAny(runningTasks.ToArray());
+                runningTasks.RemoveAt(finished);
             }
-
-            Parallel.ForEach(imageTextBuffers, parallelOptions, imageTextBuffer =>
-            {
-                var bytes = imageService.Recognition(imageTextBuffer.Memory.Span);
-                if (bytes.Length == 0) return;
-                var blocks = ocr.Process(bytes).ToList();
-                pageResponses[imageTextBuffer.Number - 1].Images.Add(new ImageModel
-                {
-                    Blocks = blocks,
-                });
-            });
         }
+        
+        Task.WaitAll(runningTasks);
 
         return new ResponseModel
         {
-            Pages = pageResponses
+            Pages = pages
         };
     }
-}
 
+    private void ProcessImage(
+        ReadOnlyMemory<byte> image,
+        PageModel page)
+    {
+        var bytes = imageService.Recognition(image.Span);
+        if (bytes.Length == 0)
+            return;
+
+        var blocks = ocr.Process(bytes).ToList();
+
+        lock (page)
+        {
+            page.Images.Add(new ImageModel
+            {
+                Blocks = blocks
+            });
+        }
+    }
+}
