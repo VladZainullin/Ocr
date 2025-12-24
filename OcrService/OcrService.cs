@@ -7,9 +7,10 @@ namespace OcrService;
 
 internal sealed class OcrService(ObjectPool<TesseractEngine> pool) : IOcrService
 {
-    public IEnumerable<BlockModel> Process(byte[] bytes)
+    public List<BlockModel> Process(byte[] bytes)
     {
         var tesseractEngine = pool.Get();
+        var blocks = new List<BlockModel>();
         try
         {
             using var pix = Pix.LoadFromMemory(bytes);
@@ -47,7 +48,7 @@ internal sealed class OcrService(ObjectPool<TesseractEngine> pool) : IOcrService
 
                 if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && currentBlock?.Lines.Count > 0)
                 {
-                    yield return currentBlock;
+                    blocks.Add(currentBlock);
                 }
             } while (iterator.Next(PageIteratorLevel.Word));
         }
@@ -55,5 +56,7 @@ internal sealed class OcrService(ObjectPool<TesseractEngine> pool) : IOcrService
         {
             pool.Return(tesseractEngine);
         }
+
+        return blocks;
     }
 }
