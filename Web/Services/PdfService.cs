@@ -41,7 +41,6 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
             }
             catch (Exception e)
             {
-                await cts.CancelAsync();
                 imageChannel.Writer.TryComplete(e);
                 aggregatorChannel.Writer.TryComplete(e);
                 throw;
@@ -69,7 +68,6 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
                 }
                 catch (Exception e)
                 {
-                    await cts.CancelAsync();
                     aggregatorChannel.Writer.TryComplete(e);
                     imageChannel.Writer.TryComplete(e);
                     throw;
@@ -107,7 +105,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
         }
         catch (Exception e)
         {
-            await cts.CancelAsync();
+            if (!cts.IsCancellationRequested) cts.Cancel();
             aggregatorChannel.Writer.TryComplete(e);
             imageChannel.Writer.TryComplete(e);
             throw;
