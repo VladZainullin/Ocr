@@ -37,6 +37,7 @@ public static class DependencyInjection
 
         builder.Services.AddResponseCompression(static options =>
         {
+            options.EnableForHttps = true;
             options.MimeTypes = ResponseCompressionDefaults.MimeTypes;
 
             options.Providers.Add<GzipCompressionProvider>();
