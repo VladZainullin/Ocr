@@ -16,6 +16,9 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
         var pages = new PageModel[pdf.NumberOfPages];
 
         var maxOcr = Math.Max(1, Environment.ProcessorCount / 2);
+        
+        using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        var token = cts.Token;
 
         var imageChannel = Channel.CreateBounded<ImageTask>(new BoundedChannelOptions(maxOcr)
         {
@@ -29,56 +32,86 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
         
         var aggregatorTask = Task.Run(async () =>
         {
-            await foreach (var aggTask in aggregatorChannel.Reader.ReadAllAsync(cancellationToken))
+            try
             {
-                pages[aggTask.PageNumber - 1].Images.Add(aggTask.ImageModel);
+                await foreach (var aggTask in aggregatorChannel.Reader.ReadAllAsync(token))
+                {
+                    pages[aggTask.PageNumber - 1].Images.Add(aggTask.ImageModel);
+                }
             }
-        }, cancellationToken);
+            catch (Exception e)
+            {
+                await cts.CancelAsync();
+                imageChannel.Writer.TryComplete(e);
+                aggregatorChannel.Writer.TryComplete(e);
+                throw;
+            }
+        }, token);
         
         var workers = new Task[maxOcr];
         for (var i = 0; i < maxOcr; i++)
         {
             workers[i] = Task.Run(async () =>
             {
-                await foreach (var task in imageChannel.Reader.ReadAllAsync(cancellationToken))
+                try
                 {
-                    var bytes = imageService.Recognition(task.Image.Span);
-                    if (bytes.Length == 0) continue;
+                    await foreach (var task in imageChannel.Reader.ReadAllAsync(token))
+                    {
+                        var bytes = imageService.Recognition(task.Image.Span);
+                        if (bytes.Length == 0) continue;
 
-                    var blocks = ocr.Process(bytes);
-                    if (blocks.Count == 0) continue;
+                        var blocks = ocr.Process(bytes);
+                        if (blocks.Count == 0) continue;
                     
-                    var aggregated = new AggregatedTask(task.PageNumber, new ImageModel { Blocks = blocks });
-                    await aggregatorChannel.Writer.WriteAsync(aggregated, cancellationToken);
+                        var aggregated = new AggregatedTask(task.PageNumber, new ImageModel { Blocks = blocks });
+                        await aggregatorChannel.Writer.WriteAsync(aggregated, token);
+                    }
                 }
-            }, cancellationToken);
+                catch (Exception e)
+                {
+                    await cts.CancelAsync();
+                    aggregatorChannel.Writer.TryComplete(e);
+                    imageChannel.Writer.TryComplete(e);
+                    throw;
+                }
+            }, token);
         }
         
-        for (var pdfPageNumber = 1; pdfPageNumber <= pdf.NumberOfPages; pdfPageNumber++)
+        try
         {
-            var page = pdf.GetPage(pdfPageNumber);
-            pages[pdfPageNumber - 1] = new PageModel
+            for (var pdfPageNumber = 1; pdfPageNumber <= pdf.NumberOfPages; pdfPageNumber++)
             {
-                Number = page.Number,
-                Blocks = page.GetBlocks(),
-                Images = []
-            };
+                var page = pdf.GetPage(pdfPageNumber);
+                pages[pdfPageNumber - 1] = new PageModel
+                {
+                    Number = page.Number,
+                    Blocks = page.GetBlocks(),
+                    Images = []
+                };
 
-            foreach (var pdfImage in page.GetImages())
-            {
-                var memory = pdfImage.Memory();
-                if (memory.Length == 0) continue;
+                foreach (var pdfImage in page.GetImages())
+                {
+                    var memory = pdfImage.Memory();
+                    if (memory.Length == 0) continue;
 
-                await imageChannel.Writer.WriteAsync(
-                    new ImageTask(page.Number, memory), cancellationToken);
+                    await imageChannel.Writer.WriteAsync(
+                        new ImageTask(page.Number, memory), token);
+                }
             }
-        }
         
-        imageChannel.Writer.Complete();
-        await Task.WhenAll(workers);
+            imageChannel.Writer.Complete();
+            await Task.WhenAll(workers);
 
-        aggregatorChannel.Writer.Complete();
-        await aggregatorTask;
+            aggregatorChannel.Writer.Complete();
+            await aggregatorTask;
+        }
+        catch (Exception e)
+        {
+            await cts.CancelAsync();
+            aggregatorChannel.Writer.TryComplete(e);
+            imageChannel.Writer.TryComplete(e);
+            throw;
+        }
 
         return new ResponseModel
         {
