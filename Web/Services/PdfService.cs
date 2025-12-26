@@ -52,10 +52,10 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
             {
                 await foreach (var task in imageChannel.Reader.ReadAllAsync(cancellationToken))
                 {
-                    var bytes = await Task.Run(() => imageService.Recognition(task.Image.Span), cancellationToken);
+                    var bytes = imageService.Recognition(task.Image.Span);
                     if (bytes.Length == 0) continue;
 
-                    var blocks = await Task.Run(() => ocr.Process(bytes), cancellationToken);
+                    var blocks = ocr.Process(bytes);
                     if (blocks.Count == 0) continue;
                     
                     var aggregated = new AggregatedTask(task.PageNumber, new ImageModel { Blocks = blocks });
