@@ -99,10 +99,10 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
                 }
             }
         
-            imageChannel.Writer.Complete();
+            imageChannel.Writer.TryComplete();
             await Task.WhenAll(workers);
 
-            aggregatorChannel.Writer.Complete();
+            aggregatorChannel.Writer.TryComplete();
             await aggregatorTask;
         }
         catch (Exception e)
