@@ -20,7 +20,7 @@ public static class DependencyInjection
                     static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Language), 
                     """Tesseract Language is required. Add "Tesseract__Language" to environment variables""")
                 .Validate(
-                    static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Language), 
+                    static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Path), 
                     """Tesseract Path is required. Add "Tesseract__Path" to environment variables""")
                 .ValidateOnStart();
         
