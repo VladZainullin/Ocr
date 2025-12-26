@@ -15,14 +15,17 @@ public static class DependencyInjection
             .AddOptions<TesseractOptions>()
             .BindConfiguration("Tesseract")
             .Validate(
-                static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Language), 
+                static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Language),
                 """Tesseract Language is required. Add "Tesseract__Language" to environment variables""")
             .Validate(
-                static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Path), 
+                static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Path),
                 """Tesseract Path is required. Add "Tesseract__Path" to environment variables""")
             .ValidateOnStart();
-        
-        builder.Services.TryAddSingleton<ObjectPoolProvider, DefaultObjectPoolProvider>();
+
+        builder.Services.TryAddSingleton<ObjectPoolProvider>(new DefaultObjectPoolProvider
+        {
+            MaximumRetained = Environment.ProcessorCount,
+        });
         builder.Services.TryAddSingleton<TesseractEnginePooledObjectPolicy>();
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {
@@ -30,9 +33,9 @@ public static class DependencyInjection
             var policy = serviceProvider.GetRequiredService<TesseractEnginePooledObjectPolicy>();
             return provider.Create(policy);
         });
-        
+
         builder.Services.TryAddSingleton<IOcrService, OcrService>();
-            
+
         return builder;
     }
 }
