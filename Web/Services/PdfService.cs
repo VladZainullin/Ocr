@@ -64,9 +64,9 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
             }, cancellationToken);
         }
         
-        for (var pageNumber = 1; pageNumber <= pdf.NumberOfPages; pageNumber++)
+        for (var pdfPageNumber = 1; pdfPageNumber <= pdf.NumberOfPages; pdfPageNumber++)
         {
-            var page = pdf.GetPage(pageNumber);
+            var page = pdf.GetPage(pdfPageNumber);
 
             foreach (var pdfImage in page.GetImages())
             {
