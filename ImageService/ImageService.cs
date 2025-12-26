@@ -11,18 +11,25 @@ internal sealed class ImageService(ILogger<ImageService> logger) : IImageService
         try
         {
             using var image = new MagickImage(bytes);
-
+            
             image.AutoOrient();
 
-            image.Grayscale();
-
-            image.MedianFilter(1);
+            image.Alpha(AlphaOption.Remove);
+            
+            image.ColorSpace = ColorSpace.Gray;
+            image.Depth = 8;
+            
+            image.Normalize();
+            
+            image.Strip();
+            
+            image.Format = MagickFormat.Png;
 
             return image.ToByteArray();
         }
-        catch (MagickMissingDelegateErrorException e)
+        catch (Exception e)
         {
-            logger.LogError(e, "Magick missing delegate error");
+            logger.LogError(e, "Image error");
             return [];
         }
     }
