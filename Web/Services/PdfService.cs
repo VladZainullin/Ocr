@@ -14,16 +14,6 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
         using var pdf = PdfDocument.Open(stream);
         
         var pages = new PageModel[pdf.NumberOfPages];
-        for (var pdfPageNumber = 1; pdfPageNumber <= pdf.NumberOfPages; pdfPageNumber++)
-        {
-            var page = pdf.GetPage(pdfPageNumber);
-            pages[pdfPageNumber - 1] = new PageModel
-            {
-                Number = page.Number,
-                Blocks = page.GetBlocks(),
-                Images = []
-            };
-        }
 
         var maxOcr = Math.Max(1, Environment.ProcessorCount / 2);
 
@@ -67,6 +57,12 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService)
         for (var pdfPageNumber = 1; pdfPageNumber <= pdf.NumberOfPages; pdfPageNumber++)
         {
             var page = pdf.GetPage(pdfPageNumber);
+            pages[pdfPageNumber - 1] = new PageModel
+            {
+                Number = page.Number,
+                Blocks = page.GetBlocks(),
+                Images = []
+            };
 
             foreach (var pdfImage in page.GetImages())
             {
