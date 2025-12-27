@@ -8,12 +8,12 @@ namespace Application.Extensions;
 
 public static class PdfPageExtensions
 {
-    public static BlockModel[] GetBlocks(this Page page)
+    public static List<BlockModel> GetBlocks(this Page page)
     {
         var words = page.GetWords(NearestNeighbourWordExtractor.Instance);
         var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
         var orderedBlocks = UnsupervisedReadingOrderDetector.Instance.Get(blocks);
-        var blockResponses = new List<BlockModel>();
+        var blockResponses = new List<BlockModel>(blocks.Count);
         foreach (var block in orderedBlocks)
         {
             if (block.TextLines.Count == 0) continue;
@@ -33,6 +33,6 @@ public static class PdfPageExtensions
             blockResponses.Add(blockResponse);
         }
         
-        return blockResponses.ToArray();
+        return blockResponses;
     }
 }
