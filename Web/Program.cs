@@ -1,4 +1,5 @@
 using System.Net.Mime;
+using Application;
 using Application.Contracts;
 using Domain;
 using ImageService;
@@ -19,11 +20,13 @@ file sealed class Program
 
         try
         {
-            builder.AddOcr();
+            builder
+                .AddOcr()
+                .AddImageService()
+                .AddApplication();
             
             builder
-                .AddWeb()
-                .AddImageService();
+                .AddWeb();
 
             await using var app = builder.Build();
 
