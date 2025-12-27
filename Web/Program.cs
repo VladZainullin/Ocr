@@ -1,9 +1,9 @@
 using System.Net.Mime;
+using Application.Contracts;
 using Domain;
 using ImageService;
 using OcrService;
 using Serilog;
-using Web.Services;
 
 namespace Web;
 
@@ -49,7 +49,7 @@ file sealed class Program
                     return;
                 }
 
-                var pdfService = context.RequestServices.GetRequiredService<PdfService>();
+                var pdfService = context.RequestServices.GetRequiredService<IPdfService>();
 
                 await using var stream = context.Request.Form.Files[0].OpenReadStream();
                 var response = await pdfService.ProcessAsync(stream, context.RequestAborted);

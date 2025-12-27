@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Serilog;
-using Web.Services;
 
 namespace Web;
 
@@ -53,9 +51,7 @@ public static class DependencyInjection
         });
 
         builder.WebHost.ConfigureKestrel(static options => options.Limits.MaxRequestBodySize = 100 * 1024 * 1024);
-
-        builder.Services.TryAddSingleton<PdfService>();
-
+        
         return builder;
     }
 }

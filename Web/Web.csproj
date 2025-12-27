@@ -12,6 +12,7 @@
       </Content>
     </ItemGroup>
     <ItemGroup>
+      <ProjectReference Include="..\Application\Application.csproj" />
       <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\ImageService\ImageService.csproj" />
       <ProjectReference Include="..\OcrService\OcrService.csproj" />

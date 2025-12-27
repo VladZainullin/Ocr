@@ -6,5 +6,5 @@ public sealed class PageModel
 
     public required BlockModel[] Blocks { get; set; }
 
-    public List<ImageModel> Images { get; set; } = [];
+    public List<ImageModel> Images { get; init; } = [];
 }

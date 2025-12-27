@@ -1,13 +1,14 @@
 using System.Threading.Channels;
+using Application.Contracts;
+using Application.Extensions;
 using Domain;
 using ImageService.Contracts;
 using OcrService.Contracts;
 using UglyToad.PdfPig;
-using Web.Extensions;
 
-namespace Web.Services;
+namespace Application;
 
-internal sealed class PdfService(IOcrService ocr, IImageService imageService)
+internal sealed class PdfService(IOcrService ocr, IImageService imageService) : IPdfService
 {
     public async Task<ResponseModel> ProcessAsync(Stream stream, CancellationToken cancellationToken = default)
     {

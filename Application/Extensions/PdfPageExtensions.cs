@@ -4,7 +4,7 @@ using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
 using Page = UglyToad.PdfPig.Content.Page;
 
-namespace Web.Extensions;
+namespace Application.Extensions;
 
 public static class PdfPageExtensions
 {
