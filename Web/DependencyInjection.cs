@@ -1,6 +1,9 @@
+using System.Text;
 using Carter;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.ObjectPool;
 using Serilog;
 
 namespace Web;
@@ -54,6 +57,14 @@ public static class DependencyInjection
         });
 
         builder.WebHost.ConfigureKestrel(static options => options.Limits.MaxRequestBodySize = 100 * 1024 * 1024);
+        
+        builder.Services.TryAddSingleton<StringBuilderPooledObjectPolicy>();
+        builder.Services.TryAddSingleton<ObjectPool<StringBuilder>>(static serviceProvider =>
+        {
+            var provider = serviceProvider.GetRequiredService<ObjectPoolProvider>();
+            var policy = serviceProvider.GetRequiredService<StringBuilderPooledObjectPolicy>();
+            return provider.Create(policy);
+        });
         
         return builder;
     }

@@ -6,24 +6,28 @@ using Tesseract;
 
 namespace OcrService;
 
-internal sealed class OcrService(ObjectPool<TesseractEngine> pool) : IOcrService
+internal sealed class OcrService(
+    ObjectPool<TesseractEngine> tesseractEngineObjectPool, 
+    ObjectPool<StringBuilder> stringBuilderObjectPool) : IOcrService
 {
     public List<BlockModel> Process(byte[] bytes)
     {
-        var tesseractEngine = pool.Get();
+        var tesseractEngine = tesseractEngineObjectPool.Get();
+        
         var blocks = new List<BlockModel>();
+        
+        var currentLineStringBuilder = stringBuilderObjectPool.Get();
+        LineModel? currentLine = null;
+        
+        var currentBlockStringBuilder = stringBuilderObjectPool.Get();
+        BlockModel? currentBlock = null;
+        
         try
         {
             using var pix = Pix.LoadFromMemory(bytes);
             using var page = tesseractEngine.Process(pix);
             using var iterator = page.GetIterator();
 
-            var currentBlockStringBuilder = new StringBuilder();
-            BlockModel? currentBlock = null;
-            
-            var currentLineStringBuilder = new StringBuilder();
-            LineModel? currentLine = null;
-            
             do
             {
                 if (iterator.IsAtBeginningOf(PageIteratorLevel.Block))
@@ -70,7 +74,7 @@ internal sealed class OcrService(ObjectPool<TesseractEngine> pool) : IOcrService
         }
         finally
         {
-            pool.Return(tesseractEngine);
+            tesseractEngineObjectPool.Return(tesseractEngine);
         }
 
         return blocks;
