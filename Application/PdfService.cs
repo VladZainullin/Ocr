@@ -1,14 +1,17 @@
+using System.Text;
 using System.Threading.Channels;
 using Application.Contracts;
 using Application.Extensions;
 using Domain;
 using ImageService.Contracts;
+using Microsoft.Extensions.ObjectPool;
 using OcrService.Contracts;
 using UglyToad.PdfPig;
 
 namespace Application;
 
-internal sealed class PdfService(IOcrService ocr, IImageService imageService) : IPdfService
+internal sealed class PdfService(IOcrService ocr, IImageService imageService, 
+    ObjectPool<StringBuilder> stringBuilderObjectPool) : IPdfService
 {
     public async Task<ResponseModel> ProcessAsync(Stream stream, CancellationToken cancellationToken = default)
     {
@@ -84,7 +87,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService) : 
                 pages[pdfPageNumber - 1] = new PageModel
                 {
                     Number = page.Number,
-                    Blocks = page.GetBlocks(),
+                    Blocks = page.GetBlocks(stringBuilderObjectPool),
                     Images = []
                 };
 
