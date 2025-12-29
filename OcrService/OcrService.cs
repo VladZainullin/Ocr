@@ -1,3 +1,4 @@
+using System.Text;
 using Domain;
 using Microsoft.Extensions.ObjectPool;
 using OcrService.Contracts;
@@ -16,8 +17,11 @@ internal sealed class OcrService(ObjectPool<TesseractEngine> pool) : IOcrService
             using var pix = Pix.LoadFromMemory(bytes);
             using var page = tesseractEngine.Process(pix);
             using var iterator = page.GetIterator();
-            
+
+            var currentBlockStringBuilder = new StringBuilder();
             BlockModel? currentBlock = null;
+            
+            var currentLineStringBuilder = new StringBuilder();
             LineModel? currentLine = null;
             
             do
@@ -38,17 +42,29 @@ internal sealed class OcrService(ObjectPool<TesseractEngine> pool) : IOcrService
                     if (!string.IsNullOrWhiteSpace(word))
                     {
                         currentLine?.Words.Add(word);
+                        
+                        currentLineStringBuilder.Append(word);
+                        currentLineStringBuilder.Append(' ');
+                        
+                        currentBlockStringBuilder.Append(word);
+                        currentBlockStringBuilder.Append(' ');
                     }
                 }
 
                 if (iterator.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && currentLine?.Words.Count > 0)
                 {
+                    currentLine.Text = currentLineStringBuilder.ToString();
                     currentBlock?.Lines.Add(currentLine);
+                    
+                    currentLineStringBuilder.Clear();
                 }
 
                 if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && currentBlock?.Lines.Count > 0)
                 {
+                    currentBlock.Text = currentBlockStringBuilder.ToString();
                     blocks.Add(currentBlock);
+                    
+                    currentBlockStringBuilder.Clear();
                 }
             } while (iterator.Next(PageIteratorLevel.Word));
         }
