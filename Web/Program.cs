@@ -1,7 +1,5 @@
-using System.Net.Mime;
 using Application;
-using Application.Contracts;
-using Domain;
+using Carter;
 using ImageService;
 using OcrService;
 using Serilog;
@@ -39,26 +37,7 @@ file sealed class Program
             app.UseHttpsRedirection();
             app.UseHsts();
 
-            app.MapPost("api/v3/documents", static async context =>
-            {
-                if (context.Request.Form.Files.Count < 1
-                    || context.Request.Form.Files[0].ContentType != MediaTypeNames.Application.Pdf
-                    || context.Request.Form.Files[0].Length == 0)
-                {
-                    await context.Response.WriteAsJsonAsync(new
-                    {
-                        Pages = Array.Empty<PageModel>(),
-                    });
-                    return;
-                }
-
-                var pdfService = context.RequestServices.GetRequiredService<IPdfService>();
-
-                await using var stream = context.Request.Form.Files[0].OpenReadStream();
-                var response = await pdfService.ProcessAsync(stream, context.RequestAborted);
-                
-                await context.Response.WriteAsJsonAsync(response);
-            });
+            app.MapCarter();
 
             app.MapHealthChecks("/health");
 
