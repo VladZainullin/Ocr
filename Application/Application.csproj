@@ -1,5 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
     <ItemGroup>
+      <PackageReference Include="Carter" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
       <PackageReference Include="PdfPig" />
     </ItemGroup>

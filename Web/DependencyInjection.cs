@@ -1,3 +1,4 @@
+using Carter;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Serilog;
@@ -9,6 +10,8 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
         builder.Services.AddSerilog();
+
+        builder.Services.AddCarter();
         
         builder.Services.AddHsts(static options =>
         {

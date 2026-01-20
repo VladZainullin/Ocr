@@ -3,6 +3,7 @@
       <ProjectReference Include="..\ImageService.Contracts\ImageService.Contracts.csproj" />
     </ItemGroup>
     <ItemGroup>
+      <PackageReference Include="Carter" />
       <PackageReference Include="Magick.NET-Q16-AnyCPU" />
       <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     </ItemGroup>

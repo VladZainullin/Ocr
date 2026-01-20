@@ -3,6 +3,7 @@
       <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     </PropertyGroup>
     <ItemGroup>
+        <PackageReference Include="Carter" />
         <PackageReference Include="PdfPig" />
         <PackageReference Include="Serilog.AspNetCore" />
     </ItemGroup>
