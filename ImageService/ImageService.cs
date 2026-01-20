@@ -33,4 +33,32 @@ internal sealed class ImageService(ILogger<ImageService> logger) : IImageService
             return [];
         }
     }
+    
+    public byte[] Recognition(Stream stream)
+    {
+        try
+        {
+            using var image = new MagickImage(stream);
+            
+            image.AutoOrient();
+
+            image.Alpha(AlphaOption.Remove);
+            
+            image.ColorSpace = ColorSpace.Gray;
+            image.Depth = 8;
+            
+            image.Normalize();
+            
+            image.Strip();
+            
+            image.Format = MagickFormat.Png;
+
+            return image.ToByteArray();
+        }
+        catch (Exception e)
+        {
+            logger.LogError(e, "Image error");
+            return [];
+        }
+    }
 }
