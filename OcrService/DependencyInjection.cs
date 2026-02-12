@@ -21,11 +21,7 @@ public static class DependencyInjection
                 static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Path),
                 """Tesseract Path is required. Add "Tesseract__Path" to environment variables""")
             .ValidateOnStart();
-
-        builder.Services.TryAddSingleton<ObjectPoolProvider>(new DefaultObjectPoolProvider
-        {
-            MaximumRetained = Environment.ProcessorCount,
-        });
+        
         builder.Services.TryAddSingleton<TesseractEnginePooledObjectPolicy>();
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {

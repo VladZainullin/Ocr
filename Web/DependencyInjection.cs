@@ -1,6 +1,9 @@
+using System.Text;
 using Carter;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.ObjectPool;
 using Serilog;
 
 namespace Web;
@@ -10,6 +13,17 @@ public static class DependencyInjection
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
         builder.Services.AddSerilog();
+        
+        builder.Services.TryAddSingleton<ObjectPoolProvider>(new DefaultObjectPoolProvider
+        {
+            MaximumRetained = Environment.ProcessorCount,
+        });
+        builder.Services.TryAddSingleton<ObjectPool<StringBuilder>>(static serviceProvider =>
+        {
+            var provider = serviceProvider.GetRequiredService<ObjectPoolProvider>();
+            var policy = serviceProvider.GetRequiredService<StringBuilderPooledObjectPolicy>();
+            return provider.Create(policy);
+        });
 
         builder.Services.AddCarter();
         
