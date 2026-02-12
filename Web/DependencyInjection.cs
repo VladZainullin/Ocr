@@ -2,6 +2,7 @@ using System.Text;
 using Carter;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Serilog;
@@ -12,6 +13,11 @@ public static class DependencyInjection
 {
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
+        builder.Services.Configure<KestrelServerOptions>(static options =>
+        {
+            options.AddServerHeader = false;
+        });
+        
         builder.Services.AddSerilog();
         
         builder.Services.TryAddSingleton<ObjectPoolProvider>(new DefaultObjectPoolProvider
