@@ -10,7 +10,7 @@ public sealed class ImagesModule : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("api/v3/images", static async context =>
+        app.MapPost("api/v1/images", static async context =>
         {
             if (context.Request.Form.Files.Count < 1
                 || context.Request.Form.Files[0].ContentType != MediaTypeNames.Image.Jpeg
