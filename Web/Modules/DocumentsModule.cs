@@ -25,10 +25,14 @@ public sealed class DocumentsModule : ICarterModule
 
         var file = files[0];
 
-        if (file.Length == 0 ||
-            !file.ContentType.StartsWith(MediaTypeNames.Application.Pdf, StringComparison.OrdinalIgnoreCase))
+        if (file.Length == 0)
         {
-            return TypedResults.BadRequest("Invalid PDF file");
+            return TypedResults.BadRequest("Invalid PDF file. File is empty");
+        }
+
+        if (!file.ContentType.StartsWith(MediaTypeNames.Application.Pdf, StringComparison.OrdinalIgnoreCase))
+        {
+            return TypedResults.BadRequest("Invalid PDF file. Not a PDF file");
         }
 
         await using var stream = file.OpenReadStream();
