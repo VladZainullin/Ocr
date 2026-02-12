@@ -18,6 +18,8 @@ public static class DependencyInjection
         {
             MaximumRetained = Environment.ProcessorCount,
         });
+        
+        builder.Services.TryAddSingleton<StringBuilderPooledObjectPolicy>();
         builder.Services.TryAddSingleton<ObjectPool<StringBuilder>>(static serviceProvider =>
         {
             var provider = serviceProvider.GetRequiredService<ObjectPoolProvider>();
