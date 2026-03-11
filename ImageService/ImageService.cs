@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ImageService;
 
-internal sealed class ImageService(ILogger<ImageService> logger) : IImageService
+internal sealed partial class ImageService(ILogger<ImageService> logger) : IImageService
 {
     public byte[] Recognition(ReadOnlySpan<byte> bytes)
     {
@@ -29,7 +29,7 @@ internal sealed class ImageService(ILogger<ImageService> logger) : IImageService
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Image error");
+            LogImageError(logger, e);
             return [];
         }
     }
@@ -57,8 +57,11 @@ internal sealed class ImageService(ILogger<ImageService> logger) : IImageService
         }
         catch (Exception e)
         {
-            logger.LogError(e, "Image error");
+            LogImageError(logger, e);
             return [];
         }
     }
+
+    [LoggerMessage(LogLevel.Error, "Image error")]
+    internal static partial void LogImageError(ILogger<ImageService> logger, Exception e);
 }
