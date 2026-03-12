@@ -6,7 +6,7 @@ namespace ImageService;
 
 internal sealed partial class ImageService(ILogger<ImageService> logger) : IImageService
 {
-    public byte[] Recognition(ReadOnlySpan<byte> bytes)
+    public byte[] Prepare(ReadOnlySpan<byte> bytes)
     {
         try
         {
@@ -34,7 +34,7 @@ internal sealed partial class ImageService(ILogger<ImageService> logger) : IImag
         }
     }
     
-    public byte[] Recognition(Stream stream)
+    public byte[] Prepare(Stream stream)
     {
         try
         {

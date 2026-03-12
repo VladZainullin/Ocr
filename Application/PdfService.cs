@@ -60,7 +60,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
                 {
                     await foreach (var task in imageChannel.Reader.ReadAllAsync(token))
                     {
-                        var bytes = imageService.Recognition(task.Image.Span);
+                        var bytes = imageService.Prepare(task.Image.Span);
                         if (bytes.Length == 0) continue;
 
                         var blocks = ocr.Recognition(bytes);
