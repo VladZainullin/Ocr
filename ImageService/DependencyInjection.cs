@@ -6,13 +6,10 @@ namespace ImageService;
 
 public static class DependencyInjection
 {
-    extension(IHostApplicationBuilder builder) 
+    public static IHostApplicationBuilder AddImageService(this IHostApplicationBuilder builder)
     {
-        public IHostApplicationBuilder AddImageService()
-        {
-            builder.Services.TryAddSingleton<IImageService, ImageService>();
+        builder.Services.TryAddSingleton<IImageService, ImageService>();
             
-            return builder;
-        }
+        return builder;
     }
 }
