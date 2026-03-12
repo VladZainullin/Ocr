@@ -63,7 +63,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
                         var bytes = imageService.Recognition(task.Image.Span);
                         if (bytes.Length == 0) continue;
 
-                        var blocks = ocr.Process(bytes);
+                        var blocks = ocr.Recognition(bytes);
                         if (blocks.Count == 0) continue;
                     
                         var aggregated = new AggregatedTask(task.PageNumber, new ImageModel { Blocks = blocks });

@@ -28,7 +28,7 @@ public sealed class ImagesModule : ICarterModule
 
             await using var stream = context.Request.Form.Files[0].OpenReadStream();
             var bytes = imageService.Recognition(stream);
-            var blocks = ocrService.Process(bytes);
+            var blocks = ocrService.Recognition(bytes);
 
             await context.Response.WriteAsJsonAsync(new ImageModel
             {
