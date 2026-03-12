@@ -24,12 +24,12 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var token = cts.Token;
 
-        var imageChannel = Channel.CreateBounded<ImageTask>(new BoundedChannelOptions(maxOcr)
+        var imageChannel = Channel.CreateBounded<RecognitionImageTask>(new BoundedChannelOptions(maxOcr)
         {
             SingleWriter = true
         });
 
-        var aggregatorChannel = Channel.CreateUnbounded<AggregatedTask>(new UnboundedChannelOptions
+        var aggregatorChannel = Channel.CreateUnbounded<AggregatedImageTask>(new UnboundedChannelOptions
         {
             SingleReader = true
         });
@@ -66,7 +66,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
                         var blocks = ocr.Recognition(bytes);
                         if (blocks.Count == 0) continue;
                     
-                        var aggregated = new AggregatedTask(task.PageNumber, new ImageModel { Blocks = blocks });
+                        var aggregated = new AggregatedImageTask(task.PageNumber, new ImageModel { Blocks = blocks });
                         await aggregatorChannel.Writer.WriteAsync(aggregated, token);
                     }
                 }
@@ -97,7 +97,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
                     if (memory.Length == 0) continue;
 
                     await imageChannel.Writer.WriteAsync(
-                        new ImageTask(page.Number, memory), token);
+                        new RecognitionImageTask(page.Number, memory), token);
                 }
             }
         
@@ -121,6 +121,6 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
         };
     }
     
-    private sealed record ImageTask(int PageNumber, ReadOnlyMemory<byte> Image);
-    private sealed record AggregatedTask(int PageNumber, ImageModel ImageModel);
+    private sealed record RecognitionImageTask(int PageNumber, ReadOnlyMemory<byte> Image);
+    private sealed record AggregatedImageTask(int PageNumber, ImageModel ImageModel);
 }
