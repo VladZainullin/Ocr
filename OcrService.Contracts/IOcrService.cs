@@ -4,5 +4,5 @@ namespace OcrService.Contracts;
 
 public interface IOcrService
 {
-    List<BlockModel> Process(byte[] bytes);
+    IReadOnlyCollection<BlockModel> Recognition(byte[] bytes);
 }

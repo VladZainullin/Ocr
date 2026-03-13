@@ -10,8 +10,10 @@ internal sealed class OcrService(
     ObjectPool<TesseractEngine> tesseractEngineObjectPool, 
     ObjectPool<StringBuilder> stringBuilderObjectPool) : IOcrService
 {
-    public List<BlockModel> Process(byte[] bytes)
+    public IReadOnlyCollection<BlockModel> Recognition(byte[] bytes)
     {
+        ArgumentNullException.ThrowIfNull(bytes);
+        
         var tesseractEngine = tesseractEngineObjectPool.Get();
         
         var blocks = new List<BlockModel>();

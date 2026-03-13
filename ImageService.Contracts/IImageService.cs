@@ -2,7 +2,7 @@
 
 public interface IImageService
 {
-    byte[] Recognition(ReadOnlySpan<byte> bytes);
+    byte[] Prepare(ReadOnlySpan<byte> bytes);
     
-    byte[] Recognition(Stream stream);
+    byte[] Prepare(Stream stream);
 }
