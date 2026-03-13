@@ -10,7 +10,9 @@ public sealed class DocumentsModule : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("api/v1/documents", HandleDocument).DisableAntiforgery();
+        app.MapPost("api/v1/documents", HandleDocument)
+            .DisableAntiforgery()
+            .RequireAuthorization();
     }
 
     private static async Task<Results<BadRequest<string>, Ok<ResponseModel>>> HandleDocument(

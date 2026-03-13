@@ -1,5 +1,6 @@
 using System.Text;
 using Carter;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
@@ -32,6 +33,15 @@ public static class DependencyInjection
             var policy = serviceProvider.GetRequiredService<StringBuilderPooledObjectPolicy>();
             return provider.Create(policy);
         });
+
+        builder.Services.AddAuthorization();
+        
+        builder.Services
+            .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+            .AddJwtBearer(jwtBearerOptions =>
+            {
+                builder.Configuration.GetSection("Sso").Bind(jwtBearerOptions);
+            });
 
         builder.Services.AddCarter();
         

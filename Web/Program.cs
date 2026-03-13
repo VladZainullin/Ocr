@@ -36,6 +36,9 @@ file sealed class Program
             
             app.UseHttpsRedirection();
             app.UseHsts();
+            
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapCarter();
 
