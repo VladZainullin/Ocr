@@ -20,8 +20,12 @@ public static class DependencyInjection
             .Validate(
                 static tesseractOptions => !string.IsNullOrWhiteSpace(tesseractOptions.Path),
                 """Tesseract Path is required. Add "Tesseract__Path" to environment variables""")
+            .Validate(static tesseractOptions =>
+                    Directory.Exists(tesseractOptions.Path)
+                    && Directory.EnumerateFiles(tesseractOptions.Path, "*.traineddata").Any(),
+                "Tesseract path must exist and contain at least one .traineddata file")
             .ValidateOnStart();
-        
+
         builder.Services.TryAddSingleton<TesseractEnginePooledObjectPolicy>();
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {
