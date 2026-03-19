@@ -55,7 +55,8 @@ internal sealed class OcrService(
                         currentLineStringBuilder.Append(' ');
                         
                         currentBlockStringBuilder.Append(word);
-                        currentBlockStringBuilder.Append(' ');
+                        if (currentLineStringBuilder.Length > 0)
+                            currentLineStringBuilder.Append(' ');
                     }
                 }
 
