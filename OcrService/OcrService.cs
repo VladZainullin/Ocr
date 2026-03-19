@@ -76,6 +76,13 @@ internal sealed class OcrService(
         }
         finally
         {
+            currentLineStringBuilder.Clear();
+            currentBlockStringBuilder.Clear();
+    
+            stringBuilderObjectPool.Return(currentLineStringBuilder);
+            stringBuilderObjectPool.Return(currentBlockStringBuilder);
+
+            
             tesseractEngineObjectPool.Return(tesseractEngine);
         }
 
