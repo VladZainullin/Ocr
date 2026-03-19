@@ -30,6 +30,8 @@ internal sealed class OcrService(
             using var page = tesseractEngine.Process(pix);
             using var iterator = page.GetIterator();
 
+            iterator.Begin();
+            
             do
             {
                 if (iterator.IsAtBeginningOf(PageIteratorLevel.Block))
