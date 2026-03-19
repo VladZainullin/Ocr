@@ -23,7 +23,7 @@ internal sealed partial class ImageService(ILogger<ImageService> logger) : IImag
             
             image.Strip();
             
-            image.Format = MagickFormat.Pgm;
+            image.Format = MagickFormat.Tiff;
 
             return image.ToByteArray();
         }
@@ -51,7 +51,7 @@ internal sealed partial class ImageService(ILogger<ImageService> logger) : IImag
             
             image.Strip();
             
-            image.Format = MagickFormat.Png;
+            image.Format = MagickFormat.Tiff;
 
             return image.ToByteArray();
         }
