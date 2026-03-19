@@ -44,20 +44,18 @@ internal sealed class OcrService(
                     currentLine = new LineModel();
                 }
 
-                if (iterator.IsAtBeginningOf(PageIteratorLevel.Word))
+                var word = iterator.GetText(PageIteratorLevel.Word);
+                if (!string.IsNullOrWhiteSpace(word))
                 {
-                    var word = iterator.GetText(PageIteratorLevel.Word);
-                    if (!string.IsNullOrWhiteSpace(word))
-                    {
-                        currentLine?.Words.Add(word);
+                    currentLine?.Words.Add(word);
                         
-                        currentLineStringBuilder.Append(word);
+                    if (currentLineStringBuilder.Length > 0)
                         currentLineStringBuilder.Append(' ');
-                        
-                        currentBlockStringBuilder.Append(word);
-                        if (currentLineStringBuilder.Length > 0)
-                            currentLineStringBuilder.Append(' ');
-                    }
+                    currentLineStringBuilder.Append(word);
+
+                    if (currentBlockStringBuilder.Length > 0)
+                        currentBlockStringBuilder.Append(' ');
+                    currentBlockStringBuilder.Append(word);
                 }
 
                 if (iterator.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && currentLine?.Words.Count > 0)
