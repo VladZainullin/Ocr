@@ -4,7 +4,7 @@ public sealed class PageModel
 {
     public required int Number { get; init; }
 
-    public required List<BlockModel> Blocks { get; set; }
+    public required IReadOnlyCollection<BlockModel> Blocks { get; init; }
 
     public List<ImageModel> Images { get; init; } = [];
 }
