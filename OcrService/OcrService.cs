@@ -53,10 +53,10 @@ internal sealed class OcrService(
                     lines.Add(new LineModel
                     {
                         Text = currentLineStringBuilder.ToString(),
-                        Words = [..words]
+                        Words = words
                     });
-                    
-                    words.Clear();
+
+                    words = [];
                     currentLineStringBuilder.Clear();
                 }
 
@@ -67,8 +67,8 @@ internal sealed class OcrService(
                         Text = currentBlockStringBuilder.ToString(),
                         Lines = [..lines]
                     });
-                    
-                    lines.Clear();
+
+                    lines = [];
                     currentBlockStringBuilder.Clear();
                 }
             } while (iterator.Next(PageIteratorLevel.Word));
