@@ -65,7 +65,7 @@ internal sealed class OcrService(
                     blocks.Add(new BlockModel
                     {
                         Text = currentBlockStringBuilder.ToString(),
-                        Lines = [..lines]
+                        Lines = lines
                     });
 
                     lines = [];
