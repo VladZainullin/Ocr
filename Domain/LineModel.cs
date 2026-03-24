@@ -2,6 +2,6 @@ namespace Domain;
 
 public sealed class LineModel
 {
-    public string Text { get; set; } = null!;
-    public List<string> Words { get; } = [];
+    public required string Text { get; set; } = null!;
+    public required IReadOnlyCollection<string> Words { get; init; }
 }

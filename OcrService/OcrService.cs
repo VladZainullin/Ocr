@@ -19,10 +19,10 @@ internal sealed class OcrService(
         var blocks = new List<BlockModel>();
         
         var currentLineStringBuilder = stringBuilderObjectPool.Get();
-        LineModel? currentLine = null;
+        List<string> words = [];
         
         var currentBlockStringBuilder = stringBuilderObjectPool.Get();
-        BlockModel? currentBlock = null;
+        List<LineModel> textLines = [];
         
         try
         {
@@ -36,18 +36,18 @@ internal sealed class OcrService(
             {
                 if (iterator.IsAtBeginningOf(PageIteratorLevel.Block))
                 {
-                    currentBlock = new BlockModel();
+                    textLines = [];
                 }
 
                 if (iterator.IsAtBeginningOf(PageIteratorLevel.TextLine))
                 {
-                    currentLine = new LineModel();
+                    words = [];
                 }
 
                 var word = iterator.GetText(PageIteratorLevel.Word);
                 if (!string.IsNullOrWhiteSpace(word))
                 {
-                    currentLine?.Words.Add(word);
+                    words.Add(word);
                         
                     if (currentLineStringBuilder.Length > 0)
                         currentLineStringBuilder.Append(' ');
@@ -58,20 +58,28 @@ internal sealed class OcrService(
                     currentBlockStringBuilder.Append(word);
                 }
 
-                if (iterator.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && currentLine?.Words.Count > 0)
+                if (iterator.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && words.Count > 0)
                 {
-                    currentLine.Text = currentLineStringBuilder.ToString();
-                    currentBlock?.Lines.Add(currentLine);
+                    textLines.Add(new LineModel
+                    {
+                        Text = currentLineStringBuilder.ToString(),
+                        Words = words
+                    });
                     
                     currentLineStringBuilder.Clear();
+                    words = [];
                 }
 
-                if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && currentBlock?.Lines.Count > 0)
+                if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && textLines.Count > 0)
                 {
-                    currentBlock.Text = currentBlockStringBuilder.ToString();
-                    blocks.Add(currentBlock);
+                    blocks.Add(new BlockModel
+                    {
+                        Text = currentBlockStringBuilder.ToString(),
+                        Lines = textLines
+                    });
                     
                     currentBlockStringBuilder.Clear();
+                    textLines = [];
                 }
             } while (iterator.Next(PageIteratorLevel.Word));
         }

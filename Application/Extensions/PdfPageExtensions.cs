@@ -23,7 +23,7 @@ public static class PdfPageExtensions
             {
                 if (block.TextLines.Count == 0) continue;
             
-                var blockResponse = new BlockModel();
+                var textLines = new List<LineModel>();
                 foreach (var textLine in block.TextLines)
                 {
                     var lineStringBuilder = stringBuilderObjectPool.Get();
@@ -31,18 +31,21 @@ public static class PdfPageExtensions
                     {
                         if (textLine.Words.Count == 0) continue;
                 
-                        var line = new LineModel();
+                        var blockWords = new List<string>();
                         foreach (var word in textLine.Words)
                         {
-                            line.Words.Add(word.Text);
+                            blockWords.Add(word.Text);
                             lineStringBuilder.Append(word.Text);
                             lineStringBuilder.Append(' ');
                         }
 
                         lineStringBuilder.TrimEnd();
-                        line.Text = lineStringBuilder.ToString();
                         
-                        blockResponse.Lines.Add(line);
+                        textLines.Add(new LineModel
+                        {
+                            Text = lineStringBuilder.ToString(),
+                            Words = blockWords,
+                        });
                         blockStringBuilder.Append(lineStringBuilder);
                         blockStringBuilder.Append(' ');
                     }
@@ -52,8 +55,11 @@ public static class PdfPageExtensions
                     }
                 }
                 blockStringBuilder.TrimEnd();
-                blockResponse.Text = blockStringBuilder.ToString();
-                blockResponses.Add(blockResponse);
+                blockResponses.Add(new BlockModel
+                {
+                    Text = blockStringBuilder.ToString(),
+                    Lines = textLines
+                });
             }
             finally
             {

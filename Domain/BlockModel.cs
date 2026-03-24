@@ -2,7 +2,7 @@ namespace Domain;
 
 public sealed class BlockModel
 {
-    public string Text { get; set; } = null!;
+    public required string Text { get; set; } = null!;
     
-    public List<LineModel> Lines { get; } = [];
+    public required IReadOnlyCollection<LineModel> Lines { get; init; } = [];
 }
