@@ -23,7 +23,7 @@ public static class PdfPageExtensions
             {
                 if (block.TextLines.Count == 0) continue;
             
-                var textLines = new List<LineModel>();
+                var textLines = new List<LineModel>(block.TextLines.Count);
                 foreach (var textLine in block.TextLines)
                 {
                     var lineStringBuilder = stringBuilderObjectPool.Get();
@@ -31,10 +31,10 @@ public static class PdfPageExtensions
                     {
                         if (textLine.Words.Count == 0) continue;
                 
-                        var blockWords = new List<string>();
+                        var textLineWords = new List<string>(textLine.Words.Count);
                         foreach (var word in textLine.Words)
                         {
-                            blockWords.Add(word.Text);
+                            textLineWords.Add(word.Text);
                             lineStringBuilder.Append(word.Text);
                             lineStringBuilder.Append(' ');
                         }
@@ -44,7 +44,7 @@ public static class PdfPageExtensions
                         textLines.Add(new LineModel
                         {
                             Text = lineStringBuilder.ToString(),
-                            Words = blockWords,
+                            Words = textLineWords
                         });
                         blockStringBuilder.Append(lineStringBuilder);
                         blockStringBuilder.Append(' ');

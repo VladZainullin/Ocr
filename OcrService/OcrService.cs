@@ -19,7 +19,7 @@ internal sealed class OcrService(
         var blocks = new List<BlockModel>();
         
         var currentLineStringBuilder = stringBuilderObjectPool.Get();
-        List<string> words = [];
+        var words = new List<string>();
         
         var currentBlockStringBuilder = stringBuilderObjectPool.Get();
         List<LineModel> textLines = [];
@@ -34,16 +34,6 @@ internal sealed class OcrService(
             
             do
             {
-                if (iterator.IsAtBeginningOf(PageIteratorLevel.Block))
-                {
-                    textLines = [];
-                }
-
-                if (iterator.IsAtBeginningOf(PageIteratorLevel.TextLine))
-                {
-                    words = [];
-                }
-
                 var word = iterator.GetText(PageIteratorLevel.Word);
                 if (!string.IsNullOrWhiteSpace(word))
                 {
@@ -65,9 +55,9 @@ internal sealed class OcrService(
                         Text = currentLineStringBuilder.ToString(),
                         Words = words
                     });
-                    
-                    currentLineStringBuilder.Clear();
+
                     words = [];
+                    currentLineStringBuilder.Clear();
                 }
 
                 if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && textLines.Count > 0)
@@ -77,9 +67,9 @@ internal sealed class OcrService(
                         Text = currentBlockStringBuilder.ToString(),
                         Lines = textLines
                     });
-                    
-                    currentBlockStringBuilder.Clear();
+
                     textLines = [];
+                    currentBlockStringBuilder.Clear();
                 }
             } while (iterator.Next(PageIteratorLevel.Word));
         }

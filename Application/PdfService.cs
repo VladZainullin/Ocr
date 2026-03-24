@@ -34,72 +34,17 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
             SingleReader = true
         });
         
-        var aggregatorTask = Task.Run(async () =>
-        {
-            try
-            {
-                await foreach (var aggTask in aggregatorChannel.Reader.ReadAllAsync(token))
-                {
-                    pages[aggTask.PageNumber - 1].Images.Add(aggTask.ImageModel);
-                }
-            }
-            catch (Exception e)
-            {
-                imageChannel.Writer.TryComplete(e);
-                aggregatorChannel.Writer.TryComplete(e);
-                throw;
-            }
-        }, token);
+        var aggregatorTask = AddRecognitionTextToResponse(pages, aggregatorChannel, imageChannel, token);
         
         var workers = new Task[maxOcr];
         for (var i = 0; i < maxOcr; i++)
         {
-            workers[i] = Task.Run(async () =>
-            {
-                try
-                {
-                    await foreach (var task in imageChannel.Reader.ReadAllAsync(token))
-                    {
-                        var bytes = imageService.Prepare(task.Image.Span);
-                        if (bytes.Length == 0) continue;
-
-                        var blocks = ocr.Recognition(bytes);
-                        if (blocks.Count == 0) continue;
-                    
-                        var aggregated = new AggregatedImageTask(task.PageNumber, new ImageModel { Blocks = blocks });
-                        await aggregatorChannel.Writer.WriteAsync(aggregated, token);
-                    }
-                }
-                catch (Exception e)
-                {
-                    aggregatorChannel.Writer.TryComplete(e);
-                    imageChannel.Writer.TryComplete(e);
-                    throw;
-                }
-            }, token);
+            workers[i] = RecognitionImageAsync(imageChannel, aggregatorChannel, token);
         }
         
         try
         {
-            for (var pdfPageNumber = 1; pdfPageNumber <= pdf.NumberOfPages; pdfPageNumber++)
-            {
-                var page = pdf.GetPage(pdfPageNumber);
-                pages[pdfPageNumber - 1] = new PageModel
-                {
-                    Number = page.Number,
-                    Blocks = page.GetBlocks(stringBuilderObjectPool),
-                    Images = []
-                };
-
-                foreach (var pdfImage in page.GetImages())
-                {
-                    var memory = pdfImage.Memory();
-                    if (memory.Length == 0) continue;
-
-                    await imageChannel.Writer.WriteAsync(
-                        new RecognitionImageTask(page.Number, memory), token);
-                }
-            }
+            await ProcessDocument(pdf, pages, imageChannel, token);
         
             imageChannel.Writer.TryComplete();
             await Task.WhenAll(workers);
@@ -120,7 +65,82 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
             Pages = pages
         };
     }
-    
+
+    private async Task ProcessDocument(
+        PdfDocument pdf,
+        PageModel[] pages,
+        Channel<RecognitionImageTask> imageChannel,
+        CancellationToken cancellationToken)
+    {
+        for (var pdfPageNumber = 1; pdfPageNumber <= pdf.NumberOfPages; pdfPageNumber++)
+        {
+            var page = pdf.GetPage(pdfPageNumber);
+            pages[pdfPageNumber - 1] = new PageModel
+            {
+                Number = page.Number,
+                Blocks = page.GetBlocks(stringBuilderObjectPool),
+                Images = []
+            };
+
+            foreach (var pdfImage in page.GetImages())
+            {
+                var memory = pdfImage.Memory();
+                if (memory.Length == 0) continue;
+
+                await imageChannel.Writer.WriteAsync(
+                    new RecognitionImageTask(page.Number, memory), cancellationToken);
+            }
+        }
+    }
+
+    private static async Task AddRecognitionTextToResponse(
+        PageModel[] pages,
+        Channel<AggregatedImageTask> aggregatorChannel,
+        Channel<RecognitionImageTask> imageChannel,
+        CancellationToken token)
+    {
+        try
+        {
+            await foreach (var aggTask in aggregatorChannel.Reader.ReadAllAsync(token))
+            {
+                pages[aggTask.PageNumber - 1].Images.Add(aggTask.ImageModel);
+            }
+        }
+        catch (Exception e)
+        {
+            imageChannel.Writer.TryComplete(e);
+            aggregatorChannel.Writer.TryComplete(e);
+            throw;
+        }
+    }
+
+    private async Task RecognitionImageAsync(
+        Channel<RecognitionImageTask> imageChannel, 
+        Channel<AggregatedImageTask> aggregatorChannel, 
+        CancellationToken cancellationToken)
+    {
+        try
+        {
+            await foreach (var task in imageChannel.Reader.ReadAllAsync(cancellationToken))
+            {
+                var bytes = imageService.Prepare(task.Image.Span);
+                if (bytes.Length == 0) continue;
+
+                var blocks = ocr.Recognition(bytes);
+                if (blocks.Count == 0) continue;
+                    
+                var aggregated = new AggregatedImageTask(task.PageNumber, new ImageModel { Blocks = blocks });
+                await aggregatorChannel.Writer.WriteAsync(aggregated, cancellationToken);
+            }
+        }
+        catch (Exception e)
+        {
+            aggregatorChannel.Writer.TryComplete(e);
+            imageChannel.Writer.TryComplete(e);
+            throw;
+        }
+    }
+
     private sealed record RecognitionImageTask(int PageNumber, ReadOnlyMemory<byte> Image);
     private sealed record AggregatedImageTask(int PageNumber, ImageModel ImageModel);
 }
