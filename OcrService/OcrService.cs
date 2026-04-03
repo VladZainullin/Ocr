@@ -22,7 +22,7 @@ internal sealed class OcrService(
         var words = new List<string>();
         
         var currentBlockStringBuilder = stringBuilderObjectPool.Get();
-        var lines = new List<LineModel>();
+        List<LineModel> textLines = [];
         
         try
         {
@@ -50,7 +50,7 @@ internal sealed class OcrService(
 
                 if (iterator.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && words.Count > 0)
                 {
-                    lines.Add(new LineModel
+                    textLines.Add(new LineModel
                     {
                         Text = currentLineStringBuilder.ToString(),
                         Words = words
@@ -60,15 +60,15 @@ internal sealed class OcrService(
                     currentLineStringBuilder.Clear();
                 }
 
-                if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && lines.Count > 0)
+                if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && textLines.Count > 0)
                 {
                     blocks.Add(new BlockModel
                     {
                         Text = currentBlockStringBuilder.ToString(),
-                        Lines = lines
+                        Lines = textLines
                     });
 
-                    lines = [];
+                    textLines = [];
                     currentBlockStringBuilder.Clear();
                 }
             } while (iterator.Next(PageIteratorLevel.Word));
