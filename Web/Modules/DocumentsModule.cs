@@ -12,8 +12,7 @@ public sealed class DocumentsModule : ICarterModule
     {
         app.MapPost("api/v1/documents", HandleDocument)
             .DisableAntiforgery()
-            .RequireAuthorization()
-            .AllowAnonymous();
+            .RequireAuthorization();
     }
 
     private static async Task<Results<BadRequest<string>, Ok<ResponseModel>>> HandleDocument(
