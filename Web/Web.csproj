@@ -9,11 +9,6 @@
         <PackageReference Include="Serilog.AspNetCore" />
     </ItemGroup>
     <ItemGroup>
-      <Content Include="..\.dockerignore">
-        <Link>.dockerignore</Link>
-      </Content>
-    </ItemGroup>
-    <ItemGroup>
       <ProjectReference Include="..\Application\Application.csproj" />
       <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\ImageService\ImageService.csproj" />
