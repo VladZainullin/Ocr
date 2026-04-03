@@ -34,6 +34,6 @@ public sealed class ImagesModule : ICarterModule
             {
                 Blocks = blocks
             });
-        });
+        }).RequireAuthorization();
     }
 }
