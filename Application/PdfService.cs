@@ -11,17 +11,11 @@ using UglyToad.PdfPig;
 namespace Application;
 
 internal sealed class PdfService(IOcrService ocr, IImageService imageService, 
-    ObjectPool<StringBuilder> stringBuilderObjectPool) : IPdfService
+    ObjectPool<StringBuilder> stringBuilderObjectPool, ParsingOptions parsingOptions) : IPdfService
 {
-    private static readonly ParsingOptions ParsingOptions = new()
-    {
-        SkipMissingFonts = true,
-        FilterProvider = new AppFilterProvider()
-    };
-    
     public async Task<ResponseModel> ProcessAsync(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var pdf = PdfDocument.Open(stream, ParsingOptions);
+        using var pdf = PdfDocument.Open(stream, parsingOptions);
         
         var pages = new PageModel[pdf.NumberOfPages];
 
