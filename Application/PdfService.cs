@@ -13,9 +13,15 @@ namespace Application;
 internal sealed class PdfService(IOcrService ocr, IImageService imageService, 
     ObjectPool<StringBuilder> stringBuilderObjectPool) : IPdfService
 {
+    private static readonly ParsingOptions ParsingOptions = new()
+    {
+        SkipMissingFonts = true,
+        FilterProvider = new AppFilterProvider()
+    };
+    
     public async Task<ResponseModel> ProcessAsync(Stream stream, CancellationToken cancellationToken = default)
     {
-        using var pdf = PdfDocument.Open(stream);
+        using var pdf = PdfDocument.Open(stream, ParsingOptions);
         
         var pages = new PageModel[pdf.NumberOfPages];
 
