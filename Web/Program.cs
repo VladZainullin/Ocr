@@ -6,7 +6,7 @@ using Serilog;
 
 namespace Web;
 
-file sealed class Program
+file static class Program
 {
     public static async Task Main(string[] args)
     {
