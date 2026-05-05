@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
+using Microsoft.FeatureManagement;
 using Serilog;
 
 namespace Web;
@@ -18,6 +19,8 @@ public static class DependencyInjection
         {
             options.AddServerHeader = false;
         });
+
+        builder.Services.AddFeatureManagement();
         
         builder.Services.AddSerilog();
         

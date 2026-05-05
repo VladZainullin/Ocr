@@ -23,10 +23,12 @@ public static class DependencyInjection
         builder.Services.TryAddSingleton<LzwFilter>();
         
         builder.Services.TryAddSingleton<AppFilterProvider>();
+        builder.Services.TryAddSingleton<PdfLogger>();
         builder.Services.TryAddSingleton<ParsingOptions>(static sp => new ParsingOptions
         {
             SkipMissingFonts = true,
-            FilterProvider = sp.GetRequiredService<AppFilterProvider>()
+            FilterProvider = sp.GetRequiredService<AppFilterProvider>(),
+            Logger = sp.GetRequiredService<PdfLogger>()
         });
         
         builder.Services.TryAddSingleton<IPdfService, PdfService>();

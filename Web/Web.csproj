@@ -5,6 +5,7 @@
     <ItemGroup>
         <PackageReference Include="Carter" />
         <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
+        <PackageReference Include="Microsoft.FeatureManagement.AspNetCore" />
         <PackageReference Include="PdfPig" />
         <PackageReference Include="Serilog.AspNetCore" />
     </ItemGroup>
