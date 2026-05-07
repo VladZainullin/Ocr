@@ -19,8 +19,7 @@ public static class DependencyInjection
     {
         builder.Services.Configure<KestrelServerOptions>(options =>
         {
-            options.AddServerHeader = false;
-            builder.Configuration.GetSection("Limits").Bind(options.Limits);
+            builder.Configuration.GetSection("Kestrel").Bind(options);
         });
 
         builder.Services.AddProblemDetails();
