@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.ObjectPool;
 using Microsoft.FeatureManagement;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using Serilog;
 
 namespace Web;
@@ -19,6 +21,21 @@ public static class DependencyInjection
         {
             options.AddServerHeader = false;
         });
+
+        builder.Services
+            .AddOpenTelemetry()
+            .WithTracing(static tracerProviderBuilder =>
+            {
+                tracerProviderBuilder.AddAspNetCoreInstrumentation();
+                tracerProviderBuilder.AddHttpClientInstrumentation();
+                tracerProviderBuilder.AddOtlpExporter();
+            })
+            .WithMetrics(static meterProviderBuilder =>
+            {
+                meterProviderBuilder.AddAspNetCoreInstrumentation();
+                meterProviderBuilder.AddHttpClientInstrumentation();
+                meterProviderBuilder.AddOtlpExporter();
+            });
 
         builder.Services.AddFeatureManagement();
         

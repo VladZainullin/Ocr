@@ -13,6 +13,8 @@
         "Serilog__MinimumLevel__Default": "Debug",
         "Serilog__WriteTo__0__Name": "Console",
         "Serilog__WriteTo__0__Args__theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Code, Serilog.Sinks.Console",
+        "Serilog__WriteTo__1__Name": "OpenTelemetry",
+        "Serilog__WriteTo__1__Args__Protocol": "Grpc",
         "Serilog__Properties__ServiceName": "Ocr",
         
         "Tesseract__Path": "/Users/vadislavzainullin/MEGAsync/tesseract",
@@ -26,7 +28,10 @@
         "Sso__TokenValidationParameters__ValidateAudience": "true",
         "Sso__TokenValidationParameters__ValidateLifetime": "true",
         "Sso__TokenValidationParameters__ValidateIssuer": "true",
-        "Sso__TokenValidationParameters__ValidateIssuerSigningKey": "true"
+        "Sso__TokenValidationParameters__ValidateIssuerSigningKey": "true",
+
+        "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
+        "OTEL_SERVICE_NAME": "Ocr"
       }
     }
   }
