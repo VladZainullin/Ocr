@@ -31,6 +31,9 @@ file static class Program
             await using var app = builder.Build();
             
             app.UseForwardedHeaders();
+
+            app.UseExceptionHandler();
+            app.UseStatusCodePages();
             
             app.UseSerilogRequestLogging();
             

@@ -22,6 +22,8 @@ public static class DependencyInjection
             options.AddServerHeader = false;
         });
 
+        builder.Services.AddProblemDetails();
+
         builder.Services
             .AddOpenTelemetry()
             .WithTracing(static tracerProviderBuilder =>
