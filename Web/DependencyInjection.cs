@@ -1,7 +1,6 @@
 using System.Text;
 using Carter;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -34,6 +33,7 @@ public static class DependencyInjection
             })
             .WithMetrics(static meterProviderBuilder =>
             {
+                meterProviderBuilder.AddRuntimeInstrumentation();
                 meterProviderBuilder.AddAspNetCoreInstrumentation();
                 meterProviderBuilder.AddHttpClientInstrumentation();
                 meterProviderBuilder.AddOtlpExporter();
