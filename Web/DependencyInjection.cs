@@ -67,18 +67,14 @@ public static class DependencyInjection
 
         builder.Services.AddCarter();
         
-        builder.Services.AddHsts(static options =>
+        builder.Services.AddHsts(options =>
         {
-            options.Preload = true;
-            options.IncludeSubDomains = true;
-            options.MaxAge = TimeSpan.FromDays(365);
+            builder.Configuration.GetSection("Hsts").Bind(options);
         });
 
-        builder.Services.Configure<ForwardedHeadersOptions>(static options =>
-        {
-            options.ForwardedHeaders =
-                ForwardedHeaders.XForwardedFor |
-                ForwardedHeaders.XForwardedProto;
+        builder.Services.Configure<ForwardedHeadersOptions>(options =>
+        {   
+            builder.Configuration.GetSection("ForwardedHeaders").Bind(options);
         });
 
         builder.Services.AddCors(static options =>
