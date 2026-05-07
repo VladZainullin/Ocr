@@ -4,7 +4,6 @@ using ImageService;
 using Microsoft.FeatureManagement;
 using OcrService;
 using Serilog;
-using Web.Features.ResponseCompression;
 
 namespace Web;
 
@@ -30,33 +29,22 @@ file static class Program
 
             await using var app = builder.Build();
             
-            app.UseForwardedHeaders();
-
+            var featureManager = app.Services.GetRequiredService<IFeatureManager>();
+            
+            if (await featureManager.IsEnabledAsync("ForwardedHeaders"))
+            {
+                app.UseForwardedHeaders();
+            }
+            
             app.UseExceptionHandler();
             app.UseStatusCodePages();
             
             app.UseSerilogRequestLogging();
-            
-            app.Use(async (context, next) =>
+
+            if (await featureManager.IsEnabledAsync("ResponseCompression"))
             {
-                var featureManager = context.RequestServices.GetRequiredService<IFeatureManager>();
-
-                var compressionEnabled = await featureManager.IsEnabledAsync("ResponseCompression");
-                context.Features.Set<IResponseCompressionFeature>(new HttpsCompressionFeature
-                {
-                    Enable = compressionEnabled,
-                });
-
-                await next(context);
-            });
-            
-            app.UseWhen(
-                static context =>
-                {
-                    var enable = context.Features.Get<IResponseCompressionFeature>()?.Enable;
-                    return enable ?? false;
-                }, 
-                static app => app.UseResponseCompression());
+                app.UseResponseCompression();
+            }
             
             app.UseHttpsRedirection();
             app.UseHsts();
@@ -65,7 +53,7 @@ file static class Program
             app.UseAuthorization();
 
             app.MapCarter();
-
+            
             app.MapHealthChecks("/health");
 
             await app.RunAsync();
