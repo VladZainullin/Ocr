@@ -17,9 +17,10 @@ public static class DependencyInjection
 {
     public static WebApplicationBuilder AddWeb(this WebApplicationBuilder builder)
     {
-        builder.Services.Configure<KestrelServerOptions>(static options =>
+        builder.Services.Configure<KestrelServerOptions>(options =>
         {
             options.AddServerHeader = false;
+            builder.Configuration.GetSection("Limits").Bind(options.Limits);
         });
 
         builder.Services.AddProblemDetails();
@@ -106,8 +107,6 @@ public static class DependencyInjection
             options.ValidateScopes = true;
             options.ValidateOnBuild = true;
         });
-
-        builder.WebHost.ConfigureKestrel(static options => options.Limits.MaxRequestBodySize = 100 * 1024 * 1024);
         
         return builder;
     }
