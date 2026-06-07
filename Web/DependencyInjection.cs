@@ -82,13 +82,42 @@ public static class DependencyInjection
             builder.Configuration.GetSection("ForwardedHeaders").Bind(options);
         });
 
-        builder.Services.AddCors(static options =>
+        builder.Services.AddCors(options =>
         {
-            options.AddDefaultPolicy(static policy =>
-                policy
-                    .AllowAnyOrigin()
-                    .AllowAnyMethod()
-                    .AllowAnyHeader());
+            var cors = builder.Configuration.GetSection("Cors");
+            
+            options.AddDefaultPolicy(policy =>
+            {
+                var origins = cors.GetSection("Origins").Get<string[]>();
+                if (!ReferenceEquals(origins, null))
+                {
+                    policy.WithOrigins(origins);
+                }
+                else
+                {
+                    policy.AllowAnyOrigin();
+                }
+                
+                var methods = cors.GetSection("Methods").Get<string[]>();
+                if (!ReferenceEquals(methods, null))
+                {
+                    policy.WithMethods(methods);
+                }
+                else
+                {
+                    policy.AllowAnyMethod();
+                }
+                
+                var headers = cors.GetSection("Headers").Get<string[]>();
+                if (!ReferenceEquals(headers, null))
+                {
+                    policy.WithHeaders(headers);
+                }
+                else
+                {
+                    policy.AllowAnyHeader();
+                }
+            });
         });
 
         builder.Services.AddResponseCompression(static options =>

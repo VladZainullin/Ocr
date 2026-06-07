@@ -35,6 +35,8 @@ file static class Program
             {
                 app.UseForwardedHeaders();
             }
+
+            app.UseCors();
             
             app.UseExceptionHandler();
             app.UseStatusCodePages();
