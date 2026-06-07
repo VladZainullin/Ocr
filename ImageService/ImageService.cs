@@ -48,49 +48,6 @@ internal sealed partial class ImageService(ILogger<ImageService> logger) : IImag
             return [];
         }
     }
-    
-    public byte[] Prepare(Stream stream)
-    {
-        if (stream.Length == 0)  return [];
-        
-        try
-        {
-            using var image = new MagickImage(stream);
-            
-            if (image.Width == 0 || image.Height == 0)
-                return [];
-            
-            image.AutoOrient();
-            
-            image.Alpha(AlphaOption.Remove);
-            image.BackgroundColor = MagickColors.White;
-            
-            image.ColorType = ColorType.Grayscale;
-            image.Depth = 8;
-            
-            image.Deskew(new Percentage(10));
-            
-            image.Threshold(new Percentage(50));
-            
-            image.MedianFilter(3);
-            
-            image.ColorFuzz = new Percentage(10);
-            image.Trim();
-            image.ResetPage();
-            
-            image.Strip();
-            
-            image.Format = MagickFormat.Tiff;
-            image.Settings.Compression = CompressionMethod.Group4;
-
-            return image.ToByteArray();
-        }
-        catch (Exception e)
-        {
-            LogImageError(logger, e);
-            return [];
-        }
-    }
 
     [LoggerMessage(LogLevel.Error, "Image error")]
     internal static partial void LogImageError(ILogger<ImageService> logger, Exception e);
