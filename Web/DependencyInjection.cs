@@ -47,6 +47,11 @@ public static class DependencyInjection
         {
             MaximumRetained = Environment.ProcessorCount,
         });
+
+        builder.Services.AddRateLimiter(options =>
+        {
+            options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+        });
         
         builder.Services.TryAddSingleton<StringBuilderPooledObjectPolicy>();
         builder.Services.TryAddSingleton<ObjectPool<StringBuilder>>(static serviceProvider =>
@@ -97,10 +102,9 @@ public static class DependencyInjection
 
         builder.Services.AddHealthChecks();
 
-        builder.Host.UseDefaultServiceProvider(static options =>
+        builder.Host.UseDefaultServiceProvider(options =>
         {
-            options.ValidateScopes = true;
-            options.ValidateOnBuild = true;
+            builder.Configuration.GetSection("ServiceProvider").Bind(options);
         });
         
         return builder;
