@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Domain.Models;
 using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
@@ -6,7 +7,7 @@ namespace Domain.Builders;
 public sealed class BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
 {
     private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
-    private readonly List<LineModel> _lines = [];
+    private List<LineModel> _lines = [];
 
     public void AddLine(LineModel line)
     {
@@ -30,7 +31,7 @@ public sealed class BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool) : 
         var blockModel = new BlockModel
         {
             Text = _textBuilder.ToString(),
-            Lines = [.. _lines]
+            Lines = _lines
         };
 
         Clear();
@@ -39,7 +40,7 @@ public sealed class BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool) : 
 
     private void Clear()
     {
-        _lines.Clear();
+        _lines = [];
         _textBuilder.Clear();
     }
 

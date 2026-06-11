@@ -1,6 +1,7 @@
 using System.Text;
 using Domain;
 using Domain.Builders;
+using Domain.Models;
 using Microsoft.Extensions.ObjectPool;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;

@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using Domain.Models;
 using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
@@ -6,7 +7,7 @@ namespace Domain.Builders;
 public sealed class LineBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
 {
     private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
-    private readonly List<string> _words = [];
+    private List<string> _words = [];
 
     public void AddWord(string word)
     {
@@ -29,7 +30,7 @@ public sealed class LineBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
         var lineModel = new LineModel
         {
             Text = _textBuilder.ToString(),
-            Words = [.. _words]
+            Words = _words
         };
 
         Clear();
@@ -38,7 +39,7 @@ public sealed class LineBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
 
     private void Clear()
     {
-        _words.Clear();
+        _words = [];
         _textBuilder.Clear();
     }
 

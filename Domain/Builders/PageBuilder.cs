@@ -7,8 +7,8 @@ namespace Domain.Builders;
 public sealed class PageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
 {
     private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
-    private readonly List<ImageModel> _images = [];
-    private readonly List<BlockModel> _blocks = [];
+    private List<ImageModel> _images = [];
+    private List<BlockModel> _blocks = [];
     private int _number;
     
     public PageBuilder SetNumber(int number)
@@ -51,8 +51,8 @@ public sealed class PageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
         var page = new PageModel
         {
             Number = _number,
-            Images = [.._images],
-            Blocks = [.._blocks],
+            Images = _images,
+            Blocks = _blocks,
             Text = _textBuilder.ToString()
         };
 
@@ -62,8 +62,8 @@ public sealed class PageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
 
     public PageBuilder Clear()
     {
-        _images.Clear();
-        _blocks.Clear();
+        _images = [];
+        _blocks = [];
         _textBuilder.Clear();
         return this;
     }

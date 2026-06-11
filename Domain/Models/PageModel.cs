@@ -8,5 +8,5 @@ public sealed class PageModel
 
     public required IReadOnlyCollection<BlockModel> Blocks { get; init; }
 
-    public List<ImageModel> Images { get; init; } = [];
+    public required IReadOnlyCollection<ImageModel> Images { get; init; }
 }

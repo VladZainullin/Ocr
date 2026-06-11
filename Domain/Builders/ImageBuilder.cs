@@ -1,12 +1,13 @@
 ﻿using System.Text;
+using Domain.Models;
 using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
 
-public sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool, int capacity = 0) : IDisposable
+public sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
 {
     private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
-    private readonly List<BlockModel> _blocks = new(capacity);
+    private List<BlockModel> _blocks = [];
 
     public void AddBlock(BlockModel block)
     {
@@ -30,7 +31,7 @@ public sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool, in
         var image = new ImageModel
         {
             Text = _textBuilder.ToString(),
-            Blocks = [.._blocks]
+            Blocks = _blocks
         };
         
         Clear();
@@ -39,7 +40,7 @@ public sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool, in
 
     public void Clear()
     {
-        _blocks.Clear();
+        _blocks = [];
         _textBuilder.Clear();
     }
     

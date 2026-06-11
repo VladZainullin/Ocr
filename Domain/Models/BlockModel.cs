@@ -1,4 +1,4 @@
-namespace Domain;
+namespace Domain.Models;
 
 public sealed class BlockModel
 {
