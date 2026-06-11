@@ -27,18 +27,18 @@ internal sealed partial class ImageService(ILogger<ImageService> logger) : IImag
             
             image.Deskew(new Percentage(10));
             
-            image.Threshold(new Percentage(50));
-            
             image.MedianFilter(3);
+            
+            image.Threshold(new Percentage(50));
             
             image.ColorFuzz = new Percentage(10);
             image.Trim();
             image.ResetPage();
             
-            image.Strip();
-            
             image.Format = MagickFormat.Tiff;
             image.Settings.Compression = CompressionMethod.Group4;
+            
+            image.Strip();
 
             return image.ToByteArray();
         }
