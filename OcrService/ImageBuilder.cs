@@ -34,6 +34,7 @@ internal sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool, 
             Blocks = [.._blocks]
         };
         
+        Clear();
         return image;
     }
 
