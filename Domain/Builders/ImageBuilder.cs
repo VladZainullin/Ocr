@@ -1,10 +1,9 @@
 ﻿using System.Text;
-using Domain;
 using Microsoft.Extensions.ObjectPool;
 
-namespace OcrService;
+namespace Domain.Builders;
 
-internal sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool, int capacity = 0) : IDisposable
+public sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool, int capacity = 0) : IDisposable
 {
     private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
     private readonly List<BlockModel> _blocks = new(capacity);

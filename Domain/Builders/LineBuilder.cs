@@ -1,10 +1,9 @@
 ﻿using System.Text;
-using Domain;
 using Microsoft.Extensions.ObjectPool;
 
-namespace OcrService;
+namespace Domain.Builders;
 
-internal sealed class LineBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
+public sealed class LineBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
 {
     private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
     private readonly List<string> _words = [];

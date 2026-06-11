@@ -4,6 +4,7 @@ using Domain;
 using Microsoft.Extensions.ObjectPool;
 using OcrService.Contracts;
 using Tesseract;
+using Domain.Builders;
 
 namespace OcrService;
 
