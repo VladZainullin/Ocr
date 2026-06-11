@@ -129,7 +129,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
                 if (bytes.Length == 0) continue;
 
                 var imageModel = ocr.Recognition(bytes);
-                if (imageModel.Blocks.Count == 0) continue;
+                if (ReferenceEquals(imageModel, null)) continue;
                     
                 var aggregated = new AggregatedImageTask(task.PageNumber, imageModel);
                 await aggregatorChannel.Writer.WriteAsync(aggregated, cancellationToken);

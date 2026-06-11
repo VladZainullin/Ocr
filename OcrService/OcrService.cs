@@ -12,7 +12,7 @@ internal sealed class OcrService(
     ObjectPool<StringBuilder> stringBuilderObjectPool,
     ActivitySource activitySource) : IOcrService
 {
-    public ImageModel Recognition(byte[] bytes)
+    public ImageModel? Recognition(byte[] bytes)
     {
         using var activity = activitySource.StartActivity();
         ArgumentNullException.ThrowIfNull(bytes);
@@ -25,12 +25,9 @@ internal sealed class OcrService(
             using var page = tesseractEngine.Process(pix);
             using var iterator = page.GetIterator();
             
-            var blocks = ProcessIterator(iterator);
+            var imageModel = ProcessIterator(iterator);
 
-            return new ImageModel
-            {
-                Blocks = blocks,
-            };
+            return imageModel;
         }
         finally
         {
@@ -38,11 +35,11 @@ internal sealed class OcrService(
         }
     }
 
-    private List<BlockModel> ProcessIterator(ResultIterator iterator)
+    private ImageModel? ProcessIterator(ResultIterator iterator)
     {
-        var blocks = new List<BlockModel>();
-        var currentBlock = new BlockBuilder(stringBuilderObjectPool);
-        var currentLine = new LineBuilder(stringBuilderObjectPool);
+        var imageBuilder = new ImageBuilder(stringBuilderObjectPool);
+        var blockBuilder = new BlockBuilder(stringBuilderObjectPool);
+        var lineBuilder = new LineBuilder(stringBuilderObjectPool);
         
         try
         {
@@ -50,46 +47,40 @@ internal sealed class OcrService(
             
             do
             {
-                var word = GetWordText(iterator);
+                var word = iterator.GetText(PageIteratorLevel.Word);
                 
                 if (string.IsNullOrWhiteSpace(word))
                 {
                     continue;
                 }
                 
-                currentLine.AddWord(word);
-                currentBlock.AddWord(word);
+                lineBuilder.AddWord(word);
 
                 if (iterator.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
                 {
-                    var lineModel = currentLine.Build();
+                    var lineModel = lineBuilder.Build();
                     if (lineModel != null)
                     {
-                        currentBlock.AddLine(lineModel);
+                        blockBuilder.AddLine(lineModel);
                     }
                 }
 
                 if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word))
                 {
-                    var blockModel = currentBlock.Build();
+                    var blockModel = blockBuilder.Build();
                     if (blockModel != null)
                     {
-                        blocks.Add(blockModel);
+                        imageBuilder.AddBlock(blockModel);
                     }
                 }
             } while (iterator.Next(PageIteratorLevel.Word));
             
-            return blocks;
+            return imageBuilder.Build();
         }
         finally
         {
-            currentBlock.Dispose();
-            currentLine.Dispose();
+            blockBuilder.Dispose();
+            lineBuilder.Dispose();
         }
-    }
-
-    private static string GetWordText(ResultIterator iterator)
-    {
-        return iterator.GetText(PageIteratorLevel.Word);
     }
 }

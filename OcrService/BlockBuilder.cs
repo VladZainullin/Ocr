@@ -9,17 +9,15 @@ internal sealed class BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool) 
     private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
     private readonly List<LineModel> _lines = [];
 
-    public void AddWord(string word)
+    public void AddLine(LineModel line)
     {
         if (_textBuilder.Length > 0)
         {
             _textBuilder.Append(' ');
         }
-        _textBuilder.Append(word);
-    }
-
-    public void AddLine(LineModel line)
-    {
+        
+        _textBuilder.Append(line.Text);
+        
         _lines.Add(line);
     }
 
