@@ -1,5 +1,6 @@
 using System.Text;
 using Domain;
+using Domain.Builders;
 using Microsoft.Extensions.ObjectPool;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.ReadingOrderDetector;
@@ -15,58 +16,60 @@ public static class PdfPageExtensions
         var words = page.GetWords(NearestNeighbourWordExtractor.Instance);
         var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
         var orderedBlocks = UnsupervisedReadingOrderDetector.Instance.Get(blocks);
+        
         var blockResponses = new List<BlockModel>(blocks.Count);
-        foreach (var block in orderedBlocks)
+        
+        foreach (var textBlock in orderedBlocks)
         {
-            var blockStringBuilder = stringBuilderObjectPool.Get();
-            try
+            if (textBlock.TextLines.Count == 0)
             {
-                if (block.TextLines.Count == 0) continue;
-            
-                var textLines = new List<LineModel>(block.TextLines.Count);
-                foreach (var textLine in block.TextLines)
-                {
-                    var lineStringBuilder = stringBuilderObjectPool.Get();
-                    try
-                    {
-                        if (textLine.Words.Count == 0) continue;
-                
-                        var textLineWords = new List<string>(textLine.Words.Count);
-                        foreach (var word in textLine.Words)
-                        {
-                            textLineWords.Add(word.Text);
-                            lineStringBuilder.Append(word.Text);
-                            lineStringBuilder.Append(' ');
-                        }
-
-                        lineStringBuilder.TrimEnd();
-                        
-                        textLines.Add(new LineModel
-                        {
-                            Text = lineStringBuilder.ToString(),
-                            Words = textLineWords
-                        });
-                        blockStringBuilder.Append(lineStringBuilder);
-                        blockStringBuilder.Append(' ');
-                    }
-                    finally
-                    {
-                        stringBuilderObjectPool.Return(lineStringBuilder);
-                    }
-                }
-                blockStringBuilder.TrimEnd();
-                blockResponses.Add(new BlockModel
-                {
-                    Text = blockStringBuilder.ToString(),
-                    Lines = textLines
-                });
+                continue;
             }
-            finally
+
+            var blockModel = BuildBlock(textBlock, stringBuilderObjectPool);
+            if (blockModel != null)
             {
-                stringBuilderObjectPool.Return(blockStringBuilder);
+                blockResponses.Add(blockModel);
             }
         }
         
         return blockResponses;
+    }
+
+    private static BlockModel? BuildBlock(
+        UglyToad.PdfPig.DocumentLayoutAnalysis.TextBlock textBlock, 
+        ObjectPool<StringBuilder> stringBuilderObjectPool)
+    {
+        using var blockBuilder = new BlockBuilder(stringBuilderObjectPool);
+        
+        foreach (var textLine in textBlock.TextLines)
+        {
+            var lineModel = BuildLine(textLine, stringBuilderObjectPool);
+            if (lineModel != null)
+            {
+                blockBuilder.AddLine(lineModel);
+            }
+        }
+        
+        return blockBuilder.Build();
+    }
+
+    private static LineModel? BuildLine(
+        UglyToad.PdfPig.DocumentLayoutAnalysis.TextLine textLine, 
+        ObjectPool<StringBuilder> stringBuilderObjectPool)
+    {
+        if (textLine.Words.Count == 0)
+        {
+            return null;
+        }
+
+        using var lineBuilder = new LineBuilder(stringBuilderObjectPool);
+        
+        foreach (var word in textLine.Words)
+        {
+            lineBuilder.AddWord(word.Text);
+        }
+        
+        return lineBuilder.Build();
     }
 }

@@ -1,6 +1,6 @@
-namespace Domain;
+namespace Domain.Models;
 
 public sealed class ResponseModel
 {
-    public required PageModel[] Pages { get; init; }
+    public required IReadOnlyCollection<PageModel> Pages { get; init; }
 }

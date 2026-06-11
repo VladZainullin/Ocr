@@ -2,6 +2,7 @@ using System.Net.Mime;
 using Application.Contracts;
 using Carter;
 using Domain;
+using Domain.Models;
 using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Web.Modules;
