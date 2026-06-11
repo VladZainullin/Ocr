@@ -12,82 +12,84 @@ internal sealed class OcrService(
     ObjectPool<StringBuilder> stringBuilderObjectPool,
     ActivitySource activitySource) : IOcrService
 {
-    public IReadOnlyCollection<BlockModel> Recognition(byte[] bytes)
+    public ImageModel Recognition(byte[] bytes)
     {
         using var activity = activitySource.StartActivity();
         ArgumentNullException.ThrowIfNull(bytes);
         
         var tesseractEngine = tesseractEngineObjectPool.Get();
         
-        var blocks = new List<BlockModel>();
-        
-        var currentLineStringBuilder = stringBuilderObjectPool.Get();
-        var words = new List<string>();
-        
-        var currentBlockStringBuilder = stringBuilderObjectPool.Get();
-        List<LineModel> textLines = [];
-        
         try
         {
             using var pix = Pix.LoadFromMemory(bytes);
             using var page = tesseractEngine.Process(pix);
             using var iterator = page.GetIterator();
+            
+            var blocks = ProcessIterator(iterator);
 
+            return new ImageModel
+            {
+                Blocks = blocks,
+            };
+        }
+        finally
+        {
+            tesseractEngineObjectPool.Return(tesseractEngine);
+        }
+    }
+
+    private List<BlockModel> ProcessIterator(ResultIterator iterator)
+    {
+        var blocks = new List<BlockModel>();
+        var currentBlock = new BlockBuilder(stringBuilderObjectPool);
+        var currentLine = new LineBuilder(stringBuilderObjectPool);
+        
+        try
+        {
             iterator.Begin();
             
             do
             {
-                var word = iterator.GetText(PageIteratorLevel.Word);
-                if (!string.IsNullOrWhiteSpace(word))
+                var word = GetWordText(iterator);
+                
+                if (string.IsNullOrWhiteSpace(word))
                 {
-                    words.Add(word);
-                        
-                    if (currentLineStringBuilder.Length > 0)
-                        currentLineStringBuilder.Append(' ');
-                    currentLineStringBuilder.Append(word);
+                    continue;
+                }
+                
+                currentLine.AddWord(word);
+                currentBlock.AddWord(word);
 
-                    if (currentBlockStringBuilder.Length > 0)
-                        currentBlockStringBuilder.Append(' ');
-                    currentBlockStringBuilder.Append(word);
+                if (iterator.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
+                {
+                    var lineModel = currentLine.Build();
+                    if (lineModel != null)
+                    {
+                        currentBlock.AddLine(lineModel);
+                    }
                 }
 
-                if (iterator.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word) && words.Count > 0)
+                if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word))
                 {
-                    textLines.Add(new LineModel
+                    var blockModel = currentBlock.Build();
+                    if (blockModel != null)
                     {
-                        Text = currentLineStringBuilder.ToString(),
-                        Words = words
-                    });
-
-                    words = [];
-                    currentLineStringBuilder.Clear();
-                }
-
-                if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word) && textLines.Count > 0)
-                {
-                    blocks.Add(new BlockModel
-                    {
-                        Text = currentBlockStringBuilder.ToString(),
-                        Lines = textLines
-                    });
-
-                    textLines = [];
-                    currentBlockStringBuilder.Clear();
+                        blocks.Add(blockModel);
+                    }
                 }
             } while (iterator.Next(PageIteratorLevel.Word));
+            
+            return blocks;
         }
         finally
         {
-            currentLineStringBuilder.Clear();
-            currentBlockStringBuilder.Clear();
-    
-            stringBuilderObjectPool.Return(currentLineStringBuilder);
-            stringBuilderObjectPool.Return(currentBlockStringBuilder);
-
-            
-            tesseractEngineObjectPool.Return(tesseractEngine);
+            currentBlock.Dispose();
+            currentLine.Dispose();
         }
+    }
 
-        return blocks;
+    private static string GetWordText(ResultIterator iterator)
+    {
+        return iterator.GetText(PageIteratorLevel.Word);
     }
 }

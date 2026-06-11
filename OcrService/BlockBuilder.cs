@@ -1,0 +1,54 @@
+﻿using System.Text;
+using Domain;
+using Microsoft.Extensions.ObjectPool;
+
+namespace OcrService;
+
+internal sealed class BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
+{
+    private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
+    private readonly List<LineModel> _lines = [];
+
+    public void AddWord(string word)
+    {
+        if (_textBuilder.Length > 0)
+        {
+            _textBuilder.Append(' ');
+        }
+        _textBuilder.Append(word);
+    }
+
+    public void AddLine(LineModel line)
+    {
+        _lines.Add(line);
+    }
+
+    public BlockModel? Build()
+    {
+        if (_lines.Count == 0)
+        {
+            return null;
+        }
+
+        var blockModel = new BlockModel
+        {
+            Text = _textBuilder.ToString(),
+            Lines = [.. _lines]
+        };
+
+        Clear();
+        return blockModel;
+    }
+
+    private void Clear()
+    {
+        _lines.Clear();
+        _textBuilder.Clear();
+    }
+
+    public void Dispose()
+    {
+        _textBuilder.Clear();
+        stringBuilderPool.Return(_textBuilder);
+    }
+}

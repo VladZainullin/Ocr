@@ -7,7 +7,7 @@
       "launchBrowser": false,
       "applicationUrl": "https://localhost:7207",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development",
+        "ASPNETCORE_ENVIRONMENT": "Production",
         
         "Serilog__Using__0": "Serilog.Sinks.Console",
         "Serilog__MinimumLevel__Default": "Debug",
@@ -16,7 +16,7 @@
         "Serilog__WriteTo__1__Name": "OpenTelemetry",
         "Serilog__WriteTo__1__Args__Protocol": "Grpc",
         
-        "Tesseract__Path": "/Users/vadislavzainullin/MEGAsync/tesseract",
+        "Tesseract__Path": "D:/tesseract",
         "Tesseract__Language": "rus+eng",
         
         "Sso__Authority": "http://localhost:8080/realms/development",
