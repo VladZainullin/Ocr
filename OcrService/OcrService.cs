@@ -79,6 +79,7 @@ internal sealed class OcrService(
         }
         finally
         {
+            imageBuilder.Dispose();
             blockBuilder.Dispose();
             lineBuilder.Dispose();
         }
