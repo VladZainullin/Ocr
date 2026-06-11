@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using Domain;
 using Microsoft.Extensions.ObjectPool;
@@ -8,10 +9,12 @@ namespace OcrService;
 
 internal sealed class OcrService(
     ObjectPool<TesseractEngine> tesseractEngineObjectPool, 
-    ObjectPool<StringBuilder> stringBuilderObjectPool) : IOcrService
+    ObjectPool<StringBuilder> stringBuilderObjectPool,
+    ActivitySource activitySource) : IOcrService
 {
     public IReadOnlyCollection<BlockModel> Recognition(byte[] bytes)
     {
+        using var activity = activitySource.StartActivity();
         ArgumentNullException.ThrowIfNull(bytes);
         
         var tesseractEngine = tesseractEngineObjectPool.Get();

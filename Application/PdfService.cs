@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text;
 using System.Threading.Channels;
 using Application.Contracts;
@@ -11,10 +12,11 @@ using UglyToad.PdfPig;
 namespace Application;
 
 internal sealed class PdfService(IOcrService ocr, IImageService imageService, 
-    ObjectPool<StringBuilder> stringBuilderObjectPool, ParsingOptions parsingOptions) : IPdfService
+    ObjectPool<StringBuilder> stringBuilderObjectPool, ParsingOptions parsingOptions, ActivitySource activitySource) : IPdfService
 {
     public async Task<ResponseModel> ProcessAsync(Stream stream, CancellationToken cancellationToken = default)
     {
+        using var activity = activitySource.StartActivity();
         using var pdf = PdfDocument.Open(stream, parsingOptions);
         
         var pages = new PageModel[pdf.NumberOfPages];

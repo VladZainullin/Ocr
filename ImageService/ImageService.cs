@@ -1,13 +1,15 @@
+using System.Diagnostics;
 using ImageMagick;
 using ImageService.Contracts;
 using Microsoft.Extensions.Logging;
 
 namespace ImageService;
 
-internal sealed partial class ImageService(ILogger<ImageService> logger) : IImageService
+internal sealed partial class ImageService(ILogger<ImageService> logger, ActivitySource activitySource) : IImageService
 {
     public byte[] Prepare(ReadOnlySpan<byte> bytes)
     {
+        using var activity = activitySource.StartActivity();
         if (bytes.IsEmpty) return [];
         
         try
