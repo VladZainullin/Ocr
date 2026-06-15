@@ -55,8 +55,11 @@ file static class Program
                 app.UseHsts();
             }
 
-            app.UseAuthentication();
-            app.UseAuthorization();
+            if (await featureManager.IsEnabledAsync("Authorization"))
+            {
+                app.UseAuthentication();
+                app.UseAuthorization();
+            }
 
             app.MapCarter();
             

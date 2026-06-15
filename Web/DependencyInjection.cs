@@ -1,6 +1,7 @@
 using System.Text;
 using Carter;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -62,6 +63,7 @@ public static class DependencyInjection
         });
 
         builder.Services.AddAuthorization();
+        builder.Services.Decorate<IAuthorizationService, ConditionAuthorizationService>();
         
         builder.Services
             .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
