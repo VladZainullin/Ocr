@@ -3,15 +3,22 @@ using System.IO.Hashing;
 using Application.Contracts;
 using Domain.Models;
 using Microsoft.Extensions.Caching.Hybrid;
+using Microsoft.FeatureManagement;
 
 namespace Application;
 
 internal sealed class CachedPdfService(
     HybridCache cache,
-    IPdfService pdfService) : IPdfService
+    IPdfService pdfService,
+    IFeatureManager featureManager) : IPdfService
 {
     public async Task<ResponseModel> ProcessAsync(Stream stream, CancellationToken cancellationToken = default)
     {
+        if (!await featureManager.IsEnabledAsync("Caching"))
+        {
+            return await pdfService.ProcessAsync(stream, cancellationToken);
+        }
+        
         var hash = ComputeXxHash128FromStreamSpan(stream);
         var key = Convert.ToHexString(hash);
         var result = await cache.GetOrCreateAsync(
