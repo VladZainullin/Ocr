@@ -32,6 +32,7 @@ public static class DependencyInjection
         });
         
         builder.Services.TryAddSingleton<IPdfService, PdfService>();
+        builder.Services.Decorate<IPdfService, CachedPdfService>();
         
         return builder;
     }

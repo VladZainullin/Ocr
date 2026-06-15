@@ -122,6 +122,11 @@ public static class DependencyInjection
             });
         });
 
+        builder.Services.AddHybridCache(options =>
+        {
+            options.MaximumPayloadBytes = 1024 * 1024 * 10; //10mb
+        });
+
         builder.Services.AddResponseCompression(static options =>
         {
             options.EnableForHttps = true;
