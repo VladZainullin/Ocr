@@ -49,7 +49,11 @@ file static class Program
             }
             
             app.UseHttpsRedirection();
-            app.UseHsts();
+
+            if (await featureManager.IsEnabledAsync("Hsts"))
+            {
+                app.UseHsts();
+            }
 
             app.UseAuthentication();
             app.UseAuthorization();
