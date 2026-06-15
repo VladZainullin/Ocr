@@ -16,6 +16,7 @@
     <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.15.1" />
     <PackageVersion Include="PdfPig" Version="0.1.14" />
     <PackageVersion Include="PdfPig.Filters.Jbig2.PdfboxJbig2" Version="0.1.12.1" />
+    <PackageVersion Include="Scrutor" Version="7.0.0" />
     <PackageVersion Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageVersion Include="Magick.NET-Q16-AnyCPU" Version="14.13.1" />
     <PackageVersion Include="Serilog.Sinks.OpenTelemetry" Version="4.2.0" />
