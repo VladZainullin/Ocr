@@ -13,6 +13,8 @@ public sealed class PageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
     
     public PageBuilder SetNumber(int number)
     {
+        if (number < 1) throw new ArgumentOutOfRangeException(nameof(number), "Number must be greater than or equal to 1.");
+        
         _number = number;
 
         return this;
@@ -20,6 +22,8 @@ public sealed class PageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
 
     public PageBuilder AddBlock(BlockModel block)
     {
+        ArgumentNullException.ThrowIfNull(block);
+        
         _blocks.Add(block);
 
         if (_textBuilder.Length > 0)
@@ -34,6 +38,8 @@ public sealed class PageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
 
     public PageBuilder AddImage(ImageModel image)
     {
+        ArgumentNullException.ThrowIfNull(image);
+        
         _images.Add(image);
         
         if (_textBuilder.Length > 0)

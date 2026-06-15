@@ -11,6 +11,8 @@ public sealed class BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool) : 
 
     public void AddLine(LineModel line)
     {
+        ArgumentNullException.ThrowIfNull(line);
+        
         if (_textBuilder.Length > 0)
         {
             _textBuilder.Append(' ');

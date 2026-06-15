@@ -11,6 +11,8 @@ public sealed class LineBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
 
     public void AddWord(string word)
     {
+        ArgumentNullException.ThrowIfNull(word);
+        
         _words.Add(word);
         
         if (_textBuilder.Length > 0)

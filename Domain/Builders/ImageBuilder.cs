@@ -11,6 +11,8 @@ public sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : 
 
     public void AddBlock(BlockModel block)
     {
+        ArgumentNullException.ThrowIfNull(block);
+        
         _blocks.Add(block);
 
         if (_blocks.Count > 0)
