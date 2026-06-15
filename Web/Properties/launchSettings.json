@@ -18,16 +18,6 @@
         
         "Tesseract__Path": "D:/tesseract",
         "Tesseract__Language": "rus+eng",
-        
-        "Sso__Authority": "http://localhost:8080/realms/development",
-        "Sso__IncludeErrorDetails": "true",
-        "Sso__RequireHttpsMetadata": "false",
-        "Sso__TokenValidationParameters__ValidIssuer": "client",
-        "Sso__TokenValidationParameters__ValidAudiences__0": "ocr",
-        "Sso__TokenValidationParameters__ValidateAudience": "true",
-        "Sso__TokenValidationParameters__ValidateLifetime": "true",
-        "Sso__TokenValidationParameters__ValidateIssuer": "true",
-        "Sso__TokenValidationParameters__ValidateIssuerSigningKey": "true",
 
         "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
         "OTEL_SERVICE_NAME": "Ocr"
