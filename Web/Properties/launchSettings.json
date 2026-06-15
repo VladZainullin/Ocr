@@ -9,16 +9,6 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Production",
         
-        "Serilog__Using__0": "Serilog.Sinks.Console",
-        "Serilog__MinimumLevel__Default": "Debug",
-        "Serilog__WriteTo__0__Name": "Console",
-        "Serilog__WriteTo__0__Args__theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Code, Serilog.Sinks.Console",
-        "Serilog__WriteTo__1__Name": "OpenTelemetry",
-        "Serilog__WriteTo__1__Args__Protocol": "Grpc",
-        
-        "Tesseract__Path": "D:/tesseract",
-        "Tesseract__Language": "rus+eng",
-
         "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:4317",
         "OTEL_SERVICE_NAME": "Ocr"
       }
