@@ -3,7 +3,7 @@ using UglyToad.PdfPig.Logging;
 
 namespace Application;
 
-internal sealed partial class PdfLogger(ILogger<PdfLogger> logger) : ILog
+internal sealed partial class PdfLoggerAdapter(ILogger<PdfLoggerAdapter> logger) : ILog
 {
     [LoggerMessage(Level = LogLevel.Debug, Message = "{Message}")]
     private static partial void LogDebug(ILogger logger, string message);
