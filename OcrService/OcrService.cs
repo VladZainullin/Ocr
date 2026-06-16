@@ -1,6 +1,4 @@
 using System.Diagnostics;
-using System.Text;
-using Domain;
 using Microsoft.Extensions.ObjectPool;
 using OcrService.Contracts;
 using Tesseract;
@@ -10,8 +8,10 @@ using Domain.Models;
 namespace OcrService;
 
 internal sealed class OcrService(
-    ObjectPool<TesseractEngine> tesseractEngineObjectPool, 
-    ObjectPool<StringBuilder> stringBuilderObjectPool,
+    ObjectPool<TesseractEngine> tesseractEngineObjectPool,
+    ObjectPool<ImageBuilder> imageBuilderObjectPool,
+    ObjectPool<BlockBuilder> blockBuilderObjectPool,
+    ObjectPool<LineBuilder> lineBuilderObjectPool,
     ActivitySource activitySource) : IOcrService
 {
     public ImageModel? Recognition(byte[] bytes)
@@ -39,9 +39,9 @@ internal sealed class OcrService(
 
     private ImageModel? ProcessIterator(ResultIterator iterator)
     {
-        var imageBuilder = new ImageBuilder(stringBuilderObjectPool);
-        var blockBuilder = new BlockBuilder(stringBuilderObjectPool);
-        var lineBuilder = new LineBuilder(stringBuilderObjectPool);
+        var imageBuilder = imageBuilderObjectPool.Get();
+        var blockBuilder = blockBuilderObjectPool.Get();
+        var lineBuilder = lineBuilderObjectPool.Get();
         
         try
         {
@@ -82,8 +82,11 @@ internal sealed class OcrService(
         finally
         {
             imageBuilder.Dispose();
+            imageBuilderObjectPool.Return(imageBuilder);
             blockBuilder.Dispose();
+            blockBuilderObjectPool.Return(blockBuilder);
             lineBuilder.Dispose();
+            lineBuilderObjectPool.Return(lineBuilder);
         }
     }
 }

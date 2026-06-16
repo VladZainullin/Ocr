@@ -1,5 +1,6 @@
 using Application;
 using Carter;
+using Domain;
 using ImageService;
 using Microsoft.FeatureManagement;
 using OcrService;
@@ -20,6 +21,7 @@ file static class Program
         try
         {
             builder
+                .AddDomain()
                 .AddOcr()
                 .AddImageService()
                 .AddApplication();

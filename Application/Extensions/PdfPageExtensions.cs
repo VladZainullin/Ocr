@@ -1,5 +1,3 @@
-using System.Text;
-using Domain;
 using Domain.Builders;
 using Domain.Models;
 using Microsoft.Extensions.ObjectPool;
@@ -12,7 +10,9 @@ namespace Application.Extensions;
 
 public static class PdfPageExtensions
 {
-    public static List<BlockModel> GetBlocks(this Page page, ObjectPool<StringBuilder> stringBuilderObjectPool)
+    public static List<BlockModel> GetBlocks(this Page page, 
+        ObjectPool<BlockBuilder> blockBuilderObjectPool,
+        ObjectPool<LineBuilder> lineBuilderObjectPool)
     {
         var words = page.GetWords(NearestNeighbourWordExtractor.Instance);
         var blocks = DocstrumBoundingBoxes.Instance.GetBlocks(words);
@@ -27,7 +27,11 @@ public static class PdfPageExtensions
                 continue;
             }
 
-            var blockModel = BuildBlock(textBlock, stringBuilderObjectPool);
+            var blockModel = BuildBlock(
+                textBlock,
+                blockBuilderObjectPool,
+                lineBuilderObjectPool);
+            
             if (blockModel != null)
             {
                 blockResponses.Add(blockModel);
@@ -38,39 +42,54 @@ public static class PdfPageExtensions
     }
 
     private static BlockModel? BuildBlock(
-        UglyToad.PdfPig.DocumentLayoutAnalysis.TextBlock textBlock, 
-        ObjectPool<StringBuilder> stringBuilderObjectPool)
+        UglyToad.PdfPig.DocumentLayoutAnalysis.TextBlock textBlock,
+        ObjectPool<BlockBuilder> blockBuilderObjectPool,
+        ObjectPool<LineBuilder> lineBuilderObjectPool)
     {
-        using var blockBuilder = new BlockBuilder(stringBuilderObjectPool);
-        
-        foreach (var textLine in textBlock.TextLines)
+        var blockBuilder = blockBuilderObjectPool.Get();
+        try
         {
-            var lineModel = BuildLine(textLine, stringBuilderObjectPool);
-            if (lineModel != null)
+            foreach (var textLine in textBlock.TextLines)
             {
-                blockBuilder.AddLine(lineModel);
+                var lineModel = BuildLine(textLine, lineBuilderObjectPool);
+                if (lineModel != null)
+                {
+                    blockBuilder.AddLine(lineModel);
+                }
             }
-        }
         
-        return blockBuilder.Build();
+            return blockBuilder.Build();
+        }
+        finally
+        {
+            blockBuilder.Dispose();
+            blockBuilderObjectPool.Return(blockBuilder);
+        }
     }
 
     private static LineModel? BuildLine(
         UglyToad.PdfPig.DocumentLayoutAnalysis.TextLine textLine, 
-        ObjectPool<StringBuilder> stringBuilderObjectPool)
+        ObjectPool<LineBuilder> lineBuilderObjectPool)
     {
         if (textLine.Words.Count == 0)
         {
             return null;
         }
 
-        using var lineBuilder = new LineBuilder(stringBuilderObjectPool);
-        
-        foreach (var word in textLine.Words)
+        var lineBuilder = lineBuilderObjectPool.Get();
+        try
         {
-            lineBuilder.AddWord(word.Text);
-        }
+            foreach (var word in textLine.Words)
+            {
+                lineBuilder.AddWord(word.Text);
+            }
         
-        return lineBuilder.Build();
+            return lineBuilder.Build();   
+        }
+        finally
+        {
+            lineBuilder.Dispose();
+            lineBuilderObjectPool.Return(lineBuilder);
+        }
     }
 }

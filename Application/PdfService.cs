@@ -1,9 +1,7 @@
 using System.Diagnostics;
-using System.Text;
 using System.Threading.Channels;
 using Application.Contracts;
 using Application.Extensions;
-using Domain;
 using Domain.Builders;
 using Domain.Models;
 using ImageService.Contracts;
@@ -13,22 +11,29 @@ using UglyToad.PdfPig;
 
 namespace Application;
 
-internal sealed class PdfService(IOcrService ocr, IImageService imageService, 
-    ObjectPool<StringBuilder> stringBuilderObjectPool, ParsingOptions parsingOptions, ActivitySource activitySource) : IPdfService
+internal sealed class PdfService(
+    IOcrService ocr,
+    IImageService imageService,
+    ObjectPool<PageBuilder> pageBuilderObjectPool,
+    ObjectPool<BlockBuilder> blockBuilderObjectPool,
+    ObjectPool<LineBuilder> lineBuilderObjectPool,
+    ParsingOptions parsingOptions,
+    ActivitySource activitySource) : IPdfService
 {
     public async Task<ResponseModel> ProcessAsync(Stream stream, CancellationToken cancellationToken = default)
     {
         using var activity = activitySource.StartActivity();
         using var pdf = PdfDocument.Open(stream, parsingOptions);
-        
+
         var pageBuilders = new List<PageBuilder>(pdf.NumberOfPages);
         for (var index = 0; index < pdf.NumberOfPages; index++)
         {
-            pageBuilders.Add(new PageBuilder(stringBuilderObjectPool));
+            var pageBuilder = pageBuilderObjectPool.Get();
+            pageBuilders.Add(pageBuilder);
         }
-
-        var maxOcr = Math.Max(1, Environment.ProcessorCount / 2);
         
+        var maxOcr = Math.Max(1, Environment.ProcessorCount / 2);
+
         using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
         var token = cts.Token;
 
@@ -41,19 +46,19 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
         {
             SingleReader = true
         });
-        
-        var aggregatorTask = AddRecognitionTextToResponse(pageBuilders, aggregatorChannel, imageChannel, token);
-        
-        var workers = new Task[maxOcr];
-        for (var i = 0; i < maxOcr; i++)
-        {
-            workers[i] = RecognitionImageAsync(imageChannel, aggregatorChannel, token);
-        }
-        
+
         try
         {
+            var aggregatorTask = AddRecognitionTextToResponse(pageBuilders, aggregatorChannel, imageChannel, token);
+
+            var workers = new Task[maxOcr];
+            for (var i = 0; i < maxOcr; i++)
+            {
+                workers[i] = RecognitionImageAsync(imageChannel, aggregatorChannel, token);
+            }
+
             await ProcessDocument(pdf, pageBuilders, imageChannel, token);
-        
+
             imageChannel.Writer.TryComplete();
             await Task.WhenAll(workers);
 
@@ -66,6 +71,13 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
             aggregatorChannel.Writer.TryComplete(e);
             imageChannel.Writer.TryComplete(e);
             throw;
+        }
+        finally
+        {
+            foreach (var pageBuilder in pageBuilders)
+            {
+                pageBuilderObjectPool.Return(pageBuilder);
+            }
         }
 
         return new ResponseModel
@@ -85,13 +97,13 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
             var page = pdf.GetPage(pdfPageNumber);
 
             var pageBuilder = pageBuilders[pdfPageNumber - 1];
-            
+
             pageBuilder.SetNumber(page.Number);
 
-            var blocks = page.GetBlocks(stringBuilderObjectPool);
+            var blocks = page.GetBlocks(blockBuilderObjectPool, lineBuilderObjectPool);
             foreach (var block in blocks)
             {
-                pageBuilder.AddBlock(block);   
+                pageBuilder.AddBlock(block);
             }
 
             foreach (var pdfImage in page.GetImages())
@@ -116,7 +128,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
             await foreach (var aggTask in aggregatorChannel.Reader.ReadAllAsync(token))
             {
                 var pageBuilder = pages[aggTask.PageNumber - 1];
-                
+
                 pageBuilder.AddImage(aggTask.ImageModel);
             }
         }
@@ -129,8 +141,8 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
     }
 
     private async Task RecognitionImageAsync(
-        Channel<RecognitionImageTask> imageChannel, 
-        Channel<AggregatedImageTask> aggregatorChannel, 
+        Channel<RecognitionImageTask> imageChannel,
+        Channel<AggregatedImageTask> aggregatorChannel,
         CancellationToken cancellationToken)
     {
         try
@@ -142,7 +154,7 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
 
                 var imageModel = ocr.Recognition(bytes);
                 if (ReferenceEquals(imageModel, null)) continue;
-                    
+
                 var aggregated = new AggregatedImageTask(task.PageNumber, imageModel);
                 await aggregatorChannel.Writer.WriteAsync(aggregated, cancellationToken);
             }
@@ -156,5 +168,6 @@ internal sealed class PdfService(IOcrService ocr, IImageService imageService,
     }
 
     private sealed record RecognitionImageTask(int PageNumber, ReadOnlyMemory<byte> Image);
+
     private sealed record AggregatedImageTask(int PageNumber, ImageModel ImageModel);
 }
