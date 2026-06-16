@@ -4,10 +4,17 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
 
-public sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
+public sealed class ImageBuilder : IDisposable
 {
-    private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
+    private readonly StringBuilder _textBuilder;
     private List<BlockModel> _blocks = [];
+    private readonly ObjectPool<StringBuilder> _stringBuilderPool;
+
+    internal ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool)
+    {
+        _stringBuilderPool = stringBuilderPool;
+        _textBuilder = stringBuilderPool.Get();
+    }
 
     public void AddBlock(BlockModel block)
     {
@@ -49,6 +56,6 @@ public sealed class ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : 
     public void Dispose()
     {
         _textBuilder.Clear();
-        stringBuilderPool.Return(_textBuilder);
+        _stringBuilderPool.Return(_textBuilder);
     }
 }

@@ -4,13 +4,20 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
 
-public sealed class PageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
+public sealed class PageBuilder : IDisposable
 {
-    private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
+    private readonly StringBuilder _textBuilder;
     private List<ImageModel> _images = [];
     private List<BlockModel> _blocks = [];
     private int _number;
-    
+    private readonly ObjectPool<StringBuilder> _stringBuilderPool;
+
+    internal PageBuilder(ObjectPool<StringBuilder> stringBuilderPool)
+    {
+        _stringBuilderPool = stringBuilderPool;
+        _textBuilder = stringBuilderPool.Get();
+    }
+
     public PageBuilder SetNumber(int number)
     {
         if (number < 1) throw new ArgumentOutOfRangeException(nameof(number), "Number must be greater than or equal to 1.");
@@ -77,6 +84,6 @@ public sealed class PageBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
     public void Dispose()
     {
         _textBuilder.Clear();
-        stringBuilderPool.Return(_textBuilder);
+        _stringBuilderPool.Return(_textBuilder);
     }
 }

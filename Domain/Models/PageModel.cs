@@ -2,6 +2,10 @@ namespace Domain.Models;
 
 public sealed class PageModel
 {
+    internal PageModel()
+    {
+    }
+    
     public required int Number { get; init; }
 
     public required string Text { get; init; }

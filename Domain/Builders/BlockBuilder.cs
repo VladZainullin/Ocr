@@ -4,10 +4,17 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
 
-public sealed class BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
+public sealed class BlockBuilder : IDisposable
 {
-    private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
+    private readonly ObjectPool<StringBuilder> _stringBuilderPool;
+    private readonly StringBuilder _textBuilder;
     private List<LineModel> _lines = [];
+
+    internal BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool)
+    {
+        _stringBuilderPool = stringBuilderPool;
+        _textBuilder = stringBuilderPool.Get();
+    }
 
     public void AddLine(LineModel line)
     {
@@ -49,6 +56,6 @@ public sealed class BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool) : 
     public void Dispose()
     {
         _textBuilder.Clear();
-        stringBuilderPool.Return(_textBuilder);
+        _stringBuilderPool.Return(_textBuilder);
     }
 }

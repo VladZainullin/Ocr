@@ -4,10 +4,17 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
 
-public sealed class LineBuilder(ObjectPool<StringBuilder> stringBuilderPool) : IDisposable
+public sealed class LineBuilder : IDisposable
 {
-    private readonly StringBuilder _textBuilder = stringBuilderPool.Get();
+    private readonly StringBuilder _textBuilder;
     private List<string> _words = [];
+    private readonly ObjectPool<StringBuilder> _stringBuilderPool;
+
+    internal LineBuilder(ObjectPool<StringBuilder> stringBuilderPool)
+    {
+        _stringBuilderPool = stringBuilderPool;
+        _textBuilder = stringBuilderPool.Get();
+    }
 
     public void AddWord(string word)
     {
@@ -48,6 +55,6 @@ public sealed class LineBuilder(ObjectPool<StringBuilder> stringBuilderPool) : I
     public void Dispose()
     {
         _textBuilder.Clear();
-        stringBuilderPool.Return(_textBuilder);
+        _stringBuilderPool.Return(_textBuilder);
     }
 }
