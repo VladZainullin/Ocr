@@ -82,6 +82,9 @@ internal static class Native
     #endregion
 
     #region Управление изображениями
+    
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessResultIteratorGetUTF8Text")]
+    public static extern IntPtr ResultIteratorGetUTF8TextInternal(IntPtr handle, PageIteratorLevel level);
 
     /// <summary>
     /// Устанавливает изображение для распознавания из данных пикселей
@@ -279,7 +282,10 @@ internal static class Native
     /// <param name="level">Уровень итерации</param>
     /// <returns>true если есть следующий элемент</returns>
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern bool TessPageIteratorNext(IntPtr iterator, int level);
+    public static extern bool TessPageIteratorNext(IntPtr iterator, PageIteratorLevel level);
+    
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorIsAtFinalElement")]
+    public static extern int PageIteratorIsAtFinalElement(IntPtr handle, PageIteratorLevel level, PageIteratorLevel element);
 
     /// <summary>
     /// Проверяет, является ли текущий элемент началом
