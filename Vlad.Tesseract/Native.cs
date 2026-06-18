@@ -148,6 +148,15 @@ internal static class Native
     #region Распознавание текста
 
     /// <summary>
+    /// Выполняет распознавание на установленном изображении
+    /// </summary>
+    /// <param name="handle">Указатель на экземпляр API</param>
+    /// <param name="monitor"></param>
+    /// <returns>0 при успехе, -1 при ошибке</returns>
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern int TessBaseAPIRecognize(IntPtr handle, IntPtr monitor);
+    
+    /// <summary>
     /// Выполняет распознавание и возвращает UTF-8 текст
     /// </summary>
     /// <param name="handle">Указатель на экземпляр API</param>
