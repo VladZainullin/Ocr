@@ -41,6 +41,14 @@ internal static class Native
     /// <param name="handle">Указатель на экземпляр API</param>
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
     public static extern void TessBaseAPIDelete(IntPtr handle);
+    
+    /// <summary>
+    /// Устанавливает режим сегментации страницы.
+    /// </summary>
+    /// <param name="handle">Указатель на экземпляр API</param>
+    /// <param name="mode">Режим сегментации (значение от 0 до 14)</param>
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
+    public static extern void TessBaseAPISetPageSegMode(IntPtr handle, int mode);
 
     /// <summary>
     /// Инициализирует Tesseract с указанным путем к данным и языком

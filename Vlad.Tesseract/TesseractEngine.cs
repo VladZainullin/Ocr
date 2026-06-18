@@ -18,6 +18,8 @@ public sealed class TesseractEngine : IDisposable
             Dispose();
             throw new InvalidOperationException($"Failed to initialize Vlad.Tesseract with language '{language}'.");
         }
+        
+        Native.TessBaseAPISetPageSegMode(_handle, 1);
     }
 
     public unsafe string Recognize(byte[] imageData, uint width, uint height, uint bytesPerPixel)
