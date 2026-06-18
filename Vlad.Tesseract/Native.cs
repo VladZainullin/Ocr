@@ -13,7 +13,7 @@ internal static class Native
     public static extern void TessBaseAPIDelete(IntPtr handle);
     
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl)]
-    public static extern void TessBaseAPISetPageSegMode(IntPtr handle, int mode);
+    public static extern void TessBaseAPISetPageSegMode(IntPtr handle, PageSegMode mode);
     
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, CharSet = CharSet.Ansi, BestFitMapping = false,
         ThrowOnUnmappableChar = true)]
