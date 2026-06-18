@@ -104,4 +104,7 @@ internal static class Native
     [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorIsAtFinalElement")]
     public static extern int PageIteratorIsAtFinalElement(IntPtr handle, PageIteratorLevel level,
         PageIteratorLevel element);
+    
+    [DllImport(DllName, CallingConvention = CallingConvention.Cdecl, EntryPoint = "TessPageIteratorDelete")]
+    public static extern void PageIteratorDelete(IntPtr handle);
 }

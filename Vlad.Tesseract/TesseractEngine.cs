@@ -1,5 +1,4 @@
 ﻿using System.Runtime.InteropServices;
-using System.Text;
 using Domain.Builders;
 using Domain.Models;
 using Microsoft.Extensions.ObjectPool;
@@ -67,48 +66,71 @@ public sealed class TesseractEngine : IDisposable
         var imageBuilder = _imageBuilderObjectPool.Get();
         var blockBuilder = _blockBuilderObjectPool.Get();
         var lineBuilder = _lineBuilderObjectPool.Get();
-        
-        fixed (byte* imagePtr = imageData)
+
+        try
         {
-            var bytesPerLine = width * bytesPerPixel;
-            Native.TessBaseAPISetImage(_handle, (nint)imagePtr, width, height, bytesPerPixel, bytesPerLine);
-
-            var a = Native.TessBaseAPIRecognize(_handle, IntPtr.Zero);
-            var iterator = Native.TessBaseAPIGetIterator(_handle);
-
-            do
+            fixed (byte* imagePtr = imageData)
             {
-                var wordPtr = Native.ResultIteratorGetUTF8TextInternal(iterator, PageIteratorLevel.Word);
-                var word = Marshal.PtrToStringUTF8(wordPtr);
-                if (string.IsNullOrWhiteSpace(word))
-                {
-                    continue;
-                }
-                
-                lineBuilder.AddWord(word);
+                var bytesPerLine = width * bytesPerPixel;
+                Native.TessBaseAPISetImage(_handle, (nint)imagePtr, width, height, bytesPerPixel, bytesPerLine);
 
-                var lastWordInLine = Native.PageIteratorIsAtFinalElement(iterator, PageIteratorLevel.Line, PageIteratorLevel.Word);
-                if (lastWordInLine != 0)
+                var a = Native.TessBaseAPIRecognize(_handle, IntPtr.Zero);
+                var iterator = Native.TessBaseAPIGetIterator(_handle);
+                try
                 {
-                    var lineModel = lineBuilder.Build();
-                    if (lineModel != null)
+                    do
                     {
-                        blockBuilder.AddLine(lineModel);
-                    }
-                }
+                        var wordPtr = Native.ResultIteratorGetUTF8TextInternal(iterator, PageIteratorLevel.Word);
+                        try
+                        {
+                            var word = Marshal.PtrToStringUTF8(wordPtr);
+                            if (string.IsNullOrWhiteSpace(word))
+                            {
+                                continue;
+                            }
                 
-                var lastWordInBlock = Native.PageIteratorIsAtFinalElement(iterator, PageIteratorLevel.Line, PageIteratorLevel.Word);
-                if (lastWordInBlock != 0)
-                {
-                    var blockModel = blockBuilder.Build();
-                    if (blockModel != null)
-                    {
-                        imageBuilder.AddBlock(blockModel);
-                    }
-                }
-            } while (Native.TessPageIteratorNext(iterator, PageIteratorLevel.Word));
+                            lineBuilder.AddWord(word);
+                        }
+                        finally
+                        {
+                            Native.TessDeleteText(wordPtr);
+                        }
+
+                        var lastWordInLine = Native.PageIteratorIsAtFinalElement(iterator, PageIteratorLevel.Line, PageIteratorLevel.Word);
+                        if (lastWordInLine != 0)
+                        {
+                            var lineModel = lineBuilder.Build();
+                            if (lineModel != null)
+                            {
+                                blockBuilder.AddLine(lineModel);
+                            }
+                        }
+                
+                        var lastWordInBlock = Native.PageIteratorIsAtFinalElement(iterator, PageIteratorLevel.Block, PageIteratorLevel.Word);
+                        if (lastWordInBlock != 0)
+                        {
+                            var blockModel = blockBuilder.Build();
+                            if (blockModel != null)
+                            {
+                                imageBuilder.AddBlock(blockModel);
+                            }
+                        }
+                    } while (Native.TessPageIteratorNext(iterator, PageIteratorLevel.Word));
             
-            return imageBuilder.Build();
+                    return imageBuilder.Build();
+                }
+                finally
+                {
+                    Native.PageIteratorDelete(iterator);
+                }
+
+            }
+        }
+        finally
+        {
+            _imageBuilderObjectPool.Return(imageBuilder);
+            _blockBuilderObjectPool.Return(blockBuilder);
+            _lineBuilderObjectPool.Return(lineBuilder);
         }
     }
 
