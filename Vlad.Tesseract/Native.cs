@@ -17,7 +17,7 @@ internal static partial class Native
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPISetPageSegMode")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetPageSegMode(IntPtr handle, PageSegMode mode);
+    public static partial void TessBaseApiSetPageSegMode(IntPtr handle, PageSegmentMode mode);
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIInit3", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
