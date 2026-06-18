@@ -19,5 +19,6 @@
   <Folder Name="/src/infrastructure/">
     <Project Path="ImageService/ImageService.csproj" />
     <Project Path="OcrService\OcrService.csproj" />
+    <Project Path="Vlad.Tesseract/Vlad.Tesseract.csproj" />
   </Folder>
 </Solution>
