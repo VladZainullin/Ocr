@@ -128,8 +128,11 @@ public sealed class TesseractEngine : IDisposable
         }
         finally
         {
+            imageBuilder.Dispose();
             _imageBuilderObjectPool.Return(imageBuilder);
+            blockBuilder.Dispose();
             _blockBuilderObjectPool.Return(blockBuilder);
+            lineBuilder.Dispose();
             _lineBuilderObjectPool.Return(lineBuilder);
         }
     }
