@@ -11,19 +11,6 @@ internal static class Native
 
     private const string DllName = @"C:\Users\user\RiderProjects\Ocr\Web\bin\Debug\net10.0\x64\tesseract50.dll";
 
-    // Константы для страниц
-    public const int PageIteratorLevelBlock = 0;
-    public const int PageIteratorLevelPara = 1;
-    public const int PageIteratorLevelTextLine = 2;
-    public const int PageIteratorLevelWord = 3;
-    public const int PageIteratorLevelSymbol = 4;
-
-    // Константы для Orientation
-    public const int OrientationPageUp = 0;
-    public const int OrientationPageRight = 1;
-    public const int OrientationPageDown = 2;
-    public const int OrientationPageLeft = 3;
-
     #endregion
 
     #region Базовые методы управления API
