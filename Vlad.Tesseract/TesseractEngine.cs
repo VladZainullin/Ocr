@@ -20,19 +20,17 @@ public sealed class TesseractEngine : IDisposable
         }
     }
 
-    public string Recognize(byte[] imageData, uint width, uint height, uint bytesPerPixel)
+    public unsafe string Recognize(byte[] imageData, uint width, uint height, uint bytesPerPixel)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        var handle = GCHandle.Alloc(imageData, GCHandleType.Pinned);
-        try
+        fixed (byte* imagePtr = imageData)
         {
             var bytesPerLine = width * bytesPerPixel;
-            Native.TessBaseAPISetImage(_handle, handle.AddrOfPinnedObject(), width, height, bytesPerPixel, bytesPerLine);
+            Native.TessBaseAPISetImage(_handle, (nint)imagePtr, width, height, bytesPerPixel, bytesPerLine);
 
             var textPtr = Native.TessBaseAPIGetUTF8Text(_handle);
-            if (textPtr == IntPtr.Zero)
-                return string.Empty;
+            if (textPtr == IntPtr.Zero) return string.Empty;
 
             try
             {
@@ -42,10 +40,6 @@ public sealed class TesseractEngine : IDisposable
             {
                 Native.TessDeleteText(textPtr);
             }
-        }
-        finally
-        {
-            handle.Free();
         }
     }
 
