@@ -40,16 +40,34 @@ internal static partial class Native
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIInit4", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessBaseApiInit4(IntPtr handle, string dataPath, string language, int mode,
-        IntPtr configs, int configsSize, IntPtr varsVec, IntPtr varsValues, IntPtr varsVecSize, [MarshalAs(UnmanagedType.Bool)] bool setOnlyNonDebugParams);
+        IntPtr configs, int configsSize, IntPtr varsVec, IntPtr varsValues, IntPtr varsVecSize,
+        [MarshalAs(UnmanagedType.Bool)] bool setOnlyNonDebugParams);
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIInit5", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessBaseApiInit5(IntPtr handle, string dataPath, string language, int mode,
-        IntPtr configs, int configsSize, IntPtr varsVec, IntPtr varsValues, IntPtr varsVecSize, [MarshalAs(UnmanagedType.Bool)] bool setOnlyNonDebugParams);
+        IntPtr configs, int configsSize, IntPtr varsVec, IntPtr varsValues, IntPtr varsVecSize,
+        [MarshalAs(UnmanagedType.Bool)] bool setOnlyNonDebugParams);
 
     #endregion
 
     #region BaseAPI Configuration
+    
+    [LibraryImport(DllName, EntryPoint = "TessBaseAPIGetFeaturesForBlob")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr TessBaseApiGetFeaturesForBlob(IntPtr handle, IntPtr blob, out int featureSize);
+
+    [LibraryImport(DllName, EntryPoint = "TessBaseAPIFreeFeatures")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void TessBaseApiFreeFeatures(IntPtr handle, IntPtr features);
+    
+    [LibraryImport(DllName, EntryPoint = "TessBaseAPIGetSourceYResolution")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int TessBaseApiGetSourceYResolution(IntPtr handle);
+
+    [LibraryImport(DllName, EntryPoint = "TessBaseAPISetWarningHandler")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void TessBaseApiSetWarningHandler(IntPtr handle, IntPtr warningHandler);
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPISetVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -69,7 +87,8 @@ internal static partial class Native
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIGetBoolVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiGetBoolVariable(IntPtr handle, string name, [MarshalAs(UnmanagedType.Bool)] out bool value);
+    public static partial bool TessBaseApiGetBoolVariable(IntPtr handle, string name,
+        [MarshalAs(UnmanagedType.Bool)] out bool value);
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIGetDoubleVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -83,17 +102,17 @@ internal static partial class Native
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIGetOpenCLDevice", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial IntPtr TessBaseApiGetOpenClDevice(IntPtr handle, out IntPtr device);
-    
+
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIReadConfigFile", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessBaseApiReadConfigFile(IntPtr handle, string filename);
-    
+
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIReadDebugConfigFile", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessBaseApiReadDebugConfigFile(IntPtr handle, string filename);
 
     #endregion
-    
+
     #region BaseAPI Debug
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIPrintVariables")]
@@ -106,7 +125,7 @@ internal static partial class Native
     public static partial bool TessBaseApiPrintVariablesToFile(IntPtr handle, string filename);
 
     #endregion
-    
+
     #region BaseAPI LSTM
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIGetLSTMChoice")]
@@ -118,12 +137,13 @@ internal static partial class Native
     public static partial IntPtr TessBaseApiGetLstmTimestep(IntPtr handle);
 
     #endregion
-    
+
     #region BaseAPI Adaptive Classifier
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPISetAdaptiveClassifier")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetAdaptiveClassifier(IntPtr handle, [MarshalAs(UnmanagedType.Bool)] bool enable);
+    public static partial void TessBaseApiSetAdaptiveClassifier(IntPtr handle,
+        [MarshalAs(UnmanagedType.Bool)] bool enable);
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIGetAdaptiveClassifier")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -131,31 +151,31 @@ internal static partial class Native
     public static partial bool TessBaseApiGetAdaptiveClassifier(IntPtr handle);
 
     #endregion
-    
+
     #region Monitor Extended
-    
+
     [LibraryImport(DllName, EntryPoint = "TessMonitorSetCancelFunc")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessMonitorSetCancelFunc(IntPtr monitor, IntPtr cancelFunc);
-    
+
     [LibraryImport(DllName, EntryPoint = "TessMonitorGetCancelThis")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial IntPtr TessMonitorGetCancelThis(IntPtr monitor);
-    
+
     [LibraryImport(DllName, EntryPoint = "TessMonitorSetCancelThis")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessMonitorSetCancelThis(IntPtr monitor, IntPtr cancelThis);
-    
+
     [LibraryImport(DllName, EntryPoint = "TessMonitorGetProgress")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessMonitorGetProgress(IntPtr monitor);
-    
+
     [LibraryImport(DllName, EntryPoint = "TessMonitorSetProgress")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessMonitorSetProgress(IntPtr monitor, int progress);
-    
+
     #endregion
-    
+
     #region BaseAPI Page Segmentation
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPISetPageSegMode")]
@@ -305,7 +325,8 @@ internal static partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessBaseApiAnalyseLayout(IntPtr handle);
 
-    [LibraryImport(DllName, EntryPoint = "TessBaseAPIDetectOrientationScript", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(DllName, EntryPoint = "TessBaseAPIDetectOrientationScript",
+        StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool TessBaseApiDetectOrientationScript(IntPtr handle, out int orientDeg,
@@ -411,7 +432,7 @@ internal static partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessPageIteratorIsAtFinalElement(IntPtr iterator, PageIteratorLevel level,
         PageIteratorLevel element);
-    
+
     [LibraryImport(DllName, EntryPoint = "TessPageIteratorIsAtBeginningOf")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
@@ -485,6 +506,14 @@ internal static partial class Native
     #endregion
 
     #region ResultIterator
+
+    [LibraryImport(DllName, EntryPoint = "TessResultIteratorGetWordLSTMChoice")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr TessResultIteratorGetWordLstmChoice(IntPtr iterator);
+
+    [LibraryImport(DllName, EntryPoint = "TessResultIteratorGetWordTimestep")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr TessResultIteratorGetWordTimestep(IntPtr iterator);
 
     [LibraryImport(DllName, EntryPoint = "TessBaseAPIGetIterator")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -611,6 +640,10 @@ internal static partial class Native
 
     #region ChoiceIterator
 
+    [LibraryImport(DllName, EntryPoint = "TessChoiceIteratorGetWordConfidences")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr TessChoiceIteratorGetWordConfidences(IntPtr choiceIterator);
+
     [LibraryImport(DllName, EntryPoint = "TessChoiceIteratorDelete")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessChoiceIteratorDelete(IntPtr choiceIterator);
@@ -654,7 +687,8 @@ internal static partial class Native
 
     [LibraryImport(DllName, EntryPoint = "TessHOcrRendererCreate2", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessHOcrRendererCreate2(string outputBase, [MarshalAs(UnmanagedType.Bool)] bool fontInfo);
+    public static partial IntPtr TessHOcrRendererCreate2(string outputBase,
+        [MarshalAs(UnmanagedType.Bool)] bool fontInfo);
 
     [LibraryImport(DllName, EntryPoint = "TessAltoRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -666,7 +700,8 @@ internal static partial class Native
 
     [LibraryImport(DllName, EntryPoint = "TessPDFRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessPdfRendererCreate(string outputBase, string dataDir, [MarshalAs(UnmanagedType.Bool)] bool textOnly);
+    public static partial IntPtr TessPdfRendererCreate(string outputBase, string dataDir,
+        [MarshalAs(UnmanagedType.Bool)] bool textOnly);
 
     [LibraryImport(DllName, EntryPoint = "TessUnlvRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -728,12 +763,12 @@ internal static partial class Native
     public static partial IntPtr TessResultRendererOutputType(IntPtr renderer);
 
     #endregion
-    
+
     #region Renderer Extended
-    
+
     [LibraryImport(DllName, EntryPoint = "TessResultRendererSetPermissions")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessResultRendererSetPermissions(IntPtr renderer, int permissions);
-    
+
     #endregion
 }
