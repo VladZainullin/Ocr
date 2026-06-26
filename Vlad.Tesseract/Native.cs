@@ -6,7 +6,72 @@ namespace Vlad.Tesseract;
 internal static partial class Native
 {
     private const string DllName = @"C:\Users\user\RiderProjects\Ocr\Web\bin\Debug\net10.0\x64\tesseract50.dll";
+    
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorBegin")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void TessPageIteratorBegin(IntPtr iterator);
 
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorBoundingBox")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessPageIteratorBoundingBox(IntPtr iterator, PageIteratorLevel level,
+        out int left, out int top, out int right, out int bottom);
+
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorBlockType")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial PolyBlockType TessPageIteratorBlockType(IntPtr iterator);
+
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorGetBinaryImage")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr TessPageIteratorGetBinaryImage(IntPtr iterator, PageIteratorLevel level);
+
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorGetImage")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr TessPageIteratorGetImage(IntPtr iterator, PageIteratorLevel level, int padding,
+        IntPtr originalImage, out int left, out int top);
+
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorBaseline")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessPageIteratorBaseline(IntPtr iterator, PageIteratorLevel level, out int x1, 
+        out int y1, out int x2, out int y2);
+
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorOrientation")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void TessPageIteratorOrientation(
+        IntPtr iterator,
+        out OrientationPage orientation,
+        out WritingDirection writingDirection,
+        out TextlineOrder textlineOrder, 
+        out float deskewAngle);
+
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorParagraphInfo")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void TessPageIteratorParagraphInfo(
+        IntPtr iterator,
+        out ParagraphJustification justification,
+        [MarshalAs(UnmanagedType.Bool)] out bool isListItem,
+        [MarshalAs(UnmanagedType.Bool)] out bool isCrown,
+        out int firstLineIndent);
+
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorCopy")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial IntPtr TessPageIteratorCopy(IntPtr iterator);
+
+    [LibraryImport(DllName, EntryPoint = "TessPageIteratorGetWordFontAttributes")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessPageIteratorGetWordFontAttributes(
+        IntPtr iterator,
+        [MarshalAs(UnmanagedType.Bool)] out bool isBold, 
+        [MarshalAs(UnmanagedType.Bool)] out bool isItalic, 
+        [MarshalAs(UnmanagedType.Bool)] out bool isUnderlined, 
+        [MarshalAs(UnmanagedType.Bool)] out bool isMonospace, 
+        [MarshalAs(UnmanagedType.Bool)] out bool isSerif,
+        [MarshalAs(UnmanagedType.Bool)] out bool isSmallCaps, 
+        out int pointSize,
+        out int fontId);
+    
     [LibraryImport(DllName, EntryPoint = "TessBaseAPICreate")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial IntPtr TessBaseApiCreate();
