@@ -9,7 +9,6 @@ public unsafe class TesseractLibrary : IDisposable
 
     // Version
     private readonly delegate* unmanaged[Cdecl]<nint> _tessVersion;
-    private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessBaseApiVersion;
 
     // BaseAPI Lifecycle
     private readonly delegate* unmanaged[Cdecl]<nint> _tessBaseApiCreate;
@@ -21,9 +20,6 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, byte*, int, nint, int, nint, nint, nint, byte, int>
         _tessBaseApiInit4;
 
-    private readonly delegate* unmanaged[Cdecl]<nint, byte*, byte*, int, nint, int, nint, nint, nint, byte, int>
-        _tessBaseApiInit5;
-
     // BaseAPI Configuration
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte> _tessBaseApiSetVariable;
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte> _tessBaseApiSetDebugVariable;
@@ -34,7 +30,6 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, nint*, nint> _tessBaseApiGetOpenClDevice;
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, void> _tessBaseApiReadConfigFile;
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, void> _tessBaseApiReadDebugConfigFile;
-    private readonly delegate* unmanaged[Cdecl]<nint, nint, void> _tessBaseApiSetWarningHandler;
 
     // BaseAPI Debug
     private readonly delegate* unmanaged[Cdecl]<nint, nint, void> _tessBaseApiPrintVariables;
@@ -48,7 +43,6 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, void> _tessBaseApiSetInputName;
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessBaseApiGetInputName;
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, void> _tessBaseApiSetOutputName;
-    private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessBaseApiGetOutputName;
 
     // BaseAPI Source Resolution
     private readonly delegate* unmanaged[Cdecl]<nint, int, void> _tessBaseApiSetSourceResolution;
@@ -71,14 +65,11 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, int, nint> _tessBaseApiGetLstmBoxText;
     private readonly delegate* unmanaged[Cdecl]<nint, int, nint> _tessBaseApiGetWordStrBoxText;
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessBaseApiGetUnlvText;
-    private readonly delegate* unmanaged[Cdecl]<nint, int, nint> _tessBaseApiGetOsdText;
-    private readonly delegate* unmanaged[Cdecl]<nint, int, nint> _tessBaseApiGetBestLstmBoxText;
 
     // BaseAPI Text Deletion
     private readonly delegate* unmanaged[Cdecl]<nint, void> _tessDeleteText;
     private readonly delegate* unmanaged[Cdecl]<nint, void> _tessDeleteTextArray;
     private readonly delegate* unmanaged[Cdecl]<nint, void> _tessDeleteIntArray;
-    private readonly delegate* unmanaged[Cdecl]<nint, void> _tessDeleteBlockList;
 
     // BaseAPI Confidence
     private readonly delegate* unmanaged[Cdecl]<nint, int> _tessBaseApiMeanTextConf;
@@ -89,9 +80,6 @@ public unsafe class TesseractLibrary : IDisposable
 
     private readonly delegate* unmanaged[Cdecl]<nint, int*, float*, byte**, float*, byte>
         _tessBaseApiDetectOrientationScript;
-
-    private readonly delegate* unmanaged[Cdecl]<nint, OrientationPage*, WritingDirection*, TextlineOrder*, float*, nint>
-        _tessBaseApiDetectOs;
 
     private readonly delegate* unmanaged[Cdecl]<nint, int*, float*, nint> _tessBaseApiGetTextDirection;
 
@@ -110,18 +98,6 @@ public unsafe class TesseractLibrary : IDisposable
     // BaseAPI Languages
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessBaseApiGetAvailableLanguagesAsVector;
     private readonly delegate* unmanaged[Cdecl]<nint, int, nint> _tessBaseApiGetUnichar;
-
-    // BaseAPI LSTM
-    private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessBaseApiGetLstmChoice;
-    private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessBaseApiGetLstmTimestep;
-
-    // BaseAPI Adaptive Classifier
-    private readonly delegate* unmanaged[Cdecl]<nint, byte, void> _tessBaseApiSetAdaptiveClassifier;
-    private readonly delegate* unmanaged[Cdecl]<nint, byte> _tessBaseApiGetAdaptiveClassifier;
-
-    // BaseAPI Features (Training)
-    private readonly delegate* unmanaged[Cdecl]<nint, nint, int*, nint> _tessBaseApiGetFeaturesForBlob;
-    private readonly delegate* unmanaged[Cdecl]<nint, nint, void> _tessBaseApiFreeFeatures;
 
     // PageIterator
     private readonly delegate* unmanaged[Cdecl]<nint, void> _tessPageIteratorBegin;
@@ -149,9 +125,6 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, ParagraphJustification*, byte*, byte*, int*, void>
         _tessPageIteratorParagraphInfo;
 
-    private readonly delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte*, byte*, byte*, byte*, int*, int*, byte>
-        _tessPageIteratorGetWordFontAttributes;
-
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessPageIteratorCopy;
     private readonly delegate* unmanaged[Cdecl]<nint, void> _tessPageIteratorDelete;
 
@@ -161,12 +134,7 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, void> _tessResultIteratorDelete;
     private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, byte> _tessResultIteratorNext;
 
-    private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, PageIteratorLevel, byte>
-        _tessResultIteratorIsAtFinalElement;
-
     private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, nint> _tessResultIteratorGetUtf8Text;
-    private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, float> _tessResultIteratorGetConfidence;
-    private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorWordConfidences;
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorWordRecognitionLanguage;
 
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte*, byte*, byte*, byte*, int*, int*, byte>
@@ -177,34 +145,16 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, byte> _tessResultIteratorSymbolIsSuperscript;
     private readonly delegate* unmanaged[Cdecl]<nint, byte> _tessResultIteratorSymbolIsSubscript;
     private readonly delegate* unmanaged[Cdecl]<nint, byte> _tessResultIteratorSymbolIsDropcap;
-
-    private readonly delegate* unmanaged[Cdecl]<nint, int*, int*, int*, int*, int*, int*, int*, int*, nint>
-        _tessResultIteratorGetWordStrAttributes;
-
-    private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorGetWordLstmChoice;
-    private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorGetWordTimestep;
+    
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorGetPageIterator;
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorGetPageIteratorConst;
-
-    private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int, nint, int*, int*, nint>
-        _tessResultIteratorGetImage;
-
-    private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int*, int*, int*, int*, byte>
-        _tessResultIteratorBoundingBox;
-
-    private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int*, int*, int*, int*, byte>
-        _tessResultIteratorBaseline;
-
-    private readonly delegate* unmanaged[Cdecl]<nint, PolyBlockType> _tessResultIteratorBlockType;
-    private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, nint> _tessResultIteratorGetBinaryImage;
+    
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorGetChoiceIterator;
 
     // ChoiceIterator
     private readonly delegate* unmanaged[Cdecl]<nint, void> _tessChoiceIteratorDelete;
     private readonly delegate* unmanaged[Cdecl]<nint, byte> _tessChoiceIteratorNext;
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessChoiceIteratorGetUtf8Text;
-    private readonly delegate* unmanaged[Cdecl]<nint, float> _tessChoiceIteratorGetConfidence;
-    private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessChoiceIteratorGetWordConfidences;
 
     // Monitor
     private readonly delegate* unmanaged[Cdecl]<nint> _tessMonitorCreate;
@@ -213,7 +163,6 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessMonitorGetCancelThis;
     private readonly delegate* unmanaged[Cdecl]<nint, nint, void> _tessMonitorSetCancelThis;
     private readonly delegate* unmanaged[Cdecl]<nint, int> _tessMonitorGetProgress;
-    private readonly delegate* unmanaged[Cdecl]<nint, int, void> _tessMonitorSetProgress;
 
     // Renderers
     private readonly delegate* unmanaged[Cdecl]<byte*, nint> _tessTextRendererCreate;
@@ -235,8 +184,6 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultRendererExtention;
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultRendererTitle;
     private readonly delegate* unmanaged[Cdecl]<nint, int> _tessResultRendererImageNum;
-    private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultRendererOutputType;
-    private readonly delegate* unmanaged[Cdecl]<nint, int, void> _tessResultRendererSetPermissions;
 
     public TesseractLibrary(string dllPath)
     {
@@ -249,11 +196,7 @@ public unsafe class TesseractLibrary : IDisposable
         var versionPtr = NativeLibrary.GetExport(_libraryHandle, "TessVersion");
         if (versionPtr == nint.Zero) throw new EntryPointNotFoundException("TessVersion not found in the library");
         _tessVersion = (delegate* unmanaged[Cdecl]<nint>)versionPtr;
-
-        var baseApiVersionPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIVersion");
-        if (baseApiVersionPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIVersion not found in the library");
-        _tessBaseApiVersion = (delegate* unmanaged[Cdecl]<nint, nint>)baseApiVersionPtr;
+        
 
         // BaseAPI Lifecycle
         var baseApiCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPICreate");
@@ -278,13 +221,6 @@ public unsafe class TesseractLibrary : IDisposable
         _tessBaseApiInit4 =
             (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int, nint, int, nint, nint, nint, byte, int>)
             baseApiInit4Ptr;
-
-        var baseApiInit5Ptr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIInit5");
-        if (baseApiInit5Ptr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIInit5 not found in the library");
-        _tessBaseApiInit5 =
-            (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int, nint, int, nint, nint, nint, byte, int>)
-            baseApiInit5Ptr;
 
         // BaseAPI Configuration
         var setVariablePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetVariable");
@@ -332,11 +268,6 @@ public unsafe class TesseractLibrary : IDisposable
             throw new EntryPointNotFoundException("TessBaseAPIReadDebugConfigFile not found in the library");
         _tessBaseApiReadDebugConfigFile = (delegate* unmanaged[Cdecl]<nint, byte*, void>)readDebugConfigFilePtr;
 
-        var setWarningHandlerPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetWarningHandler");
-        if (setWarningHandlerPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetWarningHandler not found in the library");
-        _tessBaseApiSetWarningHandler = (delegate* unmanaged[Cdecl]<nint, nint, void>)setWarningHandlerPtr;
-
         // BaseAPI Debug
         var printVariablesPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIPrintVariables");
         if (printVariablesPtr == nint.Zero)
@@ -374,11 +305,6 @@ public unsafe class TesseractLibrary : IDisposable
         if (setOutputNamePtr == nint.Zero)
             throw new EntryPointNotFoundException("TessBaseAPISetOutputName not found in the library");
         _tessBaseApiSetOutputName = (delegate* unmanaged[Cdecl]<nint, byte*, void>)setOutputNamePtr;
-
-        var getOutputNamePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetOutputName");
-        if (getOutputNamePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetOutputName not found in the library");
-        _tessBaseApiGetOutputName = (delegate* unmanaged[Cdecl]<nint, nint>)getOutputNamePtr;
 
         // BaseAPI Source Resolution
         var setSourceResolutionPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetSourceResolution");
@@ -455,16 +381,6 @@ public unsafe class TesseractLibrary : IDisposable
             throw new EntryPointNotFoundException("TessBaseAPIGetUNLVText not found in the library");
         _tessBaseApiGetUnlvText = (delegate* unmanaged[Cdecl]<nint, nint>)getUnlvTextPtr;
 
-        var getOsdTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetOsdText");
-        if (getOsdTextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetOsdText not found in the library");
-        _tessBaseApiGetOsdText = (delegate* unmanaged[Cdecl]<nint, int, nint>)getOsdTextPtr;
-
-        var getBestLstmBoxTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetBestLSTMBoxText");
-        if (getBestLstmBoxTextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetBestLSTMBoxText not found in the library");
-        _tessBaseApiGetBestLstmBoxText = (delegate* unmanaged[Cdecl]<nint, int, nint>)getBestLstmBoxTextPtr;
-
         // BaseAPI Text Deletion
         var deleteTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessDeleteText");
         if (deleteTextPtr == nint.Zero)
@@ -480,11 +396,6 @@ public unsafe class TesseractLibrary : IDisposable
         if (deleteIntArrayPtr == nint.Zero)
             throw new EntryPointNotFoundException("TessDeleteIntArray not found in the library");
         _tessDeleteIntArray = (delegate* unmanaged[Cdecl]<nint, void>)deleteIntArrayPtr;
-
-        var deleteBlockListPtr = NativeLibrary.GetExport(_libraryHandle, "TessDeleteBlockList");
-        if (deleteBlockListPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessDeleteBlockList not found in the library");
-        _tessDeleteBlockList = (delegate* unmanaged[Cdecl]<nint, void>)deleteBlockListPtr;
 
         // BaseAPI Confidence
         var meanTextConfPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIMeanTextConf");
@@ -508,13 +419,6 @@ public unsafe class TesseractLibrary : IDisposable
             throw new EntryPointNotFoundException("TessBaseAPIDetectOrientationScript not found in the library");
         _tessBaseApiDetectOrientationScript =
             (delegate* unmanaged[Cdecl]<nint, int*, float*, byte**, float*, byte>)detectOrientationScriptPtr;
-
-        var detectOsPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIDetectOS");
-        if (detectOsPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIDetectOS not found in the library");
-        _tessBaseApiDetectOs =
-            (delegate* unmanaged[Cdecl]<nint, OrientationPage*, WritingDirection*, TextlineOrder*, float*, nint>)
-            detectOsPtr;
 
         var getTextDirectionPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetTextDirection");
         if (getTextDirectionPtr == nint.Zero)
@@ -567,39 +471,6 @@ public unsafe class TesseractLibrary : IDisposable
         if (getUnicharPtr == nint.Zero)
             throw new EntryPointNotFoundException("TessBaseAPIGetUnichar not found in the library");
         _tessBaseApiGetUnichar = (delegate* unmanaged[Cdecl]<nint, int, nint>)getUnicharPtr;
-
-        // BaseAPI LSTM
-        var getLstmChoicePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetLSTMChoice");
-        if (getLstmChoicePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetLSTMChoice not found in the library");
-        _tessBaseApiGetLstmChoice = (delegate* unmanaged[Cdecl]<nint, nint>)getLstmChoicePtr;
-
-        var getLstmTimestepPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetLSTMTimestep");
-        if (getLstmTimestepPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetLSTMTimestep not found in the library");
-        _tessBaseApiGetLstmTimestep = (delegate* unmanaged[Cdecl]<nint, nint>)getLstmTimestepPtr;
-
-        // BaseAPI Adaptive Classifier
-        var setAdaptiveClassifierPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetAdaptiveClassifier");
-        if (setAdaptiveClassifierPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetAdaptiveClassifier not found in the library");
-        _tessBaseApiSetAdaptiveClassifier = (delegate* unmanaged[Cdecl]<nint, byte, void>)setAdaptiveClassifierPtr;
-
-        var getAdaptiveClassifierPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetAdaptiveClassifier");
-        if (getAdaptiveClassifierPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetAdaptiveClassifier not found in the library");
-        _tessBaseApiGetAdaptiveClassifier = (delegate* unmanaged[Cdecl]<nint, byte>)getAdaptiveClassifierPtr;
-
-        // BaseAPI Features (Training)
-        var getFeaturesForBlobPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetFeaturesForBlob");
-        if (getFeaturesForBlobPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetFeaturesForBlob not found in the library");
-        _tessBaseApiGetFeaturesForBlob = (delegate* unmanaged[Cdecl]<nint, nint, int*, nint>)getFeaturesForBlobPtr;
-
-        var freeFeaturesPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIFreeFeatures");
-        if (freeFeaturesPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIFreeFeatures not found in the library");
-        _tessBaseApiFreeFeatures = (delegate* unmanaged[Cdecl]<nint, nint, void>)freeFeaturesPtr;
 
         // PageIterator
         var pageIteratorBeginPtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorBegin");
@@ -670,14 +541,6 @@ public unsafe class TesseractLibrary : IDisposable
             (delegate* unmanaged[Cdecl]<nint, ParagraphJustification*, byte*, byte*, int*, void>)
             pageIteratorParagraphInfoPtr;
 
-        var pageIteratorGetWordFontAttributesPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorGetWordFontAttributes");
-        if (pageIteratorGetWordFontAttributesPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorGetWordFontAttributes not found in the library");
-        _tessPageIteratorGetWordFontAttributes =
-            (delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte*, byte*, byte*, byte*, int*, int*, byte>)
-            pageIteratorGetWordFontAttributesPtr;
-
         var pageIteratorCopyPtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorCopy");
         if (pageIteratorCopyPtr == nint.Zero)
             throw new EntryPointNotFoundException("TessPageIteratorCopy not found in the library");
@@ -709,31 +572,11 @@ public unsafe class TesseractLibrary : IDisposable
             throw new EntryPointNotFoundException("TessResultIteratorNext not found in the library");
         _tessResultIteratorNext = (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, byte>)resultIteratorNextPtr;
 
-        var resultIteratorIsAtFinalElementPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorIsAtFinalElement");
-        if (resultIteratorIsAtFinalElementPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorIsAtFinalElement not found in the library");
-        _tessResultIteratorIsAtFinalElement =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, PageIteratorLevel, byte>)
-            resultIteratorIsAtFinalElementPtr;
-
         var resultIteratorGetUtf8TextPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetUTF8Text");
         if (resultIteratorGetUtf8TextPtr == nint.Zero)
             throw new EntryPointNotFoundException("TessResultIteratorGetUTF8Text not found in the library");
         _tessResultIteratorGetUtf8Text =
             (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, nint>)resultIteratorGetUtf8TextPtr;
-
-        var resultIteratorGetConfidencePtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetConfidence");
-        if (resultIteratorGetConfidencePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetConfidence not found in the library");
-        _tessResultIteratorGetConfidence =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, float>)resultIteratorGetConfidencePtr;
-
-        var resultIteratorWordConfidencesPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorWordConfidences");
-        if (resultIteratorWordConfidencesPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorWordConfidences not found in the library");
-        _tessResultIteratorWordConfidences = (delegate* unmanaged[Cdecl]<nint, nint>)resultIteratorWordConfidencesPtr;
 
         var resultIteratorWordRecognitionLanguagePtr =
             NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorWordRecognitionLanguage");
@@ -782,27 +625,6 @@ public unsafe class TesseractLibrary : IDisposable
             throw new EntryPointNotFoundException("TessResultIteratorSymbolIsDropcap not found in the library");
         _tessResultIteratorSymbolIsDropcap = (delegate* unmanaged[Cdecl]<nint, byte>)resultIteratorSymbolIsDropcapPtr;
 
-        var resultIteratorGetWordStrAttributesPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetWordStrAttributes");
-        if (resultIteratorGetWordStrAttributesPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetWordStrAttributes not found in the library");
-        _tessResultIteratorGetWordStrAttributes =
-            (delegate* unmanaged[Cdecl]<nint, int*, int*, int*, int*, int*, int*, int*, int*, nint>)
-            resultIteratorGetWordStrAttributesPtr;
-
-        var resultIteratorGetWordLstmChoicePtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetWordLSTMChoice");
-        if (resultIteratorGetWordLstmChoicePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetWordLSTMChoice not found in the library");
-        _tessResultIteratorGetWordLstmChoice =
-            (delegate* unmanaged[Cdecl]<nint, nint>)resultIteratorGetWordLstmChoicePtr;
-
-        var resultIteratorGetWordTimestepPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetWordTimestep");
-        if (resultIteratorGetWordTimestepPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetWordTimestep not found in the library");
-        _tessResultIteratorGetWordTimestep = (delegate* unmanaged[Cdecl]<nint, nint>)resultIteratorGetWordTimestepPtr;
-
         var resultIteratorGetPageIteratorPtr =
             NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetPageIterator");
         if (resultIteratorGetPageIteratorPtr == nint.Zero)
@@ -815,38 +637,6 @@ public unsafe class TesseractLibrary : IDisposable
             throw new EntryPointNotFoundException("TessResultIteratorGetPageIteratorConst not found in the library");
         _tessResultIteratorGetPageIteratorConst =
             (delegate* unmanaged[Cdecl]<nint, nint>)resultIteratorGetPageIteratorConstPtr;
-
-        var resultIteratorGetImagePtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetImage");
-        if (resultIteratorGetImagePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetImage not found in the library");
-        _tessResultIteratorGetImage =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int, nint, int*, int*, nint>)resultIteratorGetImagePtr;
-
-        var resultIteratorBoundingBoxPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorBoundingBox");
-        if (resultIteratorBoundingBoxPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorBoundingBox not found in the library");
-        _tessResultIteratorBoundingBox =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int*, int*, int*, int*, byte>)
-            resultIteratorBoundingBoxPtr;
-
-        var resultIteratorBaselinePtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorBaseline");
-        if (resultIteratorBaselinePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorBaseline not found in the library");
-        _tessResultIteratorBaseline =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int*, int*, int*, int*, byte>)
-            resultIteratorBaselinePtr;
-
-        var resultIteratorBlockTypePtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorBlockType");
-        if (resultIteratorBlockTypePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorBlockType not found in the library");
-        _tessResultIteratorBlockType = (delegate* unmanaged[Cdecl]<nint, PolyBlockType>)resultIteratorBlockTypePtr;
-
-        var resultIteratorGetBinaryImagePtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetBinaryImage");
-        if (resultIteratorGetBinaryImagePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetBinaryImage not found in the library");
-        _tessResultIteratorGetBinaryImage =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, nint>)resultIteratorGetBinaryImagePtr;
 
         var resultIteratorGetChoiceIteratorPtr =
             NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetChoiceIterator");
@@ -870,18 +660,6 @@ public unsafe class TesseractLibrary : IDisposable
         if (choiceIteratorGetUtf8TextPtr == nint.Zero)
             throw new EntryPointNotFoundException("TessChoiceIteratorGetUTF8Text not found in the library");
         _tessChoiceIteratorGetUtf8Text = (delegate* unmanaged[Cdecl]<nint, nint>)choiceIteratorGetUtf8TextPtr;
-
-        var choiceIteratorGetConfidencePtr = NativeLibrary.GetExport(_libraryHandle, "TessChoiceIteratorGetConfidence");
-        if (choiceIteratorGetConfidencePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessChoiceIteratorGetConfidence not found in the library");
-        _tessChoiceIteratorGetConfidence = (delegate* unmanaged[Cdecl]<nint, float>)choiceIteratorGetConfidencePtr;
-
-        var choiceIteratorGetWordConfidencesPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessChoiceIteratorGetWordConfidences");
-        if (choiceIteratorGetWordConfidencesPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessChoiceIteratorGetWordConfidences not found in the library");
-        _tessChoiceIteratorGetWordConfidences =
-            (delegate* unmanaged[Cdecl]<nint, nint>)choiceIteratorGetWordConfidencesPtr;
 
         // Monitor
         var monitorCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessMonitorCreate");
@@ -913,11 +691,6 @@ public unsafe class TesseractLibrary : IDisposable
         if (monitorGetProgressPtr == nint.Zero)
             throw new EntryPointNotFoundException("TessMonitorGetProgress not found in the library");
         _tessMonitorGetProgress = (delegate* unmanaged[Cdecl]<nint, int>)monitorGetProgressPtr;
-
-        var monitorSetProgressPtr = NativeLibrary.GetExport(_libraryHandle, "TessMonitorSetProgress");
-        if (monitorSetProgressPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessMonitorSetProgress not found in the library");
-        _tessMonitorSetProgress = (delegate* unmanaged[Cdecl]<nint, int, void>)monitorSetProgressPtr;
 
         // Renderers
         var textRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessTextRendererCreate");
@@ -1015,23 +788,10 @@ public unsafe class TesseractLibrary : IDisposable
         if (resultRendererImageNumPtr == nint.Zero)
             throw new EntryPointNotFoundException("TessResultRendererImageNum not found in the library");
         _tessResultRendererImageNum = (delegate* unmanaged[Cdecl]<nint, int>)resultRendererImageNumPtr;
-
-        var resultRendererOutputTypePtr = NativeLibrary.GetExport(_libraryHandle, "TessResultRendererOutputType");
-        if (resultRendererOutputTypePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererOutputType not found in the library");
-        _tessResultRendererOutputType = (delegate* unmanaged[Cdecl]<nint, nint>)resultRendererOutputTypePtr;
-
-        var resultRendererSetPermissionsPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultRendererSetPermissions");
-        if (resultRendererSetPermissionsPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererSetPermissions not found in the library");
-        _tessResultRendererSetPermissions =
-            (delegate* unmanaged[Cdecl]<nint, int, void>)resultRendererSetPermissionsPtr;
     }
 
     // Version
     public nint TessVersion() => _tessVersion();
-    public nint TessBaseApiVersion(nint handle) => _tessBaseApiVersion(handle);
 
 // BaseAPI Lifecycle
     public nint TessBaseApiCreate() => _tessBaseApiCreate();
@@ -1043,10 +803,6 @@ public unsafe class TesseractLibrary : IDisposable
 
     public int TessBaseApiInit4(nint handle, byte* dataPath, byte* language, int mode, nint configs, int configsSize,
         nint varsVec, nint varsValues, nint varsVecSize, byte setOnlyNonDebugParams) => _tessBaseApiInit4(handle,
-        dataPath, language, mode, configs, configsSize, varsVec, varsValues, varsVecSize, setOnlyNonDebugParams);
-
-    public int TessBaseApiInit5(nint handle, byte* dataPath, byte* language, int mode, nint configs, int configsSize,
-        nint varsVec, nint varsValues, nint varsVecSize, byte setOnlyNonDebugParams) => _tessBaseApiInit5(handle,
         dataPath, language, mode, configs, configsSize, varsVec, varsValues, varsVecSize, setOnlyNonDebugParams);
 
 // BaseAPI Configuration
@@ -1072,9 +828,6 @@ public unsafe class TesseractLibrary : IDisposable
     public void TessBaseApiReadDebugConfigFile(nint handle, byte* filename) =>
         _tessBaseApiReadDebugConfigFile(handle, filename);
 
-    public void TessBaseApiSetWarningHandler(nint handle, nint warningHandler) =>
-        _tessBaseApiSetWarningHandler(handle, warningHandler);
-
 // BaseAPI Debug
     public void TessBaseApiPrintVariables(nint handle, nint fp) => _tessBaseApiPrintVariables(handle, fp);
 
@@ -1091,7 +844,6 @@ public unsafe class TesseractLibrary : IDisposable
     public void TessBaseApiSetInputName(nint handle, byte* name) => _tessBaseApiSetInputName(handle, name);
     public nint TessBaseApiGetInputName(nint handle) => _tessBaseApiGetInputName(handle);
     public void TessBaseApiSetOutputName(nint handle, byte* name) => _tessBaseApiSetOutputName(handle, name);
-    public nint TessBaseApiGetOutputName(nint handle) => _tessBaseApiGetOutputName(handle);
 
 // BaseAPI Source Resolution
     public void TessBaseApiSetSourceResolution(nint handle, int ppi) => _tessBaseApiSetSourceResolution(handle, ppi);
@@ -1114,27 +866,22 @@ public unsafe class TesseractLibrary : IDisposable
 
 // BaseAPI Text Output
     public nint TessBaseApiGetUtf8Text(nint handle) => _tessBaseApiGetUtf8Text(handle);
-    public nint TessBaseApiGetHOCRText(nint handle, int pageNumber) => _tessBaseApiGetHocrText(handle, pageNumber);
+    public nint TessBaseApiGetHocrText(nint handle, int pageNumber) => _tessBaseApiGetHocrText(handle, pageNumber);
     public nint TessBaseApiGetAltoText(nint handle, int pageNumber) => _tessBaseApiGetAltoText(handle, pageNumber);
     public nint TessBaseApiGetTsvText(nint handle, int pageNumber) => _tessBaseApiGetTsvText(handle, pageNumber);
 
-    public nint TessBaseApiGetLSTMBoxText(nint handle, int pageNumber) =>
+    public nint TessBaseApiGetLstmBoxText(nint handle, int pageNumber) =>
         _tessBaseApiGetLstmBoxText(handle, pageNumber);
 
     public nint TessBaseApiGetWordStrBoxText(nint handle, int pageNumber) =>
         _tessBaseApiGetWordStrBoxText(handle, pageNumber);
 
-    public nint TessBaseApiGetUNLVText(nint handle) => _tessBaseApiGetUnlvText(handle);
-    public nint TessBaseApiGetOsdText(nint handle, int pageNumber) => _tessBaseApiGetOsdText(handle, pageNumber);
-
-    public nint TessBaseApiGetBestLSTMBoxText(nint handle, int pageNumber) =>
-        _tessBaseApiGetBestLstmBoxText(handle, pageNumber);
+    public nint TessBaseApiGetUnlvText(nint handle) => _tessBaseApiGetUnlvText(handle);
 
 // BaseAPI Text Deletion
     public void TessDeleteText(nint text) => _tessDeleteText(text);
     public void TessDeleteTextArray(nint arr) => _tessDeleteTextArray(arr);
     public void TessDeleteIntArray(nint arr) => _tessDeleteIntArray(arr);
-    public void TessDeleteBlockList(nint blockList) => _tessDeleteBlockList(blockList);
 
 // BaseAPI Confidence
     public int TessBaseApiMeanTextConf(nint handle) => _tessBaseApiMeanTextConf(handle);
@@ -1146,10 +893,6 @@ public unsafe class TesseractLibrary : IDisposable
     public byte TessBaseApiDetectOrientationScript(nint handle, int* orientDeg, float* orientConf, byte** scriptName,
         float* scriptConf) =>
         _tessBaseApiDetectOrientationScript(handle, orientDeg, orientConf, scriptName, scriptConf);
-
-    public nint TessBaseApiDetectOs(nint handle, OrientationPage* orientation, WritingDirection* writingDirection,
-        TextlineOrder* textlineOrder, float* deskewAngle) =>
-        _tessBaseApiDetectOs(handle, orientation, writingDirection, textlineOrder, deskewAngle);
 
     public nint TessBaseApiGetTextDirection(nint handle, int* offset, float* slope) =>
         _tessBaseApiGetTextDirection(handle, offset, slope);
@@ -1175,22 +918,6 @@ public unsafe class TesseractLibrary : IDisposable
         _tessBaseApiGetAvailableLanguagesAsVector(handle);
 
     public nint TessBaseApiGetUnichar(nint handle, int unicharId) => _tessBaseApiGetUnichar(handle, unicharId);
-
-// BaseAPI LSTM
-    public nint TessBaseApiGetLstmChoice(nint handle) => _tessBaseApiGetLstmChoice(handle);
-    public nint TessBaseApiGetLstmTimestep(nint handle) => _tessBaseApiGetLstmTimestep(handle);
-
-// BaseAPI Adaptive Classifier
-    public void TessBaseApiSetAdaptiveClassifier(nint handle, byte enable) =>
-        _tessBaseApiSetAdaptiveClassifier(handle, enable);
-
-    public byte TessBaseApiGetAdaptiveClassifier(nint handle) => _tessBaseApiGetAdaptiveClassifier(handle);
-
-// BaseAPI Features (Training)
-    public nint TessBaseApiGetFeaturesForBlob(nint handle, nint blob, int* featureSize) =>
-        _tessBaseApiGetFeaturesForBlob(handle, blob, featureSize);
-
-    public void TessBaseApiFreeFeatures(nint handle, nint features) => _tessBaseApiFreeFeatures(handle, features);
 
 // PageIterator
     public void TessPageIteratorBegin(nint iterator) => _tessPageIteratorBegin(iterator);
@@ -1224,11 +951,6 @@ public unsafe class TesseractLibrary : IDisposable
         byte* isCrown, int* firstLineIndent) =>
         _tessPageIteratorParagraphInfo(iterator, justification, isListItem, isCrown, firstLineIndent);
 
-    public byte TessPageIteratorGetWordFontAttributes(nint iterator, byte* isBold, byte* isItalic, byte* isUnderlined,
-        byte* isMonospace, byte* isSerif, byte* isSmallCaps, int* pointSize, int* fontId) =>
-        _tessPageIteratorGetWordFontAttributes(iterator, isBold, isItalic, isUnderlined, isMonospace, isSerif,
-            isSmallCaps, pointSize, fontId);
-
     public nint TessPageIteratorCopy(nint iterator) => _tessPageIteratorCopy(iterator);
     public void TessPageIteratorDelete(nint iterator) => _tessPageIteratorDelete(iterator);
 
@@ -1240,16 +962,8 @@ public unsafe class TesseractLibrary : IDisposable
     public byte TessResultIteratorNext(nint iterator, PageIteratorLevel level) =>
         _tessResultIteratorNext(iterator, level);
 
-    public byte TessResultIteratorIsAtFinalElement(nint iterator, PageIteratorLevel level, PageIteratorLevel element) =>
-        _tessResultIteratorIsAtFinalElement(iterator, level, element);
-
     public nint TessResultIteratorGetUtf8Text(nint iterator, PageIteratorLevel level) =>
         _tessResultIteratorGetUtf8Text(iterator, level);
-
-    public float TessResultIteratorGetConfidence(nint iterator, PageIteratorLevel level) =>
-        _tessResultIteratorGetConfidence(iterator, level);
-
-    public nint TessResultIteratorWordConfidences(nint iterator) => _tessResultIteratorWordConfidences(iterator);
 
     public nint TessResultIteratorWordRecognitionLanguage(nint iterator) =>
         _tessResultIteratorWordRecognitionLanguage(iterator);
@@ -1269,32 +983,11 @@ public unsafe class TesseractLibrary : IDisposable
 
     public byte TessResultIteratorSymbolIsSubscript(nint iterator) => _tessResultIteratorSymbolIsSubscript(iterator);
     public byte TessResultIteratorSymbolIsDropcap(nint iterator) => _tessResultIteratorSymbolIsDropcap(iterator);
-
-    public nint TessResultIteratorGetWordStrAttributes(nint iterator, int* isBold, int* isItalic, int* isUnderlined,
-        int* isMonospace, int* isSerif, int* isSmallCaps, int* pointSize, int* fontId) =>
-        _tessResultIteratorGetWordStrAttributes(iterator, isBold, isItalic, isUnderlined, isMonospace, isSerif,
-            isSmallCaps, pointSize, fontId);
-
-    public nint TessResultIteratorGetWordLstmChoice(nint iterator) => _tessResultIteratorGetWordLstmChoice(iterator);
-    public nint TessResultIteratorGetWordTimestep(nint iterator) => _tessResultIteratorGetWordTimestep(iterator);
+    
     public nint TessResultIteratorGetPageIterator(nint iterator) => _tessResultIteratorGetPageIterator(iterator);
 
     public nint TessResultIteratorGetPageIteratorConst(nint iterator) =>
         _tessResultIteratorGetPageIteratorConst(iterator);
-
-    public nint TessResultIteratorGetImage(nint iterator, PageIteratorLevel level, int padding, nint originalImage,
-        int* left, int* top) => _tessResultIteratorGetImage(iterator, level, padding, originalImage, left, top);
-
-    public byte TessResultIteratorBoundingBox(nint iterator, PageIteratorLevel level, int* left, int* top, int* right,
-        int* bottom) => _tessResultIteratorBoundingBox(iterator, level, left, top, right, bottom);
-
-    public byte TessResultIteratorBaseline(nint iterator, PageIteratorLevel level, int* x1, int* y1, int* x2,
-        int* y2) => _tessResultIteratorBaseline(iterator, level, x1, y1, x2, y2);
-
-    public PolyBlockType TessResultIteratorBlockType(nint iterator) => _tessResultIteratorBlockType(iterator);
-
-    public nint TessResultIteratorGetBinaryImage(nint iterator, PageIteratorLevel level) =>
-        _tessResultIteratorGetBinaryImage(iterator, level);
 
     public nint TessResultIteratorGetChoiceIterator(nint iterator) => _tessResultIteratorGetChoiceIterator(iterator);
 
@@ -1302,12 +995,6 @@ public unsafe class TesseractLibrary : IDisposable
     public void TessChoiceIteratorDelete(nint choiceIterator) => _tessChoiceIteratorDelete(choiceIterator);
     public byte TessChoiceIteratorNext(nint choiceIterator) => _tessChoiceIteratorNext(choiceIterator);
     public nint TessChoiceIteratorGetUtf8Text(nint choiceIterator) => _tessChoiceIteratorGetUtf8Text(choiceIterator);
-
-    public float TessChoiceIteratorGetConfidence(nint choiceIterator) =>
-        _tessChoiceIteratorGetConfidence(choiceIterator);
-
-    public nint TessChoiceIteratorGetWordConfidences(nint choiceIterator) =>
-        _tessChoiceIteratorGetWordConfidences(choiceIterator);
 
 // Monitor
     public nint TessMonitorCreate() => _tessMonitorCreate();
@@ -1322,7 +1009,6 @@ public unsafe class TesseractLibrary : IDisposable
         _tessMonitorSetCancelThis(monitor, cancelThis);
 
     public int TessMonitorGetProgress(nint monitor) => _tessMonitorGetProgress(monitor);
-    public void TessMonitorSetProgress(nint monitor, int progress) => _tessMonitorSetProgress(monitor, progress);
 
 // Renderers
     public nint TessTextRendererCreate(byte* outputBase) => _tessTextRendererCreate(outputBase);
@@ -1353,13 +1039,9 @@ public unsafe class TesseractLibrary : IDisposable
 
     public byte TessResultRendererAddImage(nint renderer, nint api) => _tessResultRendererAddImage(renderer, api);
     public byte TessResultRendererEndDocument(nint renderer) => _tessResultRendererEndDocument(renderer);
-    public nint TessResultRendererExtention(nint renderer) => _tessResultRendererExtention(renderer);
+    public nint TessResultRendererExtension(nint renderer) => _tessResultRendererExtention(renderer);
     public nint TessResultRendererTitle(nint renderer) => _tessResultRendererTitle(renderer);
     public int TessResultRendererImageNum(nint renderer) => _tessResultRendererImageNum(renderer);
-    public nint TessResultRendererOutputType(nint renderer) => _tessResultRendererOutputType(renderer);
-
-    public void TessResultRendererSetPermissions(nint renderer, int permissions) =>
-        _tessResultRendererSetPermissions(renderer, permissions);
 
     public void Dispose()
     {
