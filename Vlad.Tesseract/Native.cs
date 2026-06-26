@@ -55,10 +55,10 @@ internal static partial class Native
 
     [LibraryImport(DllName, EntryPoint = "TessPageIteratorIsAtFinalElement")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessPageIteratorIsAtFinalElement(IntPtr handle, PageIteratorLevel level,
+    public static partial int TessPageIteratorIsAtFinalElement(IntPtr iterator, PageIteratorLevel level,
         PageIteratorLevel element);
 
     [LibraryImport(DllName, EntryPoint = "TessPageIteratorDelete")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessPageIteratorDelete(IntPtr handle);
+    public static partial void TessPageIteratorDelete(IntPtr iterator);
 }
