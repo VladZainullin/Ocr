@@ -20,7 +20,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string containing the version. The caller must NOT free this pointer.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessVersion")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessVersion();
+    public static partial nint TessVersion();
 
     /// <summary>
     /// Returns the version string of the Tesseract library associated with the given BaseAPI handle.
@@ -29,7 +29,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string containing the version.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIVersion")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiVersion(IntPtr handle);
+    public static partial nint TessBaseApiVersion(nint handle);
 
     #endregion
 
@@ -41,7 +41,7 @@ internal static partial class Native
     /// <returns>Pointer to the newly created TessBaseAPI handle.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPICreate")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiCreate();
+    public static partial nint TessBaseApiCreate();
 
     /// <summary>
     /// Destroys a TessBaseAPI instance and frees all associated memory.
@@ -49,7 +49,7 @@ internal static partial class Native
     /// <param name="handle">Pointer to the TessBaseAPI instance to destroy.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIDelete")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiDelete(IntPtr handle);
+    public static partial void TessBaseApiDelete(nint handle);
 
     #endregion
 
@@ -65,7 +65,7 @@ internal static partial class Native
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit3", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiInit3(IntPtr handle, string dataPath, string language);
+    public static partial int TessBaseApiInit3(nint handle, string dataPath, string language);
 
     /// <summary>
     /// Initializes the Tesseract engine with the specified data path, language, engine mode,
@@ -84,8 +84,8 @@ internal static partial class Native
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit4", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiInit4(IntPtr handle, string dataPath, string language, int mode,
-        IntPtr configs, int configsSize, IntPtr varsVec, IntPtr varsValues, IntPtr varsVecSize,
+    public static partial int TessBaseApiInit4(nint handle, string dataPath, string language, int mode,
+        nint configs, int configsSize, nint varsVec, nint varsValues, nint varsVecSize,
         [MarshalAs(UnmanagedType.Bool)] bool setOnlyNonDebugParams);
 
     /// <summary>
@@ -105,8 +105,8 @@ internal static partial class Native
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit5", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiInit5(IntPtr handle, string dataPath, string language, int mode,
-        IntPtr configs, int configsSize, IntPtr varsVec, IntPtr varsValues, IntPtr varsVecSize,
+    public static partial int TessBaseApiInit5(nint handle, string dataPath, string language, int mode,
+        nint configs, int configsSize, nint varsVec, nint varsValues, nint varsVecSize,
         [MarshalAs(UnmanagedType.Bool)] bool setOnlyNonDebugParams);
 
     #endregion
@@ -123,7 +123,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiSetVariable(IntPtr handle, string name, string value);
+    public static partial bool TessBaseApiSetVariable(nint handle, string name, string value);
 
     /// <summary>
     /// Sets a debug configuration variable for the Tesseract engine.
@@ -135,7 +135,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetDebugVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiSetDebugVariable(IntPtr handle, string name, string value);
+    public static partial bool TessBaseApiSetDebugVariable(nint handle, string name, string value);
 
     /// <summary>
     /// Gets the integer value of a configuration variable.
@@ -147,7 +147,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetIntVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiGetIntVariable(IntPtr handle, string name, out int value);
+    public static partial bool TessBaseApiGetIntVariable(nint handle, string name, out int value);
 
     /// <summary>
     /// Gets the boolean value of a configuration variable.
@@ -159,7 +159,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetBoolVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiGetBoolVariable(IntPtr handle, string name,
+    public static partial bool TessBaseApiGetBoolVariable(nint handle, string name,
         [MarshalAs(UnmanagedType.Bool)] out bool value);
 
     /// <summary>
@@ -172,7 +172,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetDoubleVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiGetDoubleVariable(IntPtr handle, string name, out double value);
+    public static partial bool TessBaseApiGetDoubleVariable(nint handle, string name, out double value);
 
     /// <summary>
     /// Gets the string value of a configuration variable.
@@ -182,7 +182,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetStringVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetStringVariable(IntPtr handle, string name);
+    public static partial nint TessBaseApiGetStringVariable(nint handle, string name);
 
     /// <summary>
     /// Gets the OpenCL device description string if OpenCL is enabled.
@@ -192,7 +192,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string describing the OpenCL device, or NULL if not available.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetOpenCLDevice", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetOpenClDevice(IntPtr handle, out IntPtr device);
+    public static partial nint TessBaseApiGetOpenClDevice(nint handle, out nint device);
 
     /// <summary>
     /// Reads a Tesseract configuration file and applies its variables.
@@ -201,7 +201,7 @@ internal static partial class Native
     /// <param name="filename">Path to the configuration file.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIReadConfigFile", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiReadConfigFile(IntPtr handle, string filename);
+    public static partial void TessBaseApiReadConfigFile(nint handle, string filename);
 
     /// <summary>
     /// Reads a Tesseract debug configuration file and applies its variables.
@@ -210,7 +210,7 @@ internal static partial class Native
     /// <param name="filename">Path to the debug configuration file.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIReadDebugConfigFile", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiReadDebugConfigFile(IntPtr handle, string filename);
+    public static partial void TessBaseApiReadDebugConfigFile(nint handle, string filename);
 
     /// <summary>
     /// Sets a custom warning handler callback for the Tesseract engine.
@@ -219,7 +219,7 @@ internal static partial class Native
     /// <param name="warningHandler">Function pointer to the warning handler callback.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetWarningHandler")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetWarningHandler(IntPtr handle, IntPtr warningHandler);
+    public static partial void TessBaseApiSetWarningHandler(nint handle, nint warningHandler);
 
     #endregion
 
@@ -232,7 +232,7 @@ internal static partial class Native
     /// <param name="fp">File pointer (FILE*) to write to. Use IntPtr.Zero for stdout.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIPrintVariables")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiPrintVariables(IntPtr handle, IntPtr fp);
+    public static partial void TessBaseApiPrintVariables(nint handle, nint fp);
 
     /// <summary>
     /// Prints all current configuration variables to the specified file.
@@ -243,7 +243,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIPrintVariablesToFile", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiPrintVariablesToFile(IntPtr handle, string filename);
+    public static partial bool TessBaseApiPrintVariablesToFile(nint handle, string filename);
 
     #endregion
 
@@ -256,7 +256,7 @@ internal static partial class Native
     /// <param name="mode">Page segmentation mode.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetPageSegMode")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetPageSegMode(IntPtr handle, PageSegmentMode mode);
+    public static partial void TessBaseApiSetPageSegMode(nint handle, PageSegmentMode mode);
 
     /// <summary>
     /// Gets the current page segmentation mode of the Tesseract engine.
@@ -265,7 +265,7 @@ internal static partial class Native
     /// <returns>Current page segmentation mode.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetPageSegMode")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial PageSegmentMode TessBaseApiGetPageSegMode(IntPtr handle);
+    public static partial PageSegmentMode TessBaseApiGetPageSegMode(nint handle);
 
     #endregion
 
@@ -278,7 +278,7 @@ internal static partial class Native
     /// <param name="name">Input image name.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetInputName", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetInputName(IntPtr handle, string name);
+    public static partial void TessBaseApiSetInputName(nint handle, string name);
 
     /// <summary>
     /// Gets the current input image name.
@@ -287,7 +287,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string containing the input name.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInputName")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetInputName(IntPtr handle);
+    public static partial nint TessBaseApiGetInputName(nint handle);
 
     /// <summary>
     /// Sets the output base name for generated output files.
@@ -296,7 +296,7 @@ internal static partial class Native
     /// <param name="name">Output base name.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetOutputName", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetOutputName(IntPtr handle, string name);
+    public static partial void TessBaseApiSetOutputName(nint handle, string name);
 
     /// <summary>
     /// Gets the current output base name.
@@ -305,7 +305,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string containing the output name.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetOutputName")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetOutputName(IntPtr handle);
+    public static partial nint TessBaseApiGetOutputName(nint handle);
 
     #endregion
 
@@ -318,7 +318,7 @@ internal static partial class Native
     /// <param name="ppi">Resolution in pixels per inch.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetSourceResolution")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetSourceResolution(IntPtr handle, int ppi);
+    public static partial void TessBaseApiSetSourceResolution(nint handle, int ppi);
 
     /// <summary>
     /// Gets the Y-resolution of the source image estimated from the input.
@@ -327,7 +327,7 @@ internal static partial class Native
     /// <returns>Estimated Y-resolution in pixels per inch.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetSourceYResolution")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiGetSourceYResolution(IntPtr handle);
+    public static partial int TessBaseApiGetSourceYResolution(nint handle);
 
     #endregion
 
@@ -344,7 +344,7 @@ internal static partial class Native
     /// <param name="bytesPerLine">Stride of the image in bytes (width * bytesPerPixel for no padding).</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetImage(IntPtr handle, IntPtr imagedata, uint width, uint height,
+    public static partial void TessBaseApiSetImage(nint handle, nint imagedata, uint width, uint height,
         uint bytesPerPixel, uint bytesPerLine);
 
     /// <summary>
@@ -354,7 +354,7 @@ internal static partial class Native
     /// <param name="pix">Pointer to a Leptonica Pix structure.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetImage2")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetImage2(IntPtr handle, IntPtr pix);
+    public static partial void TessBaseApiSetImage2(nint handle, nint pix);
 
     /// <summary>
     /// Sets the minimum orientation margin required to determine text orientation.
@@ -363,7 +363,7 @@ internal static partial class Native
     /// <param name="margin">Minimum margin value (default is 0.0).</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetMinOrientationMargin")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetMinOrientationMargin(IntPtr handle, double margin);
+    public static partial void TessBaseApiSetMinOrientationMargin(nint handle, double margin);
 
     #endregion
 
@@ -377,7 +377,7 @@ internal static partial class Native
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIRecognize")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiRecognize(IntPtr handle, IntPtr monitor);
+    public static partial int TessBaseApiRecognize(nint handle, nint monitor);
 
     /// <summary>
     /// Processes a multi-page image file and produces recognition results using the given renderer.
@@ -391,8 +391,8 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIProcessPages", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiProcessPages(IntPtr handle, string filename, string retryConfig,
-        int timeoutMillis, IntPtr renderer);
+    public static partial bool TessBaseApiProcessPages(nint handle, string filename, string retryConfig,
+        int timeoutMillis, nint renderer);
 
     #endregion
 
@@ -405,7 +405,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUTF8Text")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseAPIGetUTF8Text(IntPtr handle);
+    public static partial nint TessBaseAPIGetUTF8Text(nint handle);
 
     /// <summary>
     /// Gets the recognized text in hOCR format (HTML-based OCR markup).
@@ -415,7 +415,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetHOCRText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetHOCRText(IntPtr handle, int pageNumber);
+    public static partial nint TessBaseApiGetHOCRText(nint handle, int pageNumber);
 
     /// <summary>
     /// Gets the recognized text in ALTO XML format.
@@ -425,7 +425,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetAltoText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetAltoText(IntPtr handle, int pageNumber);
+    public static partial nint TessBaseApiGetAltoText(nint handle, int pageNumber);
 
     /// <summary>
     /// Gets the recognized text in TSV (tab-separated values) format.
@@ -435,7 +435,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetTsvText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetTsvText(IntPtr handle, int pageNumber);
+    public static partial nint TessBaseApiGetTsvText(nint handle, int pageNumber);
 
     /// <summary>
     /// Gets the recognized text with bounding box coordinates in LSTM Box format.
@@ -445,7 +445,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLSTMBoxText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetLSTMBoxText(IntPtr handle, int pageNumber);
+    public static partial nint TessBaseApiGetLSTMBoxText(nint handle, int pageNumber);
 
     /// <summary>
     /// Gets the recognized text with bounding box coordinates in WordStr Box format.
@@ -455,7 +455,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetWordStrBoxText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetWordStrBoxText(IntPtr handle, int pageNumber);
+    public static partial nint TessBaseApiGetWordStrBoxText(nint handle, int pageNumber);
 
     /// <summary>
     /// Gets the recognized text in UNLV format (used by the UNLV/ISRI OCR evaluation tools).
@@ -464,7 +464,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUNLVText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetUNLVText(IntPtr handle);
+    public static partial nint TessBaseApiGetUNLVText(nint handle);
 
     /// <summary>
     /// Gets the orientation and script detection (OSD) information as a text string.
@@ -474,7 +474,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetOsdText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetOsdText(IntPtr handle, int pageNumber);
+    public static partial nint TessBaseApiGetOsdText(nint handle, int pageNumber);
 
     /// <summary>
     /// Gets the best recognized text with bounding box coordinates using LSTM engine.
@@ -484,7 +484,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetBestLSTMBoxText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetBestLSTMBoxText(IntPtr handle, int pageNumber);
+    public static partial nint TessBaseApiGetBestLSTMBoxText(nint handle, int pageNumber);
 
     #endregion
 
@@ -496,7 +496,7 @@ internal static partial class Native
     /// <param name="text">Pointer to the text string to free.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessDeleteText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessDeleteText(IntPtr text);
+    public static partial void TessDeleteText(nint text);
 
     /// <summary>
     /// Frees an array of text strings allocated by the Tesseract library.
@@ -504,7 +504,7 @@ internal static partial class Native
     /// <param name="arr">Pointer to the text array to free.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessDeleteTextArray")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessDeleteTextArray(IntPtr arr);
+    public static partial void TessDeleteTextArray(nint arr);
 
     /// <summary>
     /// Frees an array of integers allocated by the Tesseract library.
@@ -512,7 +512,7 @@ internal static partial class Native
     /// <param name="arr">Pointer to the integer array to free.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessDeleteIntArray")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessDeleteIntArray(IntPtr arr);
+    public static partial void TessDeleteIntArray(nint arr);
 
     /// <summary>
     /// Frees a block list structure allocated by the Tesseract library.
@@ -520,7 +520,7 @@ internal static partial class Native
     /// <param name="blockList">Pointer to the block list to free.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessDeleteBlockList")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessDeleteBlockList(IntPtr blockList);
+    public static partial void TessDeleteBlockList(nint blockList);
 
     #endregion
 
@@ -533,7 +533,7 @@ internal static partial class Native
     /// <returns>Mean confidence value (0-100).</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIMeanTextConf")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiMeanTextConf(IntPtr handle);
+    public static partial int TessBaseApiMeanTextConf(nint handle);
 
     /// <summary>
     /// Returns confidence values for all recognized words.
@@ -542,7 +542,7 @@ internal static partial class Native
     /// <returns>Pointer to an array of integer confidence values (0-100). Must be freed with TessDeleteIntArray().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIAllWordConfidences")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiAllWordConfidences(IntPtr handle);
+    public static partial nint TessBaseApiAllWordConfidences(nint handle);
 
     #endregion
 
@@ -555,7 +555,7 @@ internal static partial class Native
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIAnalyseLayout")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiAnalyseLayout(IntPtr handle);
+    public static partial int TessBaseApiAnalyseLayout(nint handle);
 
     /// <summary>
     /// Detects the orientation and script of the current image.
@@ -570,7 +570,7 @@ internal static partial class Native
         StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiDetectOrientationScript(IntPtr handle, out int orientDeg,
+    public static partial bool TessBaseApiDetectOrientationScript(nint handle, out int orientDeg,
         out float orientConf, out string scriptName, out float scriptConf);
 
     /// <summary>
@@ -584,7 +584,7 @@ internal static partial class Native
     /// <returns>Pointer to an OSResults structure, or NULL on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIDetectOS")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiDetectOs(IntPtr handle, out OrientationPage orientation,
+    public static partial nint TessBaseApiDetectOs(nint handle, out OrientationPage orientation,
         out WritingDirection writingDirection, out TextlineOrder textlineOrder, out float deskewAngle);
 
     /// <summary>
@@ -596,7 +596,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated string describing the text direction.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetTextDirection")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetTextDirection(IntPtr handle, out int offset, out float slope);
+    public static partial nint TessBaseApiGetTextDirection(nint handle, out int offset, out float slope);
 
     #endregion
 
@@ -609,7 +609,7 @@ internal static partial class Native
     /// <returns>Pointer to a Leptonica Pix structure, or NULL on failure. Must be freed with pixDestroy().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetThresholdedImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetThresholdedImage(IntPtr handle);
+    public static partial nint TessBaseApiGetThresholdedImage(nint handle);
 
     /// <summary>
     /// Gets the scale factor of the thresholded image relative to the original image.
@@ -618,7 +618,7 @@ internal static partial class Native
     /// <returns>Scale factor as a percentage.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetThresholdedImageScaleFactor")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiGetThresholdedImageScaleFactor(IntPtr handle);
+    public static partial int TessBaseApiGetThresholdedImageScaleFactor(nint handle);
 
     #endregion
 
@@ -632,7 +632,7 @@ internal static partial class Native
     /// <returns>Non-zero if the word is valid, 0 if not, -1 on error.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIIsValidWord", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiIsValidWord(IntPtr handle, string word);
+    public static partial int TessBaseApiIsValidWord(nint handle, string word);
 
     /// <summary>
     /// Adapts the Tesseract engine to the given word string for improved recognition.
@@ -644,7 +644,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIAdaptToWordStr", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiAdaptToWordStr(IntPtr handle, PageSegmentMode mode, string wordStr);
+    public static partial bool TessBaseApiAdaptToWordStr(nint handle, PageSegmentMode mode, string wordStr);
 
     #endregion
 
@@ -656,7 +656,7 @@ internal static partial class Native
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIClear")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiClear(IntPtr handle);
+    public static partial void TessBaseApiClear(nint handle);
 
     /// <summary>
     /// Clears any persistent cache used by the Tesseract engine.
@@ -664,7 +664,7 @@ internal static partial class Native
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIClearPersistentCache")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiClearPersistentCache(IntPtr handle);
+    public static partial void TessBaseApiClearPersistentCache(nint handle);
 
     #endregion
 
@@ -677,7 +677,7 @@ internal static partial class Native
     /// <returns>Pointer to a GenericVector&lt;string&gt; structure containing language codes.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetAvailableLanguagesAsVector")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetAvailableLanguagesAsVector(IntPtr handle);
+    public static partial nint TessBaseApiGetAvailableLanguagesAsVector(nint handle);
 
     /// <summary>
     /// Gets the UTF-8 string representation of a unichar ID.
@@ -687,7 +687,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUnichar")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetUnichar(IntPtr handle, int unicharId);
+    public static partial nint TessBaseApiGetUnichar(nint handle, int unicharId);
 
     #endregion
 
@@ -700,7 +700,7 @@ internal static partial class Native
     /// <returns>Pointer to an LSTM choice structure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLSTMChoice")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetLstmChoice(IntPtr handle);
+    public static partial nint TessBaseApiGetLstmChoice(nint handle);
 
     /// <summary>
     /// Gets the LSTM timestep information for the last recognition.
@@ -709,7 +709,7 @@ internal static partial class Native
     /// <returns>Pointer to an LSTM timestep structure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLSTMTimestep")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetLstmTimestep(IntPtr handle);
+    public static partial nint TessBaseApiGetLstmTimestep(nint handle);
 
     #endregion
 
@@ -722,7 +722,7 @@ internal static partial class Native
     /// <param name="enable">TRUE to enable, FALSE to disable.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetAdaptiveClassifier")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetAdaptiveClassifier(IntPtr handle,
+    public static partial void TessBaseApiSetAdaptiveClassifier(nint handle,
         [MarshalAs(UnmanagedType.Bool)] bool enable);
 
     /// <summary>
@@ -733,7 +733,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetAdaptiveClassifier")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiGetAdaptiveClassifier(IntPtr handle);
+    public static partial bool TessBaseApiGetAdaptiveClassifier(nint handle);
 
     #endregion
 
@@ -748,7 +748,7 @@ internal static partial class Native
     /// <returns>Pointer to the feature vector array. Must be freed with TessBaseApiFreeFeatures().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetFeaturesForBlob")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetFeaturesForBlob(IntPtr handle, IntPtr blob, out int featureSize);
+    public static partial nint TessBaseApiGetFeaturesForBlob(nint handle, nint blob, out int featureSize);
 
     /// <summary>
     /// Frees feature vectors allocated by TessBaseAPIGetFeaturesForBlob().
@@ -757,7 +757,7 @@ internal static partial class Native
     /// <param name="features">Pointer to the feature vector array to free.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIFreeFeatures")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiFreeFeatures(IntPtr handle, IntPtr features);
+    public static partial void TessBaseApiFreeFeatures(nint handle, nint features);
 
     #endregion
 
@@ -769,7 +769,7 @@ internal static partial class Native
     /// <param name="iterator">Pointer to a PageIterator instance.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorBegin")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessPageIteratorBegin(IntPtr iterator);
+    public static partial void TessPageIteratorBegin(nint iterator);
 
     /// <summary>
     /// Moves the iterator to the next element at the specified level.
@@ -780,7 +780,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessPageIteratorNext(IntPtr iterator, PageIteratorLevel level);
+    public static partial bool TessPageIteratorNext(nint iterator, PageIteratorLevel level);
 
     /// <summary>
     /// Checks if the iterator is at the beginning of the specified level.
@@ -791,7 +791,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorIsAtBeginningOf")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessPageIteratorIsAtBeginningOf(IntPtr iterator, PageIteratorLevel level);
+    public static partial bool TessPageIteratorIsAtBeginningOf(nint iterator, PageIteratorLevel level);
 
     /// <summary>
     /// Checks if the iterator is positioned at the final element at the specified level and element.
@@ -802,7 +802,7 @@ internal static partial class Native
     /// <returns>Non-zero if at the final element, 0 otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorIsAtFinalElement")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessPageIteratorIsAtFinalElement(IntPtr iterator, PageIteratorLevel level,
+    public static partial int TessPageIteratorIsAtFinalElement(nint iterator, PageIteratorLevel level,
         PageIteratorLevel element);
 
     /// <summary>
@@ -818,7 +818,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorBoundingBox")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessPageIteratorBoundingBox(IntPtr iterator, PageIteratorLevel level,
+    public static partial bool TessPageIteratorBoundingBox(nint iterator, PageIteratorLevel level,
         out int left, out int top, out int right, out int bottom);
 
     /// <summary>
@@ -828,7 +828,7 @@ internal static partial class Native
     /// <returns>PolyBlockType value indicating the type of the current block.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorBlockType")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial PolyBlockType TessPageIteratorBlockType(IntPtr iterator);
+    public static partial PolyBlockType TessPageIteratorBlockType(nint iterator);
 
     /// <summary>
     /// Gets the binary image of the current element at the specified level.
@@ -838,7 +838,7 @@ internal static partial class Native
     /// <returns>Pointer to a Leptonica Pix structure, or NULL on failure. Must be freed with pixDestroy().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorGetBinaryImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessPageIteratorGetBinaryImage(IntPtr iterator, PageIteratorLevel level);
+    public static partial nint TessPageIteratorGetBinaryImage(nint iterator, PageIteratorLevel level);
 
     /// <summary>
     /// Gets the image of the current element at the specified level with optional padding.
@@ -852,8 +852,8 @@ internal static partial class Native
     /// <returns>Pointer to a Leptonica Pix structure, or NULL on failure. Must be freed with pixDestroy().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorGetImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessPageIteratorGetImage(IntPtr iterator, PageIteratorLevel level, int padding,
-        IntPtr originalImage, out int left, out int top);
+    public static partial nint TessPageIteratorGetImage(nint iterator, PageIteratorLevel level, int padding,
+        nint originalImage, out int left, out int top);
 
     /// <summary>
     /// Gets the baseline coordinates of the current element at the specified level.
@@ -868,7 +868,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorBaseline")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessPageIteratorBaseline(IntPtr iterator, PageIteratorLevel level, out int x1,
+    public static partial bool TessPageIteratorBaseline(nint iterator, PageIteratorLevel level, out int x1,
         out int y1, out int x2, out int y2);
 
     /// <summary>
@@ -882,7 +882,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorOrientation")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessPageIteratorOrientation(
-        IntPtr iterator,
+        nint iterator,
         out OrientationPage orientation,
         out WritingDirection writingDirection,
         out TextlineOrder textlineOrder,
@@ -899,7 +899,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorParagraphInfo")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessPageIteratorParagraphInfo(
-        IntPtr iterator,
+        nint iterator,
         out ParagraphJustification justification,
         [MarshalAs(UnmanagedType.Bool)] out bool isListItem,
         [MarshalAs(UnmanagedType.Bool)] out bool isCrown,
@@ -922,7 +922,7 @@ internal static partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool TessPageIteratorGetWordFontAttributes(
-        IntPtr iterator,
+        nint iterator,
         [MarshalAs(UnmanagedType.Bool)] out bool isBold,
         [MarshalAs(UnmanagedType.Bool)] out bool isItalic,
         [MarshalAs(UnmanagedType.Bool)] out bool isUnderlined,
@@ -939,7 +939,7 @@ internal static partial class Native
     /// <returns>Pointer to a new PageIterator instance. Must be freed with TessPageIteratorDelete().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorCopy")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessPageIteratorCopy(IntPtr iterator);
+    public static partial nint TessPageIteratorCopy(nint iterator);
 
     /// <summary>
     /// Destroys a page iterator and frees all associated memory.
@@ -947,7 +947,7 @@ internal static partial class Native
     /// <param name="iterator">Pointer to the PageIterator instance to destroy.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorDelete")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessPageIteratorDelete(IntPtr iterator);
+    public static partial void TessPageIteratorDelete(nint iterator);
 
     #endregion
 
@@ -961,7 +961,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultIterator instance. Must be freed with TessResultIteratorDelete().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetIterator")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBaseApiGetIterator(IntPtr handle);
+    public static partial nint TessBaseApiGetIterator(nint handle);
 
     /// <summary>
     /// Creates a copy of the result iterator.
@@ -970,7 +970,7 @@ internal static partial class Native
     /// <returns>Pointer to a new ResultIterator instance. Must be freed with TessResultIteratorDelete().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorCopy")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorCopy(IntPtr iterator);
+    public static partial nint TessResultIteratorCopy(nint iterator);
 
     /// <summary>
     /// Destroys a result iterator and frees all associated memory.
@@ -978,7 +978,7 @@ internal static partial class Native
     /// <param name="iterator">Pointer to the ResultIterator instance to destroy.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorDelete")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessResultIteratorDelete(IntPtr iterator);
+    public static partial void TessResultIteratorDelete(nint iterator);
 
     /// <summary>
     /// Moves the result iterator to the next element at the specified level.
@@ -989,7 +989,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorNext(IntPtr iterator, PageIteratorLevel level);
+    public static partial bool TessResultIteratorNext(nint iterator, PageIteratorLevel level);
 
     /// <summary>
     /// Checks if the result iterator is positioned at the final element at the specified level and element.
@@ -1001,7 +1001,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorIsAtFinalElement")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorIsAtFinalElement(IntPtr iterator, PageIteratorLevel level,
+    public static partial bool TessResultIteratorIsAtFinalElement(nint iterator, PageIteratorLevel level,
         PageIteratorLevel element);
 
     /// <summary>
@@ -1012,7 +1012,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetUTF8Text")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorGetUtf8Text(IntPtr iterator, PageIteratorLevel level);
+    public static partial nint TessResultIteratorGetUtf8Text(nint iterator, PageIteratorLevel level);
 
     /// <summary>
     /// Gets the confidence value for the current element at the specified level.
@@ -1022,7 +1022,7 @@ internal static partial class Native
     /// <returns>Confidence value (0.0f to 100.0f).</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetConfidence")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial float TessResultIteratorGetConfidence(IntPtr iterator, PageIteratorLevel level);
+    public static partial float TessResultIteratorGetConfidence(nint iterator, PageIteratorLevel level);
 
     /// <summary>
     /// Gets the confidence values for each character in the current word.
@@ -1031,7 +1031,7 @@ internal static partial class Native
     /// <returns>Pointer to an array of integer confidence values (0-100). Must be freed with TessDeleteIntArray().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordConfidences")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorWordConfidences(IntPtr iterator);
+    public static partial nint TessResultIteratorWordConfidences(nint iterator);
 
     /// <summary>
     /// Gets the recognition language of the current word.
@@ -1040,7 +1040,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string containing the language code. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordRecognitionLanguage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorWordRecognitionLanguage(IntPtr iterator);
+    public static partial nint TessResultIteratorWordRecognitionLanguage(nint iterator);
 
     /// <summary>
     /// Gets font attributes for the current word.
@@ -1059,7 +1059,7 @@ internal static partial class Native
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool TessResultIteratorWordFontAttributes(
-        IntPtr iterator,
+        nint iterator,
         [MarshalAs(UnmanagedType.Bool)] out bool isBold,
         [MarshalAs(UnmanagedType.Bool)] out bool isItalic,
         [MarshalAs(UnmanagedType.Bool)] out bool isUnderlined,
@@ -1077,7 +1077,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordIsFromDictionary")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorWordIsFromDictionary(IntPtr iterator);
+    public static partial bool TessResultIteratorWordIsFromDictionary(nint iterator);
 
     /// <summary>
     /// Checks if the current word is numeric.
@@ -1087,7 +1087,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordIsNumeric")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorWordIsNumeric(IntPtr iterator);
+    public static partial bool TessResultIteratorWordIsNumeric(nint iterator);
 
     /// <summary>
     /// Checks if the current symbol is superscript.
@@ -1097,7 +1097,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsSuperscript")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorSymbolIsSuperscript(IntPtr iterator);
+    public static partial bool TessResultIteratorSymbolIsSuperscript(nint iterator);
 
     /// <summary>
     /// Checks if the current symbol is subscript.
@@ -1107,7 +1107,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsSubscript")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorSymbolIsSubscript(IntPtr iterator);
+    public static partial bool TessResultIteratorSymbolIsSubscript(nint iterator);
 
     /// <summary>
     /// Checks if the current symbol is a drop cap (large initial letter).
@@ -1117,7 +1117,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsDropcap")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorSymbolIsDropcap(IntPtr iterator);
+    public static partial bool TessResultIteratorSymbolIsDropcap(nint iterator);
 
     /// <summary>
     /// Gets string-based font attributes for the current word.
@@ -1135,7 +1135,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string containing the font name. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetWordStrAttributes")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorGetWordStrAttributes(IntPtr iterator,
+    public static partial nint TessResultIteratorGetWordStrAttributes(nint iterator,
         out int isBold, out int isItalic, out int isUnderlined, out int isMonospace, out int isSerif,
         out int isSmallCaps, out int pointSize, out int fontId);
 
@@ -1146,7 +1146,7 @@ internal static partial class Native
     /// <returns>Pointer to an LSTM choice structure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetWordLSTMChoice")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorGetWordLstmChoice(IntPtr iterator);
+    public static partial nint TessResultIteratorGetWordLstmChoice(nint iterator);
 
     /// <summary>
     /// Gets the LSTM timestep information for the current word.
@@ -1155,7 +1155,7 @@ internal static partial class Native
     /// <returns>Pointer to an LSTM timestep structure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetWordTimestep")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorGetWordTimestep(IntPtr iterator);
+    public static partial nint TessResultIteratorGetWordTimestep(nint iterator);
 
     /// <summary>
     /// Gets the underlying PageIterator from a ResultIterator.
@@ -1164,7 +1164,7 @@ internal static partial class Native
     /// <returns>Pointer to a PageIterator instance. Do NOT delete separately; it is owned by the ResultIterator.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetPageIterator")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorGetPageIterator(IntPtr iterator);
+    public static partial nint TessResultIteratorGetPageIterator(nint iterator);
 
     /// <summary>
     /// Gets the underlying const PageIterator from a ResultIterator.
@@ -1173,7 +1173,7 @@ internal static partial class Native
     /// <returns>Pointer to a const PageIterator instance. Do NOT delete separately.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetPageIteratorConst")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorGetPageIteratorConst(IntPtr iterator);
+    public static partial nint TessResultIteratorGetPageIteratorConst(nint iterator);
 
     /// <summary>
     /// Gets the image of the current element from the result iterator.
@@ -1187,8 +1187,8 @@ internal static partial class Native
     /// <returns>Pointer to a Leptonica Pix structure. Must be freed with pixDestroy().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorGetImage(IntPtr iterator, PageIteratorLevel level, int padding,
-        IntPtr originalImage, out int left, out int top);
+    public static partial nint TessResultIteratorGetImage(nint iterator, PageIteratorLevel level, int padding,
+        nint originalImage, out int left, out int top);
 
     /// <summary>
     /// Gets the bounding box of the current element from the result iterator.
@@ -1203,7 +1203,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorBoundingBox")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorBoundingBox(IntPtr iterator, PageIteratorLevel level,
+    public static partial bool TessResultIteratorBoundingBox(nint iterator, PageIteratorLevel level,
         out int left, out int top, out int right, out int bottom);
 
     /// <summary>
@@ -1219,7 +1219,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorBaseline")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorBaseline(IntPtr iterator, PageIteratorLevel level,
+    public static partial bool TessResultIteratorBaseline(nint iterator, PageIteratorLevel level,
         out int x1, out int y1, out int x2, out int y2);
 
     /// <summary>
@@ -1229,7 +1229,7 @@ internal static partial class Native
     /// <returns>PolyBlockType value indicating the type of the current block.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorBlockType")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial PolyBlockType TessResultIteratorBlockType(IntPtr iterator);
+    public static partial PolyBlockType TessResultIteratorBlockType(nint iterator);
 
     /// <summary>
     /// Gets the binary image of the current element from the result iterator.
@@ -1239,7 +1239,7 @@ internal static partial class Native
     /// <returns>Pointer to a Leptonica Pix structure. Must be freed with pixDestroy().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetBinaryImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorGetBinaryImage(IntPtr iterator, PageIteratorLevel level);
+    public static partial nint TessResultIteratorGetBinaryImage(nint iterator, PageIteratorLevel level);
 
     /// <summary>
     /// Gets a ChoiceIterator for the current symbol, allowing iteration through alternative recognition choices.
@@ -1248,7 +1248,7 @@ internal static partial class Native
     /// <returns>Pointer to a ChoiceIterator instance. Must be freed with TessChoiceIteratorDelete().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetChoiceIterator")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultIteratorGetChoiceIterator(IntPtr iterator);
+    public static partial nint TessResultIteratorGetChoiceIterator(nint iterator);
 
     #endregion
 
@@ -1260,7 +1260,7 @@ internal static partial class Native
     /// <param name="choiceIterator">Pointer to the ChoiceIterator instance to destroy.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorDelete")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessChoiceIteratorDelete(IntPtr choiceIterator);
+    public static partial void TessChoiceIteratorDelete(nint choiceIterator);
 
     /// <summary>
     /// Moves the choice iterator to the next alternative recognition choice.
@@ -1270,7 +1270,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessChoiceIteratorNext(IntPtr choiceIterator);
+    public static partial bool TessChoiceIteratorNext(nint choiceIterator);
 
     /// <summary>
     /// Gets the UTF-8 text of the current recognition choice.
@@ -1279,7 +1279,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorGetUTF8Text")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessChoiceIteratorGetUtf8Text(IntPtr choiceIterator);
+    public static partial nint TessChoiceIteratorGetUtf8Text(nint choiceIterator);
 
     /// <summary>
     /// Gets the confidence value of the current recognition choice.
@@ -1288,7 +1288,7 @@ internal static partial class Native
     /// <returns>Confidence value (0.0f to 100.0f).</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorGetConfidence")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial float TessChoiceIteratorGetConfidence(IntPtr choiceIterator);
+    public static partial float TessChoiceIteratorGetConfidence(nint choiceIterator);
 
     /// <summary>
     /// Gets the confidence values for each character in the current word choice.
@@ -1297,7 +1297,7 @@ internal static partial class Native
     /// <returns>Pointer to an array of integer confidence values (0-100). Must be freed with TessDeleteIntArray().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorGetWordConfidences")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessChoiceIteratorGetWordConfidences(IntPtr choiceIterator);
+    public static partial nint TessChoiceIteratorGetWordConfidences(nint choiceIterator);
 
     #endregion
 
@@ -1309,7 +1309,7 @@ internal static partial class Native
     /// <returns>Pointer to a new ETEXT_DESC monitor structure. Must be freed with TessMonitorDelete().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorCreate")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessMonitorCreate();
+    public static partial nint TessMonitorCreate();
 
     /// <summary>
     /// Destroys a progress monitor and frees associated memory.
@@ -1317,7 +1317,7 @@ internal static partial class Native
     /// <param name="monitor">Pointer to the monitor to destroy.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorDelete")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessMonitorDelete(IntPtr monitor);
+    public static partial void TessMonitorDelete(nint monitor);
 
     /// <summary>
     /// Sets a cancellation callback function for the monitor.
@@ -1326,7 +1326,7 @@ internal static partial class Native
     /// <param name="cancelFunc">Function pointer to the cancellation callback.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorSetCancelFunc")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessMonitorSetCancelFunc(IntPtr monitor, IntPtr cancelFunc);
+    public static partial void TessMonitorSetCancelFunc(nint monitor, nint cancelFunc);
 
     /// <summary>
     /// Gets the user data pointer associated with the cancellation callback.
@@ -1335,7 +1335,7 @@ internal static partial class Native
     /// <returns>User data pointer passed to the cancellation callback.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorGetCancelThis")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessMonitorGetCancelThis(IntPtr monitor);
+    public static partial nint TessMonitorGetCancelThis(nint monitor);
 
     /// <summary>
     /// Sets the user data pointer for the cancellation callback.
@@ -1344,7 +1344,7 @@ internal static partial class Native
     /// <param name="cancelThis">User data pointer to pass to the cancellation callback.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorSetCancelThis")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessMonitorSetCancelThis(IntPtr monitor, IntPtr cancelThis);
+    public static partial void TessMonitorSetCancelThis(nint monitor, nint cancelThis);
 
     /// <summary>
     /// Gets the current progress value from the monitor.
@@ -1353,7 +1353,7 @@ internal static partial class Native
     /// <returns>Progress value (0-100).</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorGetProgress")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessMonitorGetProgress(IntPtr monitor);
+    public static partial int TessMonitorGetProgress(nint monitor);
 
     /// <summary>
     /// Sets the current progress value in the monitor.
@@ -1362,7 +1362,7 @@ internal static partial class Native
     /// <param name="progress">Progress value (0-100).</param>
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorSetProgress")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessMonitorSetProgress(IntPtr monitor, int progress);
+    public static partial void TessMonitorSetProgress(nint monitor, int progress);
 
     #endregion
 
@@ -1375,7 +1375,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessTextRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessTextRendererCreate(string outputBase);
+    public static partial nint TessTextRendererCreate(string outputBase);
 
     /// <summary>
     /// Creates a renderer for hOCR output (HTML-based OCR markup).
@@ -1384,7 +1384,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessHOcrRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessHOcrRendererCreate(string outputBase);
+    public static partial nint TessHOcrRendererCreate(string outputBase);
 
     /// <summary>
     /// Creates a renderer for hOCR output with optional font information.
@@ -1394,7 +1394,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessHOcrRendererCreate2", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessHOcrRendererCreate2(string outputBase,
+    public static partial nint TessHOcrRendererCreate2(string outputBase,
         [MarshalAs(UnmanagedType.Bool)] bool fontInfo);
 
     /// <summary>
@@ -1404,7 +1404,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessAltoRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessAltoRendererCreate(string outputBase);
+    public static partial nint TessAltoRendererCreate(string outputBase);
 
     /// <summary>
     /// Creates a renderer for TSV (tab-separated values) output.
@@ -1413,7 +1413,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessTsvRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessTsvRendererCreate(string outputBase);
+    public static partial nint TessTsvRendererCreate(string outputBase);
 
     /// <summary>
     /// Creates a renderer for PDF output.
@@ -1424,7 +1424,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPDFRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessPdfRendererCreate(string outputBase, string dataDir,
+    public static partial nint TessPdfRendererCreate(string outputBase, string dataDir,
         [MarshalAs(UnmanagedType.Bool)] bool textOnly);
 
     /// <summary>
@@ -1434,7 +1434,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessUnlvRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessUnlvRendererCreate(string outputBase);
+    public static partial nint TessUnlvRendererCreate(string outputBase);
 
     /// <summary>
     /// Creates a renderer for box text output (coordinates with recognized text).
@@ -1443,7 +1443,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBoxTextRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessBoxTextRendererCreate(string outputBase);
+    public static partial nint TessBoxTextRendererCreate(string outputBase);
 
     /// <summary>
     /// Creates a renderer for LSTM box output (coordinates with recognition using LSTM engine).
@@ -1452,7 +1452,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessLSTMBoxRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessLstmBoxRendererCreate(string outputBase);
+    public static partial nint TessLstmBoxRendererCreate(string outputBase);
 
     /// <summary>
     /// Creates a renderer for WordStr box output (word-level bounding boxes with string attributes).
@@ -1461,7 +1461,7 @@ internal static partial class Native
     /// <returns>Pointer to a ResultRenderer instance. Must be freed with TessDeleteResultRenderer().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessWordStrBoxRendererCreate", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessWordStrBoxRendererCreate(string outputBase);
+    public static partial nint TessWordStrBoxRendererCreate(string outputBase);
 
     /// <summary>
     /// Destroys a result renderer and frees all associated memory.
@@ -1469,7 +1469,7 @@ internal static partial class Native
     /// <param name="renderer">Pointer to the ResultRenderer instance to destroy.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessDeleteResultRenderer")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessDeleteResultRenderer(IntPtr renderer);
+    public static partial void TessDeleteResultRenderer(nint renderer);
 
     /// <summary>
     /// Inserts a sub-renderer into the renderer chain. The inserted renderer will receive results next.
@@ -1478,7 +1478,7 @@ internal static partial class Native
     /// <param name="subRenderer">Pointer to the sub-renderer to insert.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererInsert")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessResultRendererInsert(IntPtr renderer, IntPtr subRenderer);
+    public static partial void TessResultRendererInsert(nint renderer, nint subRenderer);
 
     /// <summary>
     /// Gets the next renderer in the renderer chain.
@@ -1487,7 +1487,7 @@ internal static partial class Native
     /// <returns>Pointer to the next ResultRenderer in the chain, or NULL if there is none.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultRendererNext(IntPtr renderer);
+    public static partial nint TessResultRendererNext(nint renderer);
 
     /// <summary>
     /// Begins a new document in the renderer (required for formats like PDF that support multiple pages).
@@ -1498,7 +1498,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererBeginDocument", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultRendererBeginDocument(IntPtr renderer, string title);
+    public static partial bool TessResultRendererBeginDocument(nint renderer, string title);
 
     /// <summary>
     /// Adds a recognized image to the document (one page of results).
@@ -1509,7 +1509,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererAddImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultRendererAddImage(IntPtr renderer, IntPtr api);
+    public static partial bool TessResultRendererAddImage(nint renderer, nint api);
 
     /// <summary>
     /// Ends the document, finalizing the output file.
@@ -1519,7 +1519,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererEndDocument")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultRendererEndDocument(IntPtr renderer);
+    public static partial bool TessResultRendererEndDocument(nint renderer);
 
     /// <summary>
     /// Gets the file extension for this renderer's output format.
@@ -1528,7 +1528,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string containing the file extension (e.g., ".pdf", ".txt").</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererExtention")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultRendererExtention(IntPtr renderer);
+    public static partial nint TessResultRendererExtention(nint renderer);
 
     /// <summary>
     /// Gets the document title from the renderer.
@@ -1537,7 +1537,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string containing the document title.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererTitle")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultRendererTitle(IntPtr renderer);
+    public static partial nint TessResultRendererTitle(nint renderer);
 
     /// <summary>
     /// Gets the current image number (page number) being processed by the renderer.
@@ -1546,7 +1546,7 @@ internal static partial class Native
     /// <returns>Current image/page number.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererImageNum")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessResultRendererImageNum(IntPtr renderer);
+    public static partial int TessResultRendererImageNum(nint renderer);
 
     /// <summary>
     /// Gets a string describing the output type of this renderer (e.g., "hocr", "pdf", "txt").
@@ -1555,7 +1555,7 @@ internal static partial class Native
     /// <returns>Pointer to a null-terminated UTF-8 string containing the output type description.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererOutputType")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial IntPtr TessResultRendererOutputType(IntPtr renderer);
+    public static partial nint TessResultRendererOutputType(nint renderer);
 
     /// <summary>
     /// Sets the file permissions for the output file (mainly relevant for PDF).
@@ -1564,7 +1564,7 @@ internal static partial class Native
     /// <param name="permissions">File permission flags.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererSetPermissions")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessResultRendererSetPermissions(IntPtr renderer, int permissions);
+    public static partial void TessResultRendererSetPermissions(nint renderer, int permissions);
 
     #endregion
 }
