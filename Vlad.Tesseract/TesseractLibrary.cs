@@ -1,4 +1,5 @@
 ﻿using System.Runtime.InteropServices;
+using System.Text;
 
 namespace Vlad.Tesseract;
 
@@ -145,10 +146,10 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, byte> _tessResultIteratorSymbolIsSuperscript;
     private readonly delegate* unmanaged[Cdecl]<nint, byte> _tessResultIteratorSymbolIsSubscript;
     private readonly delegate* unmanaged[Cdecl]<nint, byte> _tessResultIteratorSymbolIsDropcap;
-    
+
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorGetPageIterator;
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorGetPageIteratorConst;
-    
+
     private readonly delegate* unmanaged[Cdecl]<nint, nint> _tessResultIteratorGetChoiceIterator;
 
     // ChoiceIterator
@@ -196,7 +197,7 @@ public unsafe class TesseractLibrary : IDisposable
         var versionPtr = NativeLibrary.GetExport(_libraryHandle, "TessVersion");
         if (versionPtr == nint.Zero) throw new EntryPointNotFoundException("TessVersion not found in the library");
         _tessVersion = (delegate* unmanaged[Cdecl]<nint>)versionPtr;
-        
+
 
         // BaseAPI Lifecycle
         var baseApiCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPICreate");
@@ -798,8 +799,59 @@ public unsafe class TesseractLibrary : IDisposable
     public void TessBaseApiDelete(nint handle) => _tessBaseApiDelete(handle);
 
 // BaseAPI Initialization
-    public int TessBaseApiInit3(nint handle, byte* dataPath, byte* language) =>
-        _tessBaseApiInit3(handle, dataPath, language);
+    public bool TessBaseApiInit3(nint handle, ReadOnlySpan<char> dataPath, ReadOnlySpan<char> language)
+    {
+        const int maxStackSize = 256;
+        var dataPathByteCount = checked(Encoding.UTF8.GetByteCount(dataPath) + 1);
+        var languageByteCount = checked(Encoding.UTF8.GetByteCount(language) + 1);
+
+        byte* pDataPath;
+        byte* pLanguage;
+
+        var freeDataPath = false;
+        var freeLanguage = false;
+
+        if (languageByteCount <= maxStackSize)
+        {
+            var stackBuffer = stackalloc byte[languageByteCount];
+            pLanguage = stackBuffer;
+        }
+        else
+        {
+            pLanguage = (byte*)Marshal.AllocHGlobal(languageByteCount);
+            freeLanguage = true;
+        }
+
+        if (dataPathByteCount <= maxStackSize)
+        {
+            var stackBuffer = stackalloc byte[dataPathByteCount];
+            pDataPath = stackBuffer;
+        }
+        else
+        {
+            pDataPath = (byte*)Marshal.AllocHGlobal(dataPathByteCount);
+            freeDataPath = true;
+        }
+
+        try
+        {
+            var dataPathSpan = new Span<byte>(pDataPath, dataPathByteCount);
+            var writtenData = Encoding.UTF8.GetBytes(dataPath, dataPathSpan);
+            dataPathSpan[writtenData] = 0;
+
+            var languageSpan = new Span<byte>(pLanguage, languageByteCount);
+            var writtenLang = Encoding.UTF8.GetBytes(language, languageSpan);
+            languageSpan[writtenLang] = 0;
+
+            return _tessBaseApiInit3(handle, pDataPath, pLanguage) == 0;
+        }
+        finally
+        {
+            if (freeDataPath) Marshal.FreeHGlobal((IntPtr)pDataPath);
+            if (freeLanguage) Marshal.FreeHGlobal((IntPtr)pLanguage);
+        }
+    }
+
 
     public int TessBaseApiInit4(nint handle, byte* dataPath, byte* language, int mode, nint configs, int configsSize,
         nint varsVec, nint varsValues, nint varsVecSize, byte setOnlyNonDebugParams) => _tessBaseApiInit4(handle,
@@ -983,7 +1035,7 @@ public unsafe class TesseractLibrary : IDisposable
 
     public byte TessResultIteratorSymbolIsSubscript(nint iterator) => _tessResultIteratorSymbolIsSubscript(iterator);
     public byte TessResultIteratorSymbolIsDropcap(nint iterator) => _tessResultIteratorSymbolIsDropcap(iterator);
-    
+
     public nint TessResultIteratorGetPageIterator(nint iterator) => _tessResultIteratorGetPageIterator(iterator);
 
     public nint TessResultIteratorGetPageIteratorConst(nint iterator) =>
