@@ -191,604 +191,359 @@ public unsafe class TesseractLibrary : IDisposable
         if (!File.Exists(dllPath)) throw new FileNotFoundException($"Library not found: {dllPath}");
 
         _libraryHandle = NativeLibrary.Load(dllPath);
-        if (_libraryHandle == nint.Zero) throw new DllNotFoundException($"Failed to load library: {dllPath}");
 
         // Version
-        var versionPtr = NativeLibrary.GetExport(_libraryHandle, "TessVersion");
-        if (versionPtr == nint.Zero) throw new EntryPointNotFoundException("TessVersion not found in the library");
-        _tessVersion = (delegate* unmanaged[Cdecl]<nint>)versionPtr;
-
+        _tessVersion = (delegate* unmanaged[Cdecl]<nint>)NativeLibrary.GetExport(_libraryHandle, "TessVersion");
 
         // BaseAPI Lifecycle
-        var baseApiCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPICreate");
-        if (baseApiCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPICreate not found in the library");
-        _tessBaseApiCreate = (delegate* unmanaged[Cdecl]<nint>)baseApiCreatePtr;
+        _tessBaseApiCreate =
+            (delegate* unmanaged[Cdecl]<nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPICreate");
 
-        var baseApiDeletePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIDelete");
-        if (baseApiDeletePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIDelete not found in the library");
-        _tessBaseApiDelete = (delegate* unmanaged[Cdecl]<nint, void>)baseApiDeletePtr;
+        _tessBaseApiDelete = (delegate* unmanaged[Cdecl]<nint, void>)
+            NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIDelete");
 
-        // BaseAPI Initialization
-        var baseApiInit3Ptr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIInit3");
-        if (baseApiInit3Ptr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIInit3 not found in the library");
-        _tessBaseApiInit3 = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int>)baseApiInit3Ptr;
+        _tessBaseApiInit3 = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int>)
+            NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIInit3");
 
-        var baseApiInit4Ptr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIInit4");
-        if (baseApiInit4Ptr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIInit4 not found in the library");
         _tessBaseApiInit4 =
             (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int, nint, int, nint, nint, nint, byte, int>)
-            baseApiInit4Ptr;
+            NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIInit4");
 
         // BaseAPI Configuration
-        var setVariablePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetVariable");
-        if (setVariablePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetVariable not found in the library");
-        _tessBaseApiSetVariable = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte>)setVariablePtr;
+        _tessBaseApiSetVariable = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetVariable");
 
-        var setDebugVariablePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetDebugVariable");
-        if (setDebugVariablePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetDebugVariable not found in the library");
-        _tessBaseApiSetDebugVariable = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte>)setDebugVariablePtr;
+        _tessBaseApiSetDebugVariable = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetDebugVariable");
 
-        var getIntVariablePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetIntVariable");
-        if (getIntVariablePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetIntVariable not found in the library");
-        _tessBaseApiGetIntVariable = (delegate* unmanaged[Cdecl]<nint, byte*, int*, byte>)getIntVariablePtr;
+        _tessBaseApiGetIntVariable = (delegate* unmanaged[Cdecl]<nint, byte*, int*, byte>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetIntVariable");
 
-        var getBoolVariablePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetBoolVariable");
-        if (getBoolVariablePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetBoolVariable not found in the library");
-        _tessBaseApiGetBoolVariable = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte>)getBoolVariablePtr;
+        _tessBaseApiGetBoolVariable = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetBoolVariable");
 
-        var getDoubleVariablePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetDoubleVariable");
-        if (getDoubleVariablePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetDoubleVariable not found in the library");
-        _tessBaseApiGetDoubleVariable = (delegate* unmanaged[Cdecl]<nint, byte*, double*, byte>)getDoubleVariablePtr;
+        _tessBaseApiGetDoubleVariable = (delegate* unmanaged[Cdecl]<nint, byte*, double*, byte>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetDoubleVariable");
 
-        var getStringVariablePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetStringVariable");
-        if (getStringVariablePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetStringVariable not found in the library");
-        _tessBaseApiGetStringVariable = (delegate* unmanaged[Cdecl]<nint, byte*, nint>)getStringVariablePtr;
+        _tessBaseApiGetStringVariable = (delegate* unmanaged[Cdecl]<nint, byte*, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetStringVariable");
 
-        var getOpenClDevicePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetOpenCLDevice");
-        if (getOpenClDevicePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetOpenCLDevice not found in the library");
-        _tessBaseApiGetOpenClDevice = (delegate* unmanaged[Cdecl]<nint, nint*, nint>)getOpenClDevicePtr;
+        _tessBaseApiGetOpenClDevice = (delegate* unmanaged[Cdecl]<nint, nint*, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetOpenCLDevice");
 
-        var readConfigFilePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIReadConfigFile");
-        if (readConfigFilePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIReadConfigFile not found in the library");
-        _tessBaseApiReadConfigFile = (delegate* unmanaged[Cdecl]<nint, byte*, void>)readConfigFilePtr;
+        _tessBaseApiReadConfigFile = (delegate* unmanaged[Cdecl]<nint, byte*, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIReadConfigFile");
 
-        var readDebugConfigFilePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIReadDebugConfigFile");
-        if (readDebugConfigFilePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIReadDebugConfigFile not found in the library");
-        _tessBaseApiReadDebugConfigFile = (delegate* unmanaged[Cdecl]<nint, byte*, void>)readDebugConfigFilePtr;
+        _tessBaseApiReadDebugConfigFile = (delegate* unmanaged[Cdecl]<nint, byte*, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIReadDebugConfigFile");
 
         // BaseAPI Debug
-        var printVariablesPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIPrintVariables");
-        if (printVariablesPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIPrintVariables not found in the library");
-        _tessBaseApiPrintVariables = (delegate* unmanaged[Cdecl]<nint, nint, void>)printVariablesPtr;
+        _tessBaseApiPrintVariables = (delegate* unmanaged[Cdecl]<nint, nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIPrintVariables");
 
-        var printVariablesToFilePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIPrintVariablesToFile");
-        if (printVariablesToFilePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIPrintVariablesToFile not found in the library");
-        _tessBaseApiPrintVariablesToFile = (delegate* unmanaged[Cdecl]<nint, byte*, byte>)printVariablesToFilePtr;
+        _tessBaseApiPrintVariablesToFile = (delegate* unmanaged[Cdecl]<nint, byte*, byte>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIPrintVariablesToFile");
 
         // BaseAPI Page Segmentation
-        var setPageSegModePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetPageSegMode");
-        if (setPageSegModePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetPageSegMode not found in the library");
-        _tessBaseApiSetPageSegMode = (delegate* unmanaged[Cdecl]<nint, PageSegmentMode, void>)setPageSegModePtr;
+        _tessBaseApiSetPageSegMode = (delegate* unmanaged[Cdecl]<nint, PageSegmentMode, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetPageSegMode");
 
-        var getPageSegModePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetPageSegMode");
-        if (getPageSegModePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetPageSegMode not found in the library");
-        _tessBaseApiGetPageSegMode = (delegate* unmanaged[Cdecl]<nint, PageSegmentMode>)getPageSegModePtr;
+        _tessBaseApiGetPageSegMode = (delegate* unmanaged[Cdecl]<nint, PageSegmentMode>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetPageSegMode");
 
         // BaseAPI Input/Output Names
-        var setInputNamePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetInputName");
-        if (setInputNamePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetInputName not found in the library");
-        _tessBaseApiSetInputName = (delegate* unmanaged[Cdecl]<nint, byte*, void>)setInputNamePtr;
+        _tessBaseApiSetInputName = (delegate* unmanaged[Cdecl]<nint, byte*, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetInputName");
 
-        var getInputNamePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetInputName");
-        if (getInputNamePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetInputName not found in the library");
-        _tessBaseApiGetInputName = (delegate* unmanaged[Cdecl]<nint, nint>)getInputNamePtr;
+        _tessBaseApiGetInputName = (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetInputName");
 
-        var setOutputNamePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetOutputName");
-        if (setOutputNamePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetOutputName not found in the library");
-        _tessBaseApiSetOutputName = (delegate* unmanaged[Cdecl]<nint, byte*, void>)setOutputNamePtr;
+        _tessBaseApiSetOutputName = (delegate* unmanaged[Cdecl]<nint, byte*, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetOutputName");
 
         // BaseAPI Source Resolution
-        var setSourceResolutionPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetSourceResolution");
-        if (setSourceResolutionPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetSourceResolution not found in the library");
-        _tessBaseApiSetSourceResolution = (delegate* unmanaged[Cdecl]<nint, int, void>)setSourceResolutionPtr;
+        _tessBaseApiSetSourceResolution = (delegate* unmanaged[Cdecl]<nint, int, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetSourceResolution");
 
-        var getSourceYResolutionPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetSourceYResolution");
-        if (getSourceYResolutionPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetSourceYResolution not found in the library");
-        _tessBaseApiGetSourceYResolution = (delegate* unmanaged[Cdecl]<nint, int>)getSourceYResolutionPtr;
+        _tessBaseApiGetSourceYResolution = (delegate* unmanaged[Cdecl]<nint, int>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetSourceYResolution");
 
         // BaseAPI Image Setting
-        var setImagePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetImage");
-        if (setImagePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetImage not found in the library");
-        _tessBaseApiSetImage = (delegate* unmanaged[Cdecl]<nint, nint, uint, uint, uint, uint, void>)setImagePtr;
+        _tessBaseApiSetImage = (delegate* unmanaged[Cdecl]<nint, nint, uint, uint, uint, uint, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetImage");
 
-        var setImage2Ptr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetImage2");
-        if (setImage2Ptr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetImage2 not found in the library");
-        _tessBaseApiSetImage2 = (delegate* unmanaged[Cdecl]<nint, nint, void>)setImage2Ptr;
+        _tessBaseApiSetImage2 = (delegate* unmanaged[Cdecl]<nint, nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetImage2");
 
-        var setMinOrientationMarginPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetMinOrientationMargin");
-        if (setMinOrientationMarginPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPISetMinOrientationMargin not found in the library");
         _tessBaseApiSetMinOrientationMargin =
-            (delegate* unmanaged[Cdecl]<nint, double, void>)setMinOrientationMarginPtr;
+            (delegate* unmanaged[Cdecl]<nint, double, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetMinOrientationMargin");
 
         // BaseAPI Recognition
-        var recognizePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIRecognize");
-        if (recognizePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIRecognize not found in the library");
-        _tessBaseApiRecognize = (delegate* unmanaged[Cdecl]<nint, nint, int>)recognizePtr;
+        _tessBaseApiRecognize = (delegate* unmanaged[Cdecl]<nint, nint, int>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIRecognize");
 
-        var processPagesPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIProcessPages");
-        if (processPagesPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIProcessPages not found in the library");
-        _tessBaseApiProcessPages = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int, nint, byte>)processPagesPtr;
+        _tessBaseApiProcessPages = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int, nint, byte>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIProcessPages");
 
         // BaseAPI Text Output
-        var getUtf8TextPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetUTF8Text");
-        if (getUtf8TextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetUTF8Text not found in the library");
-        _tessBaseApiGetUtf8Text = (delegate* unmanaged[Cdecl]<nint, nint>)getUtf8TextPtr;
+        _tessBaseApiGetUtf8Text = (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetUTF8Text");
 
-        var getHocrTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetHOCRText");
-        if (getHocrTextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetHOCRText not found in the library");
-        _tessBaseApiGetHocrText = (delegate* unmanaged[Cdecl]<nint, int, nint>)getHocrTextPtr;
+        _tessBaseApiGetHocrText = (delegate* unmanaged[Cdecl]<nint, int, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetHOCRText");
 
-        var getAltoTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetAltoText");
-        if (getAltoTextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetAltoText not found in the library");
-        _tessBaseApiGetAltoText = (delegate* unmanaged[Cdecl]<nint, int, nint>)getAltoTextPtr;
+        _tessBaseApiGetAltoText = (delegate* unmanaged[Cdecl]<nint, int, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetAltoText");
 
-        var getTsvTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetTsvText");
-        if (getTsvTextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetTsvText not found in the library");
-        _tessBaseApiGetTsvText = (delegate* unmanaged[Cdecl]<nint, int, nint>)getTsvTextPtr;
+        _tessBaseApiGetTsvText = (delegate* unmanaged[Cdecl]<nint, int, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetTsvText");
 
-        var getLstmBoxTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetLSTMBoxText");
-        if (getLstmBoxTextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetLSTMBoxText not found in the library");
-        _tessBaseApiGetLstmBoxText = (delegate* unmanaged[Cdecl]<nint, int, nint>)getLstmBoxTextPtr;
+        _tessBaseApiGetLstmBoxText = (delegate* unmanaged[Cdecl]<nint, int, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetLSTMBoxText");
 
-        var getWordStrBoxTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetWordStrBoxText");
-        if (getWordStrBoxTextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetWordStrBoxText not found in the library");
-        _tessBaseApiGetWordStrBoxText = (delegate* unmanaged[Cdecl]<nint, int, nint>)getWordStrBoxTextPtr;
+        _tessBaseApiGetWordStrBoxText = (delegate* unmanaged[Cdecl]<nint, int, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetWordStrBoxText");
 
-        var getUnlvTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetUNLVText");
-        if (getUnlvTextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetUNLVText not found in the library");
-        _tessBaseApiGetUnlvText = (delegate* unmanaged[Cdecl]<nint, nint>)getUnlvTextPtr;
+        _tessBaseApiGetUnlvText = (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetUNLVText");
 
         // BaseAPI Text Deletion
-        var deleteTextPtr = NativeLibrary.GetExport(_libraryHandle, "TessDeleteText");
-        if (deleteTextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessDeleteText not found in the library");
-        _tessDeleteText = (delegate* unmanaged[Cdecl]<nint, void>)deleteTextPtr;
+        _tessDeleteText = (delegate* unmanaged[Cdecl]<nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessDeleteText");
 
-        var deleteTextArrayPtr = NativeLibrary.GetExport(_libraryHandle, "TessDeleteTextArray");
-        if (deleteTextArrayPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessDeleteTextArray not found in the library");
-        _tessDeleteTextArray = (delegate* unmanaged[Cdecl]<nint, void>)deleteTextArrayPtr;
+        _tessDeleteTextArray = (delegate* unmanaged[Cdecl]<nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessDeleteTextArray");
 
-        var deleteIntArrayPtr = NativeLibrary.GetExport(_libraryHandle, "TessDeleteIntArray");
-        if (deleteIntArrayPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessDeleteIntArray not found in the library");
-        _tessDeleteIntArray = (delegate* unmanaged[Cdecl]<nint, void>)deleteIntArrayPtr;
+        _tessDeleteIntArray = (delegate* unmanaged[Cdecl]<nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessDeleteIntArray");
 
         // BaseAPI Confidence
-        var meanTextConfPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIMeanTextConf");
-        if (meanTextConfPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIMeanTextConf not found in the library");
-        _tessBaseApiMeanTextConf = (delegate* unmanaged[Cdecl]<nint, int>)meanTextConfPtr;
+        _tessBaseApiMeanTextConf = (delegate* unmanaged[Cdecl]<nint, int>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIMeanTextConf");
 
-        var allWordConfidencesPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIAllWordConfidences");
-        if (allWordConfidencesPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIAllWordConfidences not found in the library");
-        _tessBaseApiAllWordConfidences = (delegate* unmanaged[Cdecl]<nint, nint>)allWordConfidencesPtr;
+        _tessBaseApiAllWordConfidences = (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIAllWordConfidences");
 
         // BaseAPI Analysis
-        var analyseLayoutPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIAnalyseLayout");
-        if (analyseLayoutPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIAnalyseLayout not found in the library");
-        _tessBaseApiAnalyseLayout = (delegate* unmanaged[Cdecl]<nint, int>)analyseLayoutPtr;
+        _tessBaseApiAnalyseLayout =
+            (delegate* unmanaged[Cdecl]<nint, int>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIAnalyseLayout");
 
-        var detectOrientationScriptPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIDetectOrientationScript");
-        if (detectOrientationScriptPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIDetectOrientationScript not found in the library");
         _tessBaseApiDetectOrientationScript =
-            (delegate* unmanaged[Cdecl]<nint, int*, float*, byte**, float*, byte>)detectOrientationScriptPtr;
+            (delegate* unmanaged[Cdecl]<nint, int*, float*, byte**, float*, byte>)NativeLibrary.GetExport(
+                _libraryHandle, "TessBaseAPIDetectOrientationScript");
 
-        var getTextDirectionPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetTextDirection");
-        if (getTextDirectionPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetTextDirection not found in the library");
-        _tessBaseApiGetTextDirection = (delegate* unmanaged[Cdecl]<nint, int*, float*, nint>)getTextDirectionPtr;
+        _tessBaseApiGetTextDirection =
+            (delegate* unmanaged[Cdecl]<nint, int*, float*, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessBaseAPIGetTextDirection");
 
         // BaseAPI Image Retrieval
-        var getThresholdedImagePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetThresholdedImage");
-        if (getThresholdedImagePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetThresholdedImage not found in the library");
-        _tessBaseApiGetThresholdedImage = (delegate* unmanaged[Cdecl]<nint, nint>)getThresholdedImagePtr;
+        _tessBaseApiGetThresholdedImage =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessBaseAPIGetThresholdedImage");
 
-        var getThresholdedImageScaleFactorPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetThresholdedImageScaleFactor");
-        if (getThresholdedImageScaleFactorPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetThresholdedImageScaleFactor not found in the library");
         _tessBaseApiGetThresholdedImageScaleFactor =
-            (delegate* unmanaged[Cdecl]<nint, int>)getThresholdedImageScaleFactorPtr;
+            (delegate* unmanaged[Cdecl]<nint, int>)NativeLibrary.GetExport(_libraryHandle,
+                "TessBaseAPIGetThresholdedImageScaleFactor");
 
         // BaseAPI Dictionary
-        var isValidWordPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIIsValidWord");
-        if (isValidWordPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIIsValidWord not found in the library");
-        _tessBaseApiIsValidWord = (delegate* unmanaged[Cdecl]<nint, byte*, int>)isValidWordPtr;
+        _tessBaseApiIsValidWord =
+            (delegate* unmanaged[Cdecl]<nint, byte*, int>)NativeLibrary.GetExport(_libraryHandle,
+                "TessBaseAPIIsValidWord");
 
-        var adaptToWordStrPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIAdaptToWordStr");
-        if (adaptToWordStrPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIAdaptToWordStr not found in the library");
-        _tessBaseApiAdaptToWordStr = (delegate* unmanaged[Cdecl]<nint, PageSegmentMode, byte*, byte>)adaptToWordStrPtr;
+        _tessBaseApiAdaptToWordStr =
+            (delegate* unmanaged[Cdecl]<nint, PageSegmentMode, byte*, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessBaseAPIAdaptToWordStr");
 
         // BaseAPI Clear
         var clearPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIClear");
-        if (clearPtr == nint.Zero) throw new EntryPointNotFoundException("TessBaseAPIClear not found in the library");
         _tessBaseApiClear = (delegate* unmanaged[Cdecl]<nint, void>)clearPtr;
 
         var clearPersistentCachePtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIClearPersistentCache");
-        if (clearPersistentCachePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIClearPersistentCache not found in the library");
         _tessBaseApiClearPersistentCache = (delegate* unmanaged[Cdecl]<nint, void>)clearPersistentCachePtr;
 
         // BaseAPI Languages
-        var getAvailableLanguagesAsVectorPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetAvailableLanguagesAsVector");
-        if (getAvailableLanguagesAsVectorPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetAvailableLanguagesAsVector not found in the library");
         _tessBaseApiGetAvailableLanguagesAsVector =
-            (delegate* unmanaged[Cdecl]<nint, nint>)getAvailableLanguagesAsVectorPtr;
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessBaseAPIGetAvailableLanguagesAsVector");
 
-        var getUnicharPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetUnichar");
-        if (getUnicharPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetUnichar not found in the library");
-        _tessBaseApiGetUnichar = (delegate* unmanaged[Cdecl]<nint, int, nint>)getUnicharPtr;
+        _tessBaseApiGetUnichar =
+            (delegate* unmanaged[Cdecl]<nint, int, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessBaseAPIGetUnichar");
 
         // PageIterator
-        var pageIteratorBeginPtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorBegin");
-        if (pageIteratorBeginPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorBegin not found in the library");
-        _tessPageIteratorBegin = (delegate* unmanaged[Cdecl]<nint, void>)pageIteratorBeginPtr;
+        _tessPageIteratorBegin =
+            (delegate* unmanaged[Cdecl]<nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorBegin");
 
-        var pageIteratorNextPtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorNext");
-        if (pageIteratorNextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorNext not found in the library");
-        _tessPageIteratorNext = (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, byte>)pageIteratorNextPtr;
+        _tessPageIteratorNext =
+            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessPageIteratorNext");
 
-        var pageIteratorIsAtBeginningOfPtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorIsAtBeginningOf");
-        if (pageIteratorIsAtBeginningOfPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorIsAtBeginningOf not found in the library");
         _tessPageIteratorIsAtBeginningOf =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, byte>)pageIteratorIsAtBeginningOfPtr;
+            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessPageIteratorIsAtBeginningOf");
 
-        var pageIteratorIsAtFinalElementPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorIsAtFinalElement");
-        if (pageIteratorIsAtFinalElementPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorIsAtFinalElement not found in the library");
         _tessPageIteratorIsAtFinalElement =
             (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, PageIteratorLevel, int>)
-            pageIteratorIsAtFinalElementPtr;
+            NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorIsAtFinalElement");
 
-        var pageIteratorBoundingBoxPtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorBoundingBox");
-        if (pageIteratorBoundingBoxPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorBoundingBox not found in the library");
         _tessPageIteratorBoundingBox =
             (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int*, int*, int*, int*, byte>)
-            pageIteratorBoundingBoxPtr;
+            NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorBoundingBox");
 
-        var pageIteratorBlockTypePtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorBlockType");
-        if (pageIteratorBlockTypePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorBlockType not found in the library");
-        _tessPageIteratorBlockType = (delegate* unmanaged[Cdecl]<nint, PolyBlockType>)pageIteratorBlockTypePtr;
+        _tessPageIteratorBlockType =
+            (delegate* unmanaged[Cdecl]<nint, PolyBlockType>)NativeLibrary.GetExport(_libraryHandle,
+                "TessPageIteratorBlockType");
 
-        var pageIteratorGetBinaryImagePtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorGetBinaryImage");
-        if (pageIteratorGetBinaryImagePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorGetBinaryImage not found in the library");
         _tessPageIteratorGetBinaryImage =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, nint>)pageIteratorGetBinaryImagePtr;
+            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessPageIteratorGetBinaryImage");
 
         var pageIteratorGetImagePtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorGetImage");
-        if (pageIteratorGetImagePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorGetImage not found in the library");
         _tessPageIteratorGetImage =
             (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int, nint, int*, int*, nint>)pageIteratorGetImagePtr;
 
-        var pageIteratorBaselinePtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorBaseline");
-        if (pageIteratorBaselinePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorBaseline not found in the library");
         _tessPageIteratorBaseline =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int*, int*, int*, int*, byte>)pageIteratorBaselinePtr;
+            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int*, int*, int*, int*, byte>)NativeLibrary.GetExport(
+                _libraryHandle, "TessPageIteratorBaseline");
 
-        var pageIteratorOrientationPtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorOrientation");
-        if (pageIteratorOrientationPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorOrientation not found in the library");
         _tessPageIteratorOrientation =
             (delegate* unmanaged[Cdecl]<nint, OrientationPage*, WritingDirection*, TextlineOrder*, float*, void>)
-            pageIteratorOrientationPtr;
+            NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorOrientation");
 
-        var pageIteratorParagraphInfoPtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorParagraphInfo");
-        if (pageIteratorParagraphInfoPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorParagraphInfo not found in the library");
         _tessPageIteratorParagraphInfo =
             (delegate* unmanaged[Cdecl]<nint, ParagraphJustification*, byte*, byte*, int*, void>)
-            pageIteratorParagraphInfoPtr;
+            NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorParagraphInfo");
 
-        var pageIteratorCopyPtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorCopy");
-        if (pageIteratorCopyPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorCopy not found in the library");
-        _tessPageIteratorCopy = (delegate* unmanaged[Cdecl]<nint, nint>)pageIteratorCopyPtr;
+        _tessPageIteratorCopy =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorCopy");
 
-        var pageIteratorDeletePtr = NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorDelete");
-        if (pageIteratorDeletePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPageIteratorDelete not found in the library");
-        _tessPageIteratorDelete = (delegate* unmanaged[Cdecl]<nint, void>)pageIteratorDeletePtr;
+        _tessPageIteratorDelete =
+            (delegate* unmanaged[Cdecl]<nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorDelete");
 
         // ResultIterator
-        var getIteratorPtr = NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetIterator");
-        if (getIteratorPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBaseAPIGetIterator not found in the library");
-        _tessBaseApiGetIterator = (delegate* unmanaged[Cdecl]<nint, nint>)getIteratorPtr;
+        _tessBaseApiGetIterator =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetIterator");
 
-        var resultIteratorCopyPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorCopy");
-        if (resultIteratorCopyPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorCopy not found in the library");
-        _tessResultIteratorCopy = (delegate* unmanaged[Cdecl]<nint, nint>)resultIteratorCopyPtr;
+        _tessResultIteratorCopy =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorCopy");
 
-        var resultIteratorDeletePtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorDelete");
-        if (resultIteratorDeletePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorDelete not found in the library");
-        _tessResultIteratorDelete = (delegate* unmanaged[Cdecl]<nint, void>)resultIteratorDeletePtr;
+        _tessResultIteratorDelete =
+            (delegate* unmanaged[Cdecl]<nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorDelete");
 
-        var resultIteratorNextPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorNext");
-        if (resultIteratorNextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorNext not found in the library");
-        _tessResultIteratorNext = (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, byte>)resultIteratorNextPtr;
+        _tessResultIteratorNext =
+            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorNext");
 
-        var resultIteratorGetUtf8TextPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetUTF8Text");
-        if (resultIteratorGetUtf8TextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetUTF8Text not found in the library");
         _tessResultIteratorGetUtf8Text =
-            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, nint>)resultIteratorGetUtf8TextPtr;
+            (delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorGetUTF8Text");
 
-        var resultIteratorWordRecognitionLanguagePtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorWordRecognitionLanguage");
-        if (resultIteratorWordRecognitionLanguagePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorWordRecognitionLanguage not found in the library");
         _tessResultIteratorWordRecognitionLanguage =
-            (delegate* unmanaged[Cdecl]<nint, nint>)resultIteratorWordRecognitionLanguagePtr;
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorWordRecognitionLanguage");
 
-        var resultIteratorWordFontAttributesPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorWordFontAttributes");
-        if (resultIteratorWordFontAttributesPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorWordFontAttributes not found in the library");
         _tessResultIteratorWordFontAttributes =
             (delegate* unmanaged[Cdecl]<nint, byte*, byte*, byte*, byte*, byte*, byte*, int*, int*, byte>)
-            resultIteratorWordFontAttributesPtr;
+            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorWordFontAttributes");
 
-        var resultIteratorWordIsFromDictionaryPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorWordIsFromDictionary");
-        if (resultIteratorWordIsFromDictionaryPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorWordIsFromDictionary not found in the library");
         _tessResultIteratorWordIsFromDictionary =
-            (delegate* unmanaged[Cdecl]<nint, byte>)resultIteratorWordIsFromDictionaryPtr;
+            (delegate* unmanaged[Cdecl]<nint, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorWordIsFromDictionary");
 
-        var resultIteratorWordIsNumericPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorWordIsNumeric");
-        if (resultIteratorWordIsNumericPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorWordIsNumeric not found in the library");
-        _tessResultIteratorWordIsNumeric = (delegate* unmanaged[Cdecl]<nint, byte>)resultIteratorWordIsNumericPtr;
+        _tessResultIteratorWordIsNumeric =
+            (delegate* unmanaged[Cdecl]<nint, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorWordIsNumeric");
 
-        var resultIteratorSymbolIsSuperscriptPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorSymbolIsSuperscript");
-        if (resultIteratorSymbolIsSuperscriptPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorSymbolIsSuperscript not found in the library");
         _tessResultIteratorSymbolIsSuperscript =
-            (delegate* unmanaged[Cdecl]<nint, byte>)resultIteratorSymbolIsSuperscriptPtr;
+            (delegate* unmanaged[Cdecl]<nint, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorSymbolIsSuperscript");
 
-        var resultIteratorSymbolIsSubscriptPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorSymbolIsSubscript");
-        if (resultIteratorSymbolIsSubscriptPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorSymbolIsSubscript not found in the library");
         _tessResultIteratorSymbolIsSubscript =
-            (delegate* unmanaged[Cdecl]<nint, byte>)resultIteratorSymbolIsSubscriptPtr;
+            (delegate* unmanaged[Cdecl]<nint, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorSymbolIsSubscript");
 
-        var resultIteratorSymbolIsDropcapPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorSymbolIsDropcap");
-        if (resultIteratorSymbolIsDropcapPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorSymbolIsDropcap not found in the library");
-        _tessResultIteratorSymbolIsDropcap = (delegate* unmanaged[Cdecl]<nint, byte>)resultIteratorSymbolIsDropcapPtr;
+        _tessResultIteratorSymbolIsDropcap =
+            (delegate* unmanaged[Cdecl]<nint, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorSymbolIsDropcap");
 
-        var resultIteratorGetPageIteratorPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetPageIterator");
-        if (resultIteratorGetPageIteratorPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetPageIterator not found in the library");
-        _tessResultIteratorGetPageIterator = (delegate* unmanaged[Cdecl]<nint, nint>)resultIteratorGetPageIteratorPtr;
+        _tessResultIteratorGetPageIterator =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorGetPageIterator");
 
-        var resultIteratorGetPageIteratorConstPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetPageIteratorConst");
-        if (resultIteratorGetPageIteratorConstPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetPageIteratorConst not found in the library");
         _tessResultIteratorGetPageIteratorConst =
-            (delegate* unmanaged[Cdecl]<nint, nint>)resultIteratorGetPageIteratorConstPtr;
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorGetPageIteratorConst");
 
-        var resultIteratorGetChoiceIteratorPtr =
-            NativeLibrary.GetExport(_libraryHandle, "TessResultIteratorGetChoiceIterator");
-        if (resultIteratorGetChoiceIteratorPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultIteratorGetChoiceIterator not found in the library");
         _tessResultIteratorGetChoiceIterator =
-            (delegate* unmanaged[Cdecl]<nint, nint>)resultIteratorGetChoiceIteratorPtr;
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultIteratorGetChoiceIterator");
 
         // ChoiceIterator
-        var choiceIteratorDeletePtr = NativeLibrary.GetExport(_libraryHandle, "TessChoiceIteratorDelete");
-        if (choiceIteratorDeletePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessChoiceIteratorDelete not found in the library");
-        _tessChoiceIteratorDelete = (delegate* unmanaged[Cdecl]<nint, void>)choiceIteratorDeletePtr;
+        _tessChoiceIteratorDelete =
+            (delegate* unmanaged[Cdecl]<nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessChoiceIteratorDelete");
 
-        var choiceIteratorNextPtr = NativeLibrary.GetExport(_libraryHandle, "TessChoiceIteratorNext");
-        if (choiceIteratorNextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessChoiceIteratorNext not found in the library");
-        _tessChoiceIteratorNext = (delegate* unmanaged[Cdecl]<nint, byte>)choiceIteratorNextPtr;
+        _tessChoiceIteratorNext =
+            (delegate* unmanaged[Cdecl]<nint, byte>)NativeLibrary.GetExport(_libraryHandle, "TessChoiceIteratorNext");
 
-        var choiceIteratorGetUtf8TextPtr = NativeLibrary.GetExport(_libraryHandle, "TessChoiceIteratorGetUTF8Text");
-        if (choiceIteratorGetUtf8TextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessChoiceIteratorGetUTF8Text not found in the library");
-        _tessChoiceIteratorGetUtf8Text = (delegate* unmanaged[Cdecl]<nint, nint>)choiceIteratorGetUtf8TextPtr;
+        _tessChoiceIteratorGetUtf8Text =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessChoiceIteratorGetUTF8Text");
 
         // Monitor
-        var monitorCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessMonitorCreate");
-        if (monitorCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessMonitorCreate not found in the library");
-        _tessMonitorCreate = (delegate* unmanaged[Cdecl]<nint>)monitorCreatePtr;
+        _tessMonitorCreate =
+            (delegate* unmanaged[Cdecl]<nint>)NativeLibrary.GetExport(_libraryHandle, "TessMonitorCreate");
 
-        var monitorDeletePtr = NativeLibrary.GetExport(_libraryHandle, "TessMonitorDelete");
-        if (monitorDeletePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessMonitorDelete not found in the library");
-        _tessMonitorDelete = (delegate* unmanaged[Cdecl]<nint, void>)monitorDeletePtr;
+        _tessMonitorDelete =
+            (delegate* unmanaged[Cdecl]<nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessMonitorDelete");
 
-        var monitorSetCancelFuncPtr = NativeLibrary.GetExport(_libraryHandle, "TessMonitorSetCancelFunc");
-        if (monitorSetCancelFuncPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessMonitorSetCancelFunc not found in the library");
-        _tessMonitorSetCancelFunc = (delegate* unmanaged[Cdecl]<nint, nint, void>)monitorSetCancelFuncPtr;
+        _tessMonitorSetCancelFunc =
+            (delegate* unmanaged[Cdecl]<nint, nint, void>)NativeLibrary.GetExport(_libraryHandle,
+                "TessMonitorSetCancelFunc");
 
-        var monitorGetCancelThisPtr = NativeLibrary.GetExport(_libraryHandle, "TessMonitorGetCancelThis");
-        if (monitorGetCancelThisPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessMonitorGetCancelThis not found in the library");
-        _tessMonitorGetCancelThis = (delegate* unmanaged[Cdecl]<nint, nint>)monitorGetCancelThisPtr;
+        _tessMonitorGetCancelThis =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessMonitorGetCancelThis");
 
-        var monitorSetCancelThisPtr = NativeLibrary.GetExport(_libraryHandle, "TessMonitorSetCancelThis");
-        if (monitorSetCancelThisPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessMonitorSetCancelThis not found in the library");
-        _tessMonitorSetCancelThis = (delegate* unmanaged[Cdecl]<nint, nint, void>)monitorSetCancelThisPtr;
+        _tessMonitorSetCancelThis =
+            (delegate* unmanaged[Cdecl]<nint, nint, void>)NativeLibrary.GetExport(_libraryHandle,
+                "TessMonitorSetCancelThis");
 
-        var monitorGetProgressPtr = NativeLibrary.GetExport(_libraryHandle, "TessMonitorGetProgress");
-        if (monitorGetProgressPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessMonitorGetProgress not found in the library");
-        _tessMonitorGetProgress = (delegate* unmanaged[Cdecl]<nint, int>)monitorGetProgressPtr;
+        _tessMonitorGetProgress =
+            (delegate* unmanaged[Cdecl]<nint, int>)NativeLibrary.GetExport(_libraryHandle, "TessMonitorGetProgress");
 
         // Renderers
-        var textRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessTextRendererCreate");
-        if (textRendererCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessTextRendererCreate not found in the library");
-        _tessTextRendererCreate = (delegate* unmanaged[Cdecl]<byte*, nint>)textRendererCreatePtr;
+        _tessTextRendererCreate =
+            (delegate* unmanaged[Cdecl]<byte*, nint>)NativeLibrary.GetExport(_libraryHandle, "TessTextRendererCreate");
 
-        var hOcrRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessHOcrRendererCreate");
-        if (hOcrRendererCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessHOcrRendererCreate not found in the library");
-        _tessHOcrRendererCreate = (delegate* unmanaged[Cdecl]<byte*, nint>)hOcrRendererCreatePtr;
+        _tessHOcrRendererCreate =
+            (delegate* unmanaged[Cdecl]<byte*, nint>)NativeLibrary.GetExport(_libraryHandle, "TessHOcrRendererCreate");
 
-        var hOcrRendererCreate2Ptr = NativeLibrary.GetExport(_libraryHandle, "TessHOcrRendererCreate2");
-        if (hOcrRendererCreate2Ptr == nint.Zero)
-            throw new EntryPointNotFoundException("TessHOcrRendererCreate2 not found in the library");
-        _tessHOcrRendererCreate2 = (delegate* unmanaged[Cdecl]<byte*, byte, nint>)hOcrRendererCreate2Ptr;
+        _tessHOcrRendererCreate2 =
+            (delegate* unmanaged[Cdecl]<byte*, byte, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessHOcrRendererCreate2");
 
-        var altoRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessAltoRendererCreate");
-        if (altoRendererCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessAltoRendererCreate not found in the library");
-        _tessAltoRendererCreate = (delegate* unmanaged[Cdecl]<byte*, nint>)altoRendererCreatePtr;
+        _tessAltoRendererCreate =
+            (delegate* unmanaged[Cdecl]<byte*, nint>)NativeLibrary.GetExport(_libraryHandle, "TessAltoRendererCreate");
 
-        var tsvRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessTsvRendererCreate");
-        if (tsvRendererCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessTsvRendererCreate not found in the library");
-        _tessTsvRendererCreate = (delegate* unmanaged[Cdecl]<byte*, nint>)tsvRendererCreatePtr;
+        _tessTsvRendererCreate =
+            (delegate* unmanaged[Cdecl]<byte*, nint>)NativeLibrary.GetExport(_libraryHandle, "TessTsvRendererCreate");
 
-        var pdfRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessPDFRendererCreate");
-        if (pdfRendererCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessPDFRendererCreate not found in the library");
-        _tessPdfRendererCreate = (delegate* unmanaged[Cdecl]<byte*, byte*, byte, nint>)pdfRendererCreatePtr;
+        _tessPdfRendererCreate =
+            (delegate* unmanaged[Cdecl]<byte*, byte*, byte, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessPDFRendererCreate");
 
-        var unlvRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessUnlvRendererCreate");
-        if (unlvRendererCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessUnlvRendererCreate not found in the library");
-        _tessUnlvRendererCreate = (delegate* unmanaged[Cdecl]<byte*, nint>)unlvRendererCreatePtr;
+        _tessUnlvRendererCreate =
+            (delegate* unmanaged[Cdecl]<byte*, nint>)NativeLibrary.GetExport(_libraryHandle, "TessUnlvRendererCreate");
 
-        var boxTextRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessBoxTextRendererCreate");
-        if (boxTextRendererCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessBoxTextRendererCreate not found in the library");
-        _tessBoxTextRendererCreate = (delegate* unmanaged[Cdecl]<byte*, nint>)boxTextRendererCreatePtr;
+        _tessBoxTextRendererCreate =
+            (delegate* unmanaged[Cdecl]<byte*, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessBoxTextRendererCreate");
 
-        var lstmBoxRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessLSTMBoxRendererCreate");
-        if (lstmBoxRendererCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessLSTMBoxRendererCreate not found in the library");
-        _tessLstmBoxRendererCreate = (delegate* unmanaged[Cdecl]<byte*, nint>)lstmBoxRendererCreatePtr;
+        _tessLstmBoxRendererCreate =
+            (delegate* unmanaged[Cdecl]<byte*, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessLSTMBoxRendererCreate");
 
-        var wordStrBoxRendererCreatePtr = NativeLibrary.GetExport(_libraryHandle, "TessWordStrBoxRendererCreate");
-        if (wordStrBoxRendererCreatePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessWordStrBoxRendererCreate not found in the library");
-        _tessWordStrBoxRendererCreate = (delegate* unmanaged[Cdecl]<byte*, nint>)wordStrBoxRendererCreatePtr;
+        _tessWordStrBoxRendererCreate =
+            (delegate* unmanaged[Cdecl]<byte*, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessWordStrBoxRendererCreate");
 
-        var deleteResultRendererPtr = NativeLibrary.GetExport(_libraryHandle, "TessDeleteResultRenderer");
-        if (deleteResultRendererPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessDeleteResultRenderer not found in the library");
-        _tessDeleteResultRenderer = (delegate* unmanaged[Cdecl]<nint, void>)deleteResultRendererPtr;
+        _tessDeleteResultRenderer =
+            (delegate* unmanaged[Cdecl]<nint, void>)NativeLibrary.GetExport(_libraryHandle, "TessDeleteResultRenderer");
 
-        var resultRendererInsertPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultRendererInsert");
-        if (resultRendererInsertPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererInsert not found in the library");
-        _tessResultRendererInsert = (delegate* unmanaged[Cdecl]<nint, nint, void>)resultRendererInsertPtr;
+        _tessResultRendererInsert =
+            (delegate* unmanaged[Cdecl]<nint, nint, void>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultRendererInsert");
 
-        var resultRendererNextPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultRendererNext");
-        if (resultRendererNextPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererNext not found in the library");
-        _tessResultRendererNext = (delegate* unmanaged[Cdecl]<nint, nint>)resultRendererNextPtr;
+        _tessResultRendererNext =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessResultRendererNext");
 
-        var resultRendererBeginDocumentPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultRendererBeginDocument");
-        if (resultRendererBeginDocumentPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererBeginDocument not found in the library");
         _tessResultRendererBeginDocument =
-            (delegate* unmanaged[Cdecl]<nint, byte*, byte>)resultRendererBeginDocumentPtr;
+            (delegate* unmanaged[Cdecl]<nint, byte*, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultRendererBeginDocument");
 
-        var resultRendererAddImagePtr = NativeLibrary.GetExport(_libraryHandle, "TessResultRendererAddImage");
-        if (resultRendererAddImagePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererAddImage not found in the library");
-        _tessResultRendererAddImage = (delegate* unmanaged[Cdecl]<nint, nint, byte>)resultRendererAddImagePtr;
+        _tessResultRendererAddImage =
+            (delegate* unmanaged[Cdecl]<nint, nint, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultRendererAddImage");
 
-        var resultRendererEndDocumentPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultRendererEndDocument");
-        if (resultRendererEndDocumentPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererEndDocument not found in the library");
-        _tessResultRendererEndDocument = (delegate* unmanaged[Cdecl]<nint, byte>)resultRendererEndDocumentPtr;
+        _tessResultRendererEndDocument =
+            (delegate* unmanaged[Cdecl]<nint, byte>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultRendererEndDocument");
 
-        var resultRendererExtentionPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultRendererExtention");
-        if (resultRendererExtentionPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererExtention not found in the library");
-        _tessResultRendererExtention = (delegate* unmanaged[Cdecl]<nint, nint>)resultRendererExtentionPtr;
+        _tessResultRendererExtention =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultRendererExtention");
 
-        var resultRendererTitlePtr = NativeLibrary.GetExport(_libraryHandle, "TessResultRendererTitle");
-        if (resultRendererTitlePtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererTitle not found in the library");
-        _tessResultRendererTitle = (delegate* unmanaged[Cdecl]<nint, nint>)resultRendererTitlePtr;
+        _tessResultRendererTitle =
+            (delegate* unmanaged[Cdecl]<nint, nint>)NativeLibrary.GetExport(_libraryHandle, "TessResultRendererTitle");
 
-        var resultRendererImageNumPtr = NativeLibrary.GetExport(_libraryHandle, "TessResultRendererImageNum");
-        if (resultRendererImageNumPtr == nint.Zero)
-            throw new EntryPointNotFoundException("TessResultRendererImageNum not found in the library");
-        _tessResultRendererImageNum = (delegate* unmanaged[Cdecl]<nint, int>)resultRendererImageNumPtr;
+        _tessResultRendererImageNum =
+            (delegate* unmanaged[Cdecl]<nint, int>)NativeLibrary.GetExport(_libraryHandle,
+                "TessResultRendererImageNum");
     }
 
     // Version
