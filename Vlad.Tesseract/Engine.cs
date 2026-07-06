@@ -6,18 +6,20 @@ namespace Vlad.Tesseract;
 public sealed unsafe class Engine
 {
     private readonly nint _enginePtr;
-    
+    private readonly nint _handle;
+
     private delegate* unmanaged[Cdecl]<nint, byte*, byte*, int> _tessBaseApiInit3;
 
-    public Engine(nint enginePtr)
+    public Engine(nint enginePtr, nint handle)
     {
         _enginePtr = enginePtr;
+        _handle = handle;
     }
     
-    public bool TryInitialization(nint handle, ReadOnlySpan<char> dataPath, ReadOnlySpan<char> language)
+    public bool TryInitialization(ReadOnlySpan<char> dataPath, ReadOnlySpan<char> language)
     {
-        _tessBaseApiInit3 ??= (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int>)
-            NativeLibrary.GetExport(handle, "TessBaseAPIInit3");
+        _tessBaseApiInit3 = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int>)
+            NativeLibrary.GetExport(_handle, "TessBaseAPIInit3");
         
         const int maxStackSize = 256;
         var dataPathByteCount = checked(Encoding.UTF8.GetByteCount(dataPath) + 1);
@@ -61,12 +63,12 @@ public sealed unsafe class Engine
             var writtenLang = Encoding.UTF8.GetBytes(language, languageSpan);
             languageSpan[writtenLang] = 0;
 
-            return _tessBaseApiInit3(handle, pDataPath, pLanguage) == 0;
+            return _tessBaseApiInit3(_enginePtr, pDataPath, pLanguage) == 0;
         }
         finally
         {
-            if (freeDataPath) Marshal.FreeHGlobal((IntPtr)pDataPath);
-            if (freeLanguage) Marshal.FreeHGlobal((IntPtr)pLanguage);
+            if (freeDataPath) Marshal.FreeHGlobal((nint)pDataPath);
+            if (freeLanguage) Marshal.FreeHGlobal((nint)pLanguage);
         }
     }
 }

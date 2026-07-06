@@ -37,8 +37,8 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, byte> _tessBaseApiPrintVariablesToFile;
 
     // BaseAPI Page Segmentation
-    private readonly delegate* unmanaged[Cdecl]<nint, PageSegmentMode, void> _tessBaseApiSetPageSegMode;
-    private readonly delegate* unmanaged[Cdecl]<nint, PageSegmentMode> _tessBaseApiGetPageSegMode;
+    private readonly delegate* unmanaged[Cdecl]<nint, PageSegmentationMode, void> _tessBaseApiSetPageSegMode;
+    private readonly delegate* unmanaged[Cdecl]<nint, PageSegmentationMode> _tessBaseApiGetPageSegMode;
 
     // BaseAPI Input/Output Names
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, void> _tessBaseApiSetInputName;
@@ -90,7 +90,7 @@ public unsafe class TesseractLibrary : IDisposable
 
     // BaseAPI Dictionary
     private readonly delegate* unmanaged[Cdecl]<nint, byte*, int> _tessBaseApiIsValidWord;
-    private readonly delegate* unmanaged[Cdecl]<nint, PageSegmentMode, byte*, byte> _tessBaseApiAdaptToWordStr;
+    private readonly delegate* unmanaged[Cdecl]<nint, PageSegmentationMode, byte*, byte> _tessBaseApiAdaptToWordStr;
 
     // BaseAPI Clear
     private readonly delegate* unmanaged[Cdecl]<nint, void> _tessBaseApiClear;
@@ -234,9 +234,9 @@ public unsafe class TesseractLibrary : IDisposable
         _tessBaseApiPrintVariablesToFile = (delegate* unmanaged[Cdecl]<nint, byte*, byte>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIPrintVariablesToFile");
 
         // BaseAPI Page Segmentation
-        _tessBaseApiSetPageSegMode = (delegate* unmanaged[Cdecl]<nint, PageSegmentMode, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetPageSegMode");
+        _tessBaseApiSetPageSegMode = (delegate* unmanaged[Cdecl]<nint, PageSegmentationMode, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetPageSegMode");
 
-        _tessBaseApiGetPageSegMode = (delegate* unmanaged[Cdecl]<nint, PageSegmentMode>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetPageSegMode");
+        _tessBaseApiGetPageSegMode = (delegate* unmanaged[Cdecl]<nint, PageSegmentationMode>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPIGetPageSegMode");
 
         // BaseAPI Input/Output Names
         _tessBaseApiSetInputName = (delegate* unmanaged[Cdecl]<nint, byte*, void>)NativeLibrary.GetExport(_libraryHandle, "TessBaseAPISetInputName");
@@ -317,7 +317,7 @@ public unsafe class TesseractLibrary : IDisposable
                 "TessBaseAPIIsValidWord");
 
         _tessBaseApiAdaptToWordStr =
-            (delegate* unmanaged[Cdecl]<nint, PageSegmentMode, byte*, byte>)NativeLibrary.GetExport(_libraryHandle,
+            (delegate* unmanaged[Cdecl]<nint, PageSegmentationMode, byte*, byte>)NativeLibrary.GetExport(_libraryHandle,
                 "TessBaseAPIAdaptToWordStr");
 
         // BaseAPI Clear
@@ -642,10 +642,10 @@ public unsafe class TesseractLibrary : IDisposable
         _tessBaseApiPrintVariablesToFile(handle, filename);
 
 // BaseAPI Page Segmentation
-    public void TessBaseApiSetPageSegMode(nint handle, PageSegmentMode mode) =>
+    public void TessBaseApiSetPageSegMode(nint handle, PageSegmentationMode mode) =>
         _tessBaseApiSetPageSegMode(handle, mode);
 
-    public PageSegmentMode TessBaseApiGetPageSegMode(nint handle) => _tessBaseApiGetPageSegMode(handle);
+    public PageSegmentationMode TessBaseApiGetPageSegMode(nint handle) => _tessBaseApiGetPageSegMode(handle);
 
 // BaseAPI Input/Output Names
     public void TessBaseApiSetInputName(nint handle, byte* name) => _tessBaseApiSetInputName(handle, name);
@@ -713,7 +713,7 @@ public unsafe class TesseractLibrary : IDisposable
 // BaseAPI Dictionary
     public int TessBaseApiIsValidWord(nint handle, byte* word) => _tessBaseApiIsValidWord(handle, word);
 
-    public byte TessBaseApiAdaptToWordStr(nint handle, PageSegmentMode mode, byte* wordStr) =>
+    public byte TessBaseApiAdaptToWordStr(nint handle, PageSegmentationMode mode, byte* wordStr) =>
         _tessBaseApiAdaptToWordStr(handle, mode, wordStr);
 
 // BaseAPI Clear

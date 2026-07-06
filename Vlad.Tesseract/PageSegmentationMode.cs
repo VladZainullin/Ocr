@@ -1,6 +1,6 @@
 ﻿namespace Vlad.Tesseract;
 
-public enum PageSegmentMode
+public enum PageSegmentationMode
 {
     OsdOnly = 0,
     AutoOsd = 1,

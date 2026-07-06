@@ -256,7 +256,7 @@ internal static partial class Native
     /// <param name="mode">Page segmentation mode.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetPageSegMode")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetPageSegMode(nint handle, PageSegmentMode mode);
+    public static partial void TessBaseApiSetPageSegMode(nint handle, PageSegmentationMode mode);
 
     /// <summary>
     /// Gets the current page segmentation mode of the Tesseract engine.
@@ -265,7 +265,7 @@ internal static partial class Native
     /// <returns>Current page segmentation mode.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetPageSegMode")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial PageSegmentMode TessBaseApiGetPageSegMode(nint handle);
+    public static partial PageSegmentationMode TessBaseApiGetPageSegMode(nint handle);
 
     #endregion
 
@@ -644,7 +644,7 @@ internal static partial class Native
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIAdaptToWordStr", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiAdaptToWordStr(nint handle, PageSegmentMode mode, string wordStr);
+    public static partial bool TessBaseApiAdaptToWordStr(nint handle, PageSegmentationMode mode, string wordStr);
 
     #endregion
 
