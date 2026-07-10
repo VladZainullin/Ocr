@@ -1,6 +1,6 @@
 ﻿namespace Vlad.Tesseract;
 
-public enum TessEngineEngineMode
+public enum TessOcrEngineMode2
 {
     OemTesseractOnly = 0,
     OemLstmOnly = 1,
