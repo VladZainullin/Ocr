@@ -6,6 +6,7 @@ namespace Vlad.Tesseract;
 public sealed unsafe class Engine
 {
     private const int MaxStackSize = 256;
+    private static readonly Encoding Encoding = Encoding.UTF8;
 
     private readonly nint _enginePtr;
     private readonly nint _handle;
@@ -28,10 +29,9 @@ public sealed unsafe class Engine
     {
         _tessBaseApiInit1 = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, TessOcrEngineMode, byte**, int, int>)
             NativeLibrary.GetExport(_handle, "TessBaseAPIInit1");
-
-        // Подсчёт размера строк с учётом завершающего нуля
-        var dataPathByteCount = checked(Encoding.UTF8.GetByteCount(dataPath) + 1);
-        var languageByteCount = checked(Encoding.UTF8.GetByteCount(language) + 1);
+        
+        var dataPathByteCount = checked(Encoding.GetByteCount(dataPath) + 1);
+        var languageByteCount = checked(Encoding.GetByteCount(language) + 1);
 
         byte* pDataPath;
         byte* pLanguage;
@@ -72,7 +72,7 @@ public sealed unsafe class Engine
 
             for (var i = 0; i < configsSize; i++)
             {
-                var configBytes = Encoding.UTF8.GetBytes(configs[i]);
+                var configBytes = Encoding.GetBytes(configs[i]);
                 var configPtr = Marshal.AllocHGlobal(configBytes.Length + 1);
 
                 Marshal.Copy(configBytes, 0, configPtr, configBytes.Length);
@@ -90,11 +90,11 @@ public sealed unsafe class Engine
         try
         {
             var dataPathSpan = new Span<byte>(pDataPath, dataPathByteCount);
-            var writtenData = Encoding.UTF8.GetBytes(dataPath, dataPathSpan);
+            var writtenData = Encoding.GetBytes(dataPath, dataPathSpan);
             dataPathSpan[writtenData] = 0;
 
             var languageSpan = new Span<byte>(pLanguage, languageByteCount);
-            var writtenLang = Encoding.UTF8.GetBytes(language, languageSpan);
+            var writtenLang = Encoding.GetBytes(language, languageSpan);
             languageSpan[writtenLang] = 0;
 
             return _tessBaseApiInit1(
@@ -116,8 +116,7 @@ public sealed unsafe class Engine
                     if (ptr != IntPtr.Zero)
                         Marshal.FreeHGlobal(ptr);
                 }
-
-                // Освобождаем массив указателей
+                
                 if (configsHandle != IntPtr.Zero)
                     Marshal.FreeHGlobal(configsHandle);
             }
@@ -129,8 +128,8 @@ public sealed unsafe class Engine
         _tessBaseApiInit2 = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, TessOcrEngineMode, int>)
             NativeLibrary.GetExport(_handle, "TessBaseAPIInit2");
 
-        var dataPathByteCount = checked(Encoding.UTF8.GetByteCount(dataPath) + 1);
-        var languageByteCount = checked(Encoding.UTF8.GetByteCount(language) + 1);
+        var dataPathByteCount = checked(Encoding.GetByteCount(dataPath) + 1);
+        var languageByteCount = checked(Encoding.GetByteCount(language) + 1);
 
         byte* pDataPath;
         byte* pLanguage;
@@ -163,11 +162,11 @@ public sealed unsafe class Engine
         try
         {
             var dataPathSpan = new Span<byte>(pDataPath, dataPathByteCount);
-            var writtenData = Encoding.UTF8.GetBytes(dataPath, dataPathSpan);
+            var writtenData = Encoding.GetBytes(dataPath, dataPathSpan);
             dataPathSpan[writtenData] = 0;
 
             var languageSpan = new Span<byte>(pLanguage, languageByteCount);
-            var writtenLang = Encoding.UTF8.GetBytes(language, languageSpan);
+            var writtenLang = Encoding.GetBytes(language, languageSpan);
             languageSpan[writtenLang] = 0;
 
             return _tessBaseApiInit2(_enginePtr, pDataPath, pLanguage, oem) == 0;
@@ -184,8 +183,8 @@ public sealed unsafe class Engine
         _tessBaseApiInit3 = (delegate* unmanaged[Cdecl]<nint, byte*, byte*, int>)
             NativeLibrary.GetExport(_handle, "TessBaseAPIInit3");
 
-        var dataPathByteCount = checked(Encoding.UTF8.GetByteCount(dataPath) + 1);
-        var languageByteCount = checked(Encoding.UTF8.GetByteCount(language) + 1);
+        var dataPathByteCount = checked(Encoding.GetByteCount(dataPath) + 1);
+        var languageByteCount = checked(Encoding.GetByteCount(language) + 1);
 
         byte* pDataPath;
         byte* pLanguage;
@@ -218,11 +217,11 @@ public sealed unsafe class Engine
         try
         {
             var dataPathSpan = new Span<byte>(pDataPath, dataPathByteCount);
-            var writtenData = Encoding.UTF8.GetBytes(dataPath, dataPathSpan);
+            var writtenData = Encoding.GetBytes(dataPath, dataPathSpan);
             dataPathSpan[writtenData] = 0;
 
             var languageSpan = new Span<byte>(pLanguage, languageByteCount);
-            var writtenLang = Encoding.UTF8.GetBytes(language, languageSpan);
+            var writtenLang = Encoding.GetBytes(language, languageSpan);
             languageSpan[writtenLang] = 0;
 
             return _tessBaseApiInit3(_enginePtr, pDataPath, pLanguage) == 0;
