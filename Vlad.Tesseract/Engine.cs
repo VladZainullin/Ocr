@@ -1,4 +1,5 @@
-﻿using System.Runtime.InteropServices;
+﻿using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Vlad.Tesseract;
@@ -231,5 +232,29 @@ public sealed unsafe class Engine
             if (freeDataPath) Marshal.FreeHGlobal((nint)pDataPath);
             if (freeLanguage) Marshal.FreeHGlobal((nint)pLanguage);
         }
+    }
+
+    private static bool TryAllocation(ReadOnlySpan<char> value, out byte* ptr)
+    {
+        var byteCount = checked(Encoding.UTF8.GetByteCount(value) + 1);
+    
+        if (byteCount > MaxStackSize)
+        {
+            ptr = (byte*)Marshal.AllocHGlobal(byteCount);
+            if (ptr == null)
+                return false;
+            
+            Encoding.UTF8.GetBytes(value, new Span<byte>(ptr, byteCount));
+            ptr[byteCount - 1] = 0;
+            return true;
+        }
+        
+        Span<byte> stackBuffer = stackalloc byte[byteCount];
+        Encoding.UTF8.GetBytes(value, stackBuffer);
+        stackBuffer[byteCount - 1] = 0;
+        
+        ptr = (byte*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(stackBuffer));
+
+        return false;
     }
 }
