@@ -233,28 +233,59 @@ public sealed unsafe class Engine
             if (freeLanguage) Marshal.FreeHGlobal((nint)pLanguage);
         }
     }
-
-    private static bool TryAllocation(ReadOnlySpan<char> value, out byte* ptr)
-    {
-        var byteCount = checked(Encoding.UTF8.GetByteCount(value) + 1);
     
-        if (byteCount > MaxStackSize)
-        {
-            ptr = (byte*)Marshal.AllocHGlobal(byteCount);
-            if (ptr == null)
-                return false;
-            
-            Encoding.UTF8.GetBytes(value, new Span<byte>(ptr, byteCount));
-            ptr[byteCount - 1] = 0;
-            return true;
-        }
-        
-        Span<byte> stackBuffer = stackalloc byte[byteCount];
-        Encoding.UTF8.GetBytes(value, stackBuffer);
-        stackBuffer[byteCount - 1] = 0;
-        
-        ptr = (byte*)Unsafe.AsPointer(ref MemoryMarshal.GetReference(stackBuffer));
+    private static byte** EncodeStringArray(ReadOnlySpan<string> values, out nint heapBlock, out bool free)
+    {
+        heapBlock = 0;
 
-        return false;
+        if (values.IsEmpty)
+        {
+            free = false;
+            return null;
+        }
+
+        var pointerBytes = values.Length * sizeof(byte*);
+
+        var stringBytes = 0;
+        foreach (var s in values)
+            stringBytes += Encoding.GetByteCount(s) + 1;
+
+        var totalBytes = pointerBytes + stringBytes;
+
+        byte* block;
+
+        if (totalBytes <= MaxStackSize)
+        {
+            var stackallocBlock = stackalloc byte[totalBytes];
+            block = stackallocBlock;
+            free = false;
+        }
+        else
+        {
+            block = (byte*)Marshal.AllocHGlobal(totalBytes);
+            heapBlock = (nint)block;
+            free = true;
+        }
+
+        var ptrs = (byte**)block;
+
+        var current = block + pointerBytes;
+
+        for (var i = 0; i < values.Length; i++)
+        {
+            ptrs[i] = current;
+
+            var span = new Span<byte>(
+                current,
+                Encoding.GetByteCount(values[i]) + 1);
+
+            var written = Encoding.GetBytes(values[i], span);
+
+            span[written] = 0;
+
+            current += written + 1;
+        }
+
+        return ptrs;
     }
 }
