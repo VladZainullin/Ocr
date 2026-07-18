@@ -1,23 +1,16 @@
-﻿services:
+﻿name: "ocr"
+
+services:
   api:
-    image: ocr
     container_name: ocr
     build:
       context: .
       dockerfile: Web/Dockerfile
     environment:
       ASPNETCORE_ENVIRONMENT: "Development"
+      TESSERACT__PATH: "/usr/share/tesseract-ocr/5/tessdata"
+      TESSERACT__LANGUAGE: "rus+eng"
+    volumes:
+      - /Users/vadislavzainullin/MEGAsync/tesseract:/usr/share/tesseract-ocr/5/tessdata
     ports:
-      - "7171:8080"
-    depends_on:
-      - s3
-    networks:
-      - s3-api-bridge
-
-networks:
-  s3-api-bridge:
-    driver: bridge
-
-volumes:
-  minio_data:
-
+      - "7207:8080"
