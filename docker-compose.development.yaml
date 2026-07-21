@@ -12,5 +12,11 @@ services:
       TESSERACT__LANGUAGE: "rus+eng"
     volumes:
       - /Users/vadislavzainullin/MEGAsync/tesseract:/usr/share/tesseract-ocr/5/tessdata
+    networks:
+      - nginx-network
     ports:
       - "7207:8080"
+        
+networks:
+  nginx-network:
+    external: true
