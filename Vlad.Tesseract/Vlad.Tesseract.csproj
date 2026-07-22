@@ -4,5 +4,6 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\Domain\Domain.csproj" />
+    <ProjectReference Include="..\OcrService.Contracts\OcrService.Contracts.csproj" />
   </ItemGroup>
 </Project>
