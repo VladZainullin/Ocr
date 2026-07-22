@@ -3,6 +3,7 @@
 services:
   api:
     container_name: ocr
+    image: ocr
     build:
       context: .
       dockerfile: Web/Dockerfile
