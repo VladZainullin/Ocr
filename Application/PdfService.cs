@@ -149,10 +149,10 @@ internal sealed class PdfService(
         {
             await foreach (var task in imageChannel.Reader.ReadAllAsync(cancellationToken))
             {
-                var bytes = imageService.Prepare(task.Image.Span);
-                if (bytes.Length == 0) continue;
-
-                var imageModel = ocr.Recognition(bytes);
+                if (!imageService.TryPrepare(task.Image.Span, out var data, out var width, out var height,
+                        out var bytesPerPixel)) continue;
+                
+                var imageModel = ocr.Recognition(data, width, height, bytesPerPixel);
                 if (ReferenceEquals(imageModel, null)) continue;
 
                 var aggregated = new AggregatedImageTask(task.PageNumber, imageModel);
