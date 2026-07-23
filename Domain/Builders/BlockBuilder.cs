@@ -4,30 +4,34 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
 
-public sealed class BlockBuilder : IDisposable
+public sealed class BlockBuilder : IResettable
 {
     private readonly ObjectPool<StringBuilder> _stringBuilderPool;
-    private readonly StringBuilder _textBuilder;
+
+    private StringBuilder? _textBuilder;
     private List<LineModel> _lines = [];
 
     internal BlockBuilder(ObjectPool<StringBuilder> stringBuilderPool)
     {
+        ArgumentNullException.ThrowIfNull(stringBuilderPool);
+
         _stringBuilderPool = stringBuilderPool;
-        _textBuilder = stringBuilderPool.Get();
     }
 
     public void AddLine(LineModel line)
     {
         ArgumentNullException.ThrowIfNull(line);
-        
-        if (_textBuilder.Length > 0)
-        {
-            _textBuilder.Append(' ');
-        }
-        
-        _textBuilder.Append(line.Text);
-        
+
         _lines.Add(line);
+
+        var textBuilder = _textBuilder ??= _stringBuilderPool.Get();
+
+        if (textBuilder.Length > 0)
+        {
+            textBuilder.Append(' ');
+        }
+
+        textBuilder.Append(line.Text);
     }
 
     public BlockModel? Build()
@@ -39,23 +43,34 @@ public sealed class BlockBuilder : IDisposable
 
         var blockModel = new BlockModel
         {
-            Text = _textBuilder.ToString(),
+            Text = _textBuilder?.ToString() ?? string.Empty,
             Lines = _lines
         };
 
-        Clear();
+        ClearAfterBuild();
+
         return blockModel;
     }
 
-    private void Clear()
+    public bool TryReset()
     {
         _lines = [];
-        _textBuilder.Clear();
+
+        if (_textBuilder is not null)
+        {
+            var textBuilder = _textBuilder;
+            _textBuilder = null;
+
+            textBuilder.Clear();
+            _stringBuilderPool.Return(textBuilder);
+        }
+
+        return true;
     }
 
-    public void Dispose()
+    private void ClearAfterBuild()
     {
-        _textBuilder.Clear();
-        _stringBuilderPool.Return(_textBuilder);
+        _lines = [];
+        _textBuilder?.Clear();
     }
 }

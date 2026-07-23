@@ -12,8 +12,8 @@ internal sealed class ImageBuilderPoolPolicy(ObjectPool<StringBuilder> stringBui
         return new ImageBuilder(stringBuilderObjectPool);
     }
 
-    public bool Return(ImageBuilder obj)
+    public bool Return(ImageBuilder builder)
     {
-        return true;
+        return builder.TryReset();
     }
 }

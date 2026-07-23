@@ -4,30 +4,34 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
 
-public sealed class ImageBuilder : IDisposable
+public sealed class ImageBuilder : IResettable
 {
-    private readonly StringBuilder _textBuilder;
-    private List<BlockModel> _blocks = [];
     private readonly ObjectPool<StringBuilder> _stringBuilderPool;
+
+    private StringBuilder? _textBuilder;
+    private List<BlockModel> _blocks = [];
 
     internal ImageBuilder(ObjectPool<StringBuilder> stringBuilderPool)
     {
+        ArgumentNullException.ThrowIfNull(stringBuilderPool);
+
         _stringBuilderPool = stringBuilderPool;
-        _textBuilder = stringBuilderPool.Get();
     }
 
     public void AddBlock(BlockModel block)
     {
         ArgumentNullException.ThrowIfNull(block);
-        
+
         _blocks.Add(block);
 
-        if (_blocks.Count > 0)
+        var textBuilder = _textBuilder ??= _stringBuilderPool.Get();
+
+        if (textBuilder.Length > 0)
         {
-            _textBuilder.Append(' ');
+            textBuilder.Append(' ');
         }
-        
-        _textBuilder.Append(block.Text);
+
+        textBuilder.Append(block.Text);
     }
 
     public ImageModel? Build()
@@ -36,26 +40,37 @@ public sealed class ImageBuilder : IDisposable
         {
             return null;
         }
-        
+
         var image = new ImageModel
         {
-            Text = _textBuilder.ToString(),
+            Text = _textBuilder?.ToString() ?? string.Empty,
             Blocks = _blocks
         };
-        
-        Clear();
+
+        ClearAfterBuild();
+
         return image;
     }
 
-    public void Clear()
+    public bool TryReset()
     {
         _blocks = [];
-        _textBuilder.Clear();
+
+        if (_textBuilder is not null)
+        {
+            var textBuilder = _textBuilder;
+            _textBuilder = null;
+
+            textBuilder.Clear();
+            _stringBuilderPool.Return(textBuilder);
+        }
+
+        return true;
     }
-    
-    public void Dispose()
+
+    private void ClearAfterBuild()
     {
-        _textBuilder.Clear();
-        _stringBuilderPool.Return(_textBuilder);
+        _blocks = [];
+        _textBuilder?.Clear();
     }
 }

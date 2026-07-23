@@ -8,9 +8,9 @@ namespace Vlad.Tesseract;
 /// All methods use the Cdecl calling convention.
 /// Methods returning IntPtr strings must be freed with the corresponding TessDelete* function.
 /// </summary>
-internal static partial class Native
+internal static partial class TesseractNative
 {
-    private const string LibraryName = "tesseract50";
+    private const string LibraryName = "/opt/homebrew/lib/libtesseract.5.dylib";
 
     #region Version
 
@@ -54,6 +54,19 @@ internal static partial class Native
     #endregion
 
     #region BaseAPI Initialization
+
+    /// <summary>
+    /// Initializes the Tesseract engine with the specified data path and language string.
+    /// Equivalent to Init(dataPath, language, OEM_DEFAULT).
+    /// </summary>
+    /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
+    /// <param name="dataPath">Path to the tessdata directory.</param>
+    /// <param name="language">Language code string (e.g., "eng", "rus+eng").</param>
+    /// <param name="oem">Ocr engine mode</param>
+    /// <returns>0 on success, negative value on failure.</returns>
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit2", StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial int TessBaseApiInit2(nint handle, string dataPath, string language, TessOcrEngineMode oem);
 
     /// <summary>
     /// Initializes the Tesseract engine with the specified data path and language string.
@@ -179,10 +192,12 @@ internal static partial class Native
     /// </summary>
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     /// <param name="name">Name of the variable.</param>
+    /// <param name="value">Value of the variable</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetStringVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetStringVariable(nint handle, string name);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessBaseApiGetStringVariable(nint handle, string name, out string value);
 
     /// <summary>
     /// Gets the OpenCL device description string if OpenCL is enabled.
@@ -377,7 +392,8 @@ internal static partial class Native
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIRecognize")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiRecognize(nint handle, nint monitor);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessBaseApiRecognize(nint handle, nint monitor);
 
     /// <summary>
     /// Processes a multi-page image file and produces recognition results using the given renderer.

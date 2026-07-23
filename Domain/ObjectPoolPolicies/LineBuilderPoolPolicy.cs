@@ -12,8 +12,8 @@ internal sealed class LineBuilderPoolPolicy(ObjectPool<StringBuilder> stringBuil
         return new LineBuilder(stringBuilderObjectPool);
     }
 
-    public bool Return(LineBuilder obj)
+    public bool Return(LineBuilder builder)
     {
-        return true;
+        return builder.TryReset();
     }
 }

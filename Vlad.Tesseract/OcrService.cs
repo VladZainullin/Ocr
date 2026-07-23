@@ -1,56 +1,35 @@
-using System.Diagnostics;
-using Microsoft.Extensions.ObjectPool;
-using OcrService.Contracts;
-using Tesseract;
 using Domain.Builders;
 using Domain.Models;
+using Microsoft.Extensions.ObjectPool;
+using OcrService.Contracts;
 
-namespace OcrService;
+namespace Vlad.Tesseract;
 
 internal sealed class OcrService(
     ObjectPool<TesseractEngine> tesseractEngineObjectPool,
     ObjectPool<ImageBuilder> imageBuilderObjectPool,
     ObjectPool<BlockBuilder> blockBuilderObjectPool,
-    ObjectPool<LineBuilder> lineBuilderObjectPool,
-    ActivitySource activitySource) : IOcrService
+    ObjectPool<LineBuilder> lineBuilderObjectPool) : IOcrService
 {
     public ImageModel? Recognition(byte[] bytes, uint width, uint height, uint bytesPerPixel)
-    {
-        using var activity = activitySource.StartActivity();
-        ArgumentNullException.ThrowIfNull(bytes);
-        
-        var tesseractEngine = tesseractEngineObjectPool.Get();
-        
-        try
-        {
-            using var pix = Pix.LoadFromMemory(bytes);
-            using var page = tesseractEngine.Process(pix);
-            using var iterator = page.GetIterator();
-            
-            var imageModel = ProcessIterator(iterator);
-
-            return imageModel;
-        }
-        finally
-        {
-            tesseractEngineObjectPool.Return(tesseractEngine);
-        }
-    }
-
-    private ImageModel? ProcessIterator(ResultIterator iterator)
     {
         var imageBuilder = imageBuilderObjectPool.Get();
         var blockBuilder = blockBuilderObjectPool.Get();
         var lineBuilder = lineBuilderObjectPool.Get();
-        
+        var tesseractEngine = tesseractEngineObjectPool.Get();
+
+        using var pix = new Pix(bytes);
+        tesseractEngine.SetImage(pix);
+
+        tesseractEngine.Recognize();
+
+        var iterator = tesseractEngine.GetIterator();
+        iterator.Begin();
         try
         {
-            iterator.Begin();
-            
             do
             {
                 var word = iterator.GetText(PageIteratorLevel.Word);
-                
                 if (string.IsNullOrWhiteSpace(word))
                 {
                     continue;
@@ -58,7 +37,7 @@ internal sealed class OcrService(
                 
                 lineBuilder.AddWord(word);
 
-                if (iterator.IsAtFinalOf(PageIteratorLevel.TextLine, PageIteratorLevel.Word))
+                if (iterator.IsAtFinalElement(PageIteratorLevel.Line, PageIteratorLevel.Word))
                 {
                     var lineModel = lineBuilder.Build();
                     if (lineModel != null)
@@ -66,8 +45,8 @@ internal sealed class OcrService(
                         blockBuilder.AddLine(lineModel);
                     }
                 }
-
-                if (iterator.IsAtFinalOf(PageIteratorLevel.Block, PageIteratorLevel.Word))
+                
+                if (iterator.IsAtFinalElement(PageIteratorLevel.Block, PageIteratorLevel.Word))
                 {
                     var blockModel = blockBuilder.Build();
                     if (blockModel != null)
@@ -78,12 +57,15 @@ internal sealed class OcrService(
             } while (iterator.Next(PageIteratorLevel.Word));
             
             return imageBuilder.Build();
+            
         }
         finally
         {
+            iterator.Dispose();
             imageBuilderObjectPool.Return(imageBuilder);
             blockBuilderObjectPool.Return(blockBuilder);
             lineBuilderObjectPool.Return(lineBuilder);
+            tesseractEngineObjectPool.Return(tesseractEngine);
         }
     }
 }

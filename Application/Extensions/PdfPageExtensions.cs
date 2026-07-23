@@ -62,7 +62,6 @@ public static class PdfPageExtensions
         }
         finally
         {
-            blockBuilder.Dispose();
             blockBuilderObjectPool.Return(blockBuilder);
         }
     }
@@ -88,7 +87,6 @@ public static class PdfPageExtensions
         }
         finally
         {
-            lineBuilder.Dispose();
             lineBuilderObjectPool.Return(lineBuilder);
         }
     }

@@ -1,146 +1,96 @@
 ﻿using System.Runtime.InteropServices;
-using Domain.Builders;
-using Domain.Models;
-using Microsoft.Extensions.ObjectPool;
 
 namespace Vlad.Tesseract;
 
-public sealed class TesseractEngine : IDisposable
+internal sealed class TesseractEngine : IDisposable
 {
-    private readonly ObjectPool<ImageBuilder> _imageBuilderObjectPool;
-    private readonly ObjectPool<BlockBuilder> _blockBuilderObjectPool;
-    private readonly ObjectPool<LineBuilder> _lineBuilderObjectPool;
     private readonly IntPtr _handle;
     private bool _disposed;
 
-    public TesseractEngine(
-        string dataPath,
-        string language,
-        ObjectPool<ImageBuilder> imageBuilderObjectPool,
-        ObjectPool<BlockBuilder> blockBuilderObjectPool,
-        ObjectPool<LineBuilder> lineBuilderObjectPool)
+    public TesseractEngine()
     {
-        _imageBuilderObjectPool = imageBuilderObjectPool;
-        _blockBuilderObjectPool = blockBuilderObjectPool;
-        _lineBuilderObjectPool = lineBuilderObjectPool;
-        _handle = Native.TessBaseApiCreate();
-        if (_handle == IntPtr.Zero)
-            throw new InvalidOperationException("Failed to create Vlad.Tesseract API instance.");
-
-        if (Native.TessBaseApiInit3(_handle, dataPath, language) != 0)
-        {
-            Dispose();
-            throw new InvalidOperationException($"Failed to initialize Vlad.Tesseract with language '{language}'.");
-        }
-        
-        Native.TessBaseApiSetPageSegMode(_handle, PageSegmentationMode.AutoOsd);
+        _handle = TesseractNative.TessBaseApiCreate();
     }
 
-    public unsafe string Recognize(byte[] imageData, uint width, uint height, uint bytesPerPixel)
+    public void SetVariable(string name, string value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiSetVariable(_handle, name, value);
+    }
 
+    public bool TryGetVariable(string name, out string? value)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (TesseractNative.TessBaseApiGetStringVariable(_handle, name, out var v))
+        {
+            value = v;
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+
+    public void SetSegmentationMode(PageSegmentationMode mode)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiSetPageSegMode(_handle, mode);
+    }
+
+    public bool TryInitialization(string dataPath, string language, TessOcrEngineMode oem)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiInit2(_handle, dataPath, language, oem) == 0;
+    }
+
+    public void SetImage(Pix image)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiSetImage2(_handle, image.Handle);
+    }
+
+    public unsafe void SetImage(byte[] imageData, uint width, uint height, uint bytesPerPixel)
+    {
+        var bytesPerLine = width * bytesPerPixel;
         fixed (byte* imagePtr = imageData)
         {
-            var bytesPerLine = width * bytesPerPixel;
-            Native.TessBaseApiSetImage(_handle, (nint)imagePtr, width, height, bytesPerPixel, bytesPerLine);
-
-            var textPtr = Native.TessBaseAPIGetUTF8Text(_handle);
-            if (textPtr == IntPtr.Zero) return string.Empty;
-
-            try
-            {
-                return Marshal.PtrToStringUTF8(textPtr) ?? string.Empty;
-            }
-            finally
-            {
-                Native.TessDeleteText(textPtr);
-            }
+            TesseractNative.TessBaseApiSetImage(_handle, (nint)imagePtr, width, height, bytesPerPixel, bytesPerLine);
         }
     }
-    
-    public unsafe ImageModel? Iterate(byte[] imageData, uint width, uint height, uint bytesPerPixel)
+
+    public string Recognize()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
 
-        var imageBuilder = _imageBuilderObjectPool.Get();
-        var blockBuilder = _blockBuilderObjectPool.Get();
-        var lineBuilder = _lineBuilderObjectPool.Get();
-
+        var textPtr = TesseractNative.TessBaseAPIGetUTF8Text(_handle);
         try
         {
-            fixed (byte* imagePtr = imageData)
-            {
-                var bytesPerLine = width * bytesPerPixel;
-                Native.TessBaseApiSetImage(_handle, (nint)imagePtr, width, height, bytesPerPixel, bytesPerLine);
-
-                var a = Native.TessBaseApiRecognize(_handle, IntPtr.Zero);
-                var iterator = Native.TessBaseApiGetIterator(_handle);
-                try
-                {
-                    do
-                    {
-                        var wordPtr = Native.TessResultIteratorGetUtf8Text(iterator, PageIteratorLevel.Word);
-                        try
-                        {
-                            var word = Marshal.PtrToStringUTF8(wordPtr);
-                            if (string.IsNullOrWhiteSpace(word))
-                            {
-                                continue;
-                            }
-                
-                            lineBuilder.AddWord(word);
-                        }
-                        finally
-                        {
-                            Native.TessDeleteText(wordPtr);
-                        }
-
-                        var lastWordInLine = Native.TessPageIteratorIsAtFinalElement(iterator, PageIteratorLevel.Line, PageIteratorLevel.Word);
-                        if (lastWordInLine != 0)
-                        {
-                            var lineModel = lineBuilder.Build();
-                            if (lineModel != null)
-                            {
-                                blockBuilder.AddLine(lineModel);
-                            }
-                        }
-                
-                        var lastWordInBlock = Native.TessPageIteratorIsAtFinalElement(iterator, PageIteratorLevel.Block, PageIteratorLevel.Word);
-                        if (lastWordInBlock != 0)
-                        {
-                            var blockModel = blockBuilder.Build();
-                            if (blockModel != null)
-                            {
-                                imageBuilder.AddBlock(blockModel);
-                            }
-                        }
-                    } while (Native.TessPageIteratorNext(iterator, PageIteratorLevel.Word));
-            
-                    return imageBuilder.Build();
-                }
-                finally
-                {
-                    Native.TessPageIteratorDelete(iterator);
-                }
-
-            }
+            return Marshal.PtrToStringUTF8(textPtr) ?? string.Empty;
         }
         finally
         {
-            imageBuilder.Dispose();
-            _imageBuilderObjectPool.Return(imageBuilder);
-            blockBuilder.Dispose();
-            _blockBuilderObjectPool.Return(blockBuilder);
-            lineBuilder.Dispose();
-            _lineBuilderObjectPool.Return(lineBuilder);
+            TesseractNative.TessDeleteText(textPtr);
         }
+    }
+
+    public TesseractIterator GetIterator()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        
+        var iterator = TesseractNative.TessBaseApiGetIterator(_handle);
+        return new TesseractIterator(iterator);
+    }
+
+    public void Clear()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiClear(_handle);
     }
 
     public void Dispose()
     {
         if (_disposed) return;
-        Native.TessBaseApiDelete(_handle);
+        TesseractNative.TessBaseApiDelete(_handle);
         _disposed = true;
     }
 }

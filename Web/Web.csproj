@@ -22,6 +22,7 @@
       <ProjectReference Include="..\Domain\Domain.csproj" />
       <ProjectReference Include="..\ImageService\ImageService.csproj" />
       <ProjectReference Include="..\OcrService\OcrService.csproj" />
+      <ProjectReference Include="..\Vlad.Tesseract\Vlad.Tesseract.csproj" />
     </ItemGroup>
     <ItemGroup>
       <Content Include="..\.dockerignore">

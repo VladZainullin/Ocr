@@ -3,8 +3,8 @@ using Carter;
 using Domain;
 using ImageService;
 using Microsoft.FeatureManagement;
-using OcrService;
 using Serilog;
+using Vlad.Tesseract;
 
 namespace Web;
 
@@ -22,7 +22,7 @@ file static class Program
         {
             builder
                 .AddDomain()
-                .AddOcr()
+                .AddTesseract()
                 .AddImageService()
                 .AddApplication();
             

@@ -4,29 +4,34 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
 
-public sealed class LineBuilder : IDisposable
+public sealed class LineBuilder : IResettable
 {
-    private readonly StringBuilder _textBuilder;
+    private StringBuilder? _textBuilder;
     private List<string> _words = [];
+
     private readonly ObjectPool<StringBuilder> _stringBuilderPool;
 
     internal LineBuilder(ObjectPool<StringBuilder> stringBuilderPool)
     {
+        ArgumentNullException.ThrowIfNull(stringBuilderPool);
+
         _stringBuilderPool = stringBuilderPool;
-        _textBuilder = stringBuilderPool.Get();
     }
 
     public void AddWord(string word)
     {
-        ArgumentNullException.ThrowIfNull(word);
-        
+        ArgumentException.ThrowIfNullOrWhiteSpace(word);
+
         _words.Add(word);
-        
-        if (_textBuilder.Length > 0)
+
+        var textBuilder = _textBuilder ??= _stringBuilderPool.Get();
+
+        if (textBuilder.Length > 0)
         {
-            _textBuilder.Append(' ');
+            textBuilder.Append(' ');
         }
-        _textBuilder.Append(word);
+
+        textBuilder.Append(word);
     }
 
     public LineModel? Build()
@@ -36,25 +41,24 @@ public sealed class LineBuilder : IDisposable
             return null;
         }
 
-        var lineModel = new LineModel
+        return new LineModel
         {
-            Text = _textBuilder.ToString(),
+            Text = _textBuilder?.ToString() ?? string.Empty,
             Words = _words
         };
-
-        Clear();
-        return lineModel;
     }
 
-    private void Clear()
+    public bool TryReset()
     {
         _words = [];
-        _textBuilder.Clear();
-    }
 
-    public void Dispose()
-    {
-        _textBuilder.Clear();
-        _stringBuilderPool.Return(_textBuilder);
+        if (_textBuilder is null) return true;
+        var textBuilder = _textBuilder;
+        _textBuilder = null;
+
+        textBuilder.Clear();
+        _stringBuilderPool.Return(textBuilder);
+
+        return true;
     }
 }

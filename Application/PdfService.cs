@@ -64,6 +64,11 @@ internal sealed class PdfService(
 
             aggregatorChannel.Writer.TryComplete();
             await aggregatorTask;
+            
+            return new ResponseModel
+            {
+                Pages = pageBuilders.Select(s => s.Build()).ToList()
+            };
         }
         catch (Exception e)
         {
@@ -79,11 +84,6 @@ internal sealed class PdfService(
                 pageBuilderObjectPool.Return(pageBuilder);
             }
         }
-
-        return new ResponseModel
-        {
-            Pages = pageBuilders.Select(s => s.Build()).ToList()
-        };
     }
 
     private async Task ProcessDocument(

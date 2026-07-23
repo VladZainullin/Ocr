@@ -12,8 +12,8 @@ internal sealed class PageBuilderPoolPolicy(ObjectPool<StringBuilder> stringBuil
         return new PageBuilder(stringBuilderObjectPool);
     }
 
-    public bool Return(PageBuilder obj)
+    public bool Return(PageBuilder builder)
     {
-        return true;
+        return builder.TryReset();
     }
 }

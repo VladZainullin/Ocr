@@ -4,41 +4,36 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Domain.Builders;
 
-public sealed class PageBuilder : IDisposable
+public sealed class PageBuilder : IResettable
 {
-    private readonly StringBuilder _textBuilder;
+    private StringBuilder? _textBuilder;
     private List<ImageModel> _images = [];
     private List<BlockModel> _blocks = [];
     private int _number;
+
     private readonly ObjectPool<StringBuilder> _stringBuilderPool;
 
     internal PageBuilder(ObjectPool<StringBuilder> stringBuilderPool)
     {
+        ArgumentNullException.ThrowIfNull(stringBuilderPool);
+
         _stringBuilderPool = stringBuilderPool;
-        _textBuilder = stringBuilderPool.Get();
     }
 
     public PageBuilder SetNumber(int number)
     {
-        if (number < 1) throw new ArgumentOutOfRangeException(nameof(number), "Number must be greater than or equal to 1.");
-        
-        _number = number;
+        ArgumentOutOfRangeException.ThrowIfLessThan(number, 1);
 
+        _number = number;
         return this;
     }
 
     public PageBuilder AddBlock(BlockModel block)
     {
         ArgumentNullException.ThrowIfNull(block);
-        
-        _blocks.Add(block);
 
-        if (_textBuilder.Length > 0)
-        {
-            _textBuilder.Append(' ');
-        }
-        
-        _textBuilder.Append(block.Text);
+        _blocks.Add(block);
+        AppendText(block.Text);
 
         return this;
     }
@@ -46,44 +41,57 @@ public sealed class PageBuilder : IDisposable
     public PageBuilder AddImage(ImageModel image)
     {
         ArgumentNullException.ThrowIfNull(image);
-        
+
         _images.Add(image);
-        
-        if (_textBuilder.Length > 0)
-        {
-            _textBuilder.Append(' ');
-        }
-        
-        _textBuilder.Append(image.Text);
+        AppendText(image.Text);
 
         return this;
     }
 
     public PageModel Build()
     {
-        var page = new PageModel
+        return new PageModel
         {
             Number = _number,
             Images = _images,
             Blocks = _blocks,
-            Text = _textBuilder.ToString()
+            Text = _textBuilder?.ToString() ?? string.Empty
         };
-
-        Clear();
-        return page;
     }
 
-    public PageBuilder Clear()
+    public bool TryReset()
     {
-        _images = [];
+        _number = 0;
+        
         _blocks = [];
-        _textBuilder.Clear();
-        return this;
+        _images = [];
+
+        if (_textBuilder is not null)
+        {
+            var textBuilder = _textBuilder;
+            _textBuilder = null;
+
+            textBuilder.Clear();
+            _stringBuilderPool.Return(textBuilder);
+        }
+
+        return true;
     }
-    
-    public void Dispose()
+
+    private void AppendText(string? text)
     {
-        _textBuilder.Clear();
-        _stringBuilderPool.Return(_textBuilder);
+        if (string.IsNullOrEmpty(text))
+        {
+            return;
+        }
+
+        var textBuilder = _textBuilder ??= _stringBuilderPool.Get();
+
+        if (textBuilder.Length > 0)
+        {
+            textBuilder.Append(' ');
+        }
+
+        textBuilder.Append(text);
     }
 }

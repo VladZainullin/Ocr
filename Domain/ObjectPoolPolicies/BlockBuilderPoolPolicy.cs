@@ -12,8 +12,8 @@ internal sealed class BlockBuilderPoolPolicy(ObjectPool<StringBuilder> stringBui
         return new BlockBuilder(stringBuilderObjectPool);
     }
 
-    public bool Return(BlockBuilder obj)
+    public bool Return(BlockBuilder builder)
     {
-        return true;
+        return builder.TryReset();
     }
 }
