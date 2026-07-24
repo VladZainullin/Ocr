@@ -18,10 +18,46 @@ internal sealed class TesseractEngine : IDisposable
         TesseractNative.TessBaseApiSetVariable(_handle, name, value);
     }
 
-    public bool TryGetVariable(string name, out string? value)
+    public string? GetVariable(string name)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        if (TesseractNative.TessBaseApiGetStringVariable(_handle, name, out var v))
+        var pointer = TesseractNative.TessBaseApiGetStringVariable(
+            _handle,
+            name);
+
+        return Marshal.PtrToStringUTF8(pointer);
+    }
+    
+    public bool TryGetVariable(string name, out int? value)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (TesseractNative.TessBaseApiGetIntVariable(_handle, name, out var v))
+        {
+            value = v;
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+    
+    public bool TryGetVariable(string name, out double? value)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (TesseractNative.TessBaseApiGetDoubleVariable(_handle, name, out var v))
+        {
+            value = v;
+            return true;
+        }
+
+        value = null;
+        return false;
+    }
+    
+    public bool TryGetVariable(string name, out bool? value)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        if (TesseractNative.TessBaseApiGetBoolVariable(_handle, name, out var v))
         {
             value = v;
             return true;

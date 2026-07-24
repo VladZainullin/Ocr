@@ -1,3 +1,4 @@
+using System;
 using Microsoft.Extensions.ObjectPool;
 
 namespace Vlad.Tesseract;
@@ -8,13 +9,13 @@ internal sealed class TesseractEnginePooledObjectPolicy : IPooledObjectPolicy<Te
     {
         var engine = new TesseractEngine();
 
+        engine.SetVariable("debug_file", "/dev/stderr");
+        
         if (!engine.TryInitialization("/Users/vadislavzainullin/MEGAsync/tesseract", "rus+eng",
                 TessOcrEngineMode.OemLstmOnly)) 
             throw new InvalidOperationException("Cannot create Tesseract engine");
         
-        engine.SetVariable("debug_file", "/dev/stderr");
-        
-        engine.TryGetVariable("log_level", out var logLevel);
+        var a = engine.GetVariable("debug_file");
 
         engine.SetSegmentationMode(PageSegmentationMode.Auto);
             

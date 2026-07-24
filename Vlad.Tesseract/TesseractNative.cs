@@ -192,12 +192,10 @@ internal static partial class TesseractNative
     /// </summary>
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     /// <param name="name">Name of the variable.</param>
-    /// <param name="value">Value of the variable</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetStringVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiGetStringVariable(nint handle, string name, out string value);
+    public static partial nint TessBaseApiGetStringVariable(nint handle, string name);
 
     /// <summary>
     /// Gets the OpenCL device description string if OpenCL is enabled.
