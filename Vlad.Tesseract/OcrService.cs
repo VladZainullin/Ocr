@@ -24,9 +24,10 @@ internal sealed class OcrService(
         tesseractEngine.Recognize();
 
         var iterator = tesseractEngine.GetIterator();
-        iterator.Begin();
         try
         {
+            iterator.Begin();
+            
             do
             {
                 var word = iterator.GetText(PageIteratorLevel.Word);
