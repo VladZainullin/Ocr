@@ -11,7 +11,7 @@ internal sealed class OcrService(
     ObjectPool<BlockBuilder> blockBuilderObjectPool,
     ObjectPool<LineBuilder> lineBuilderObjectPool) : IOcrService
 {
-    public ImageModel? Recognition(byte[] bytes, uint width, uint height, uint bytesPerPixel)
+    public ImageModel? Recognition(byte[] bytes)
     {
         var imageBuilder = imageBuilderObjectPool.Get();
         var blockBuilder = blockBuilderObjectPool.Get();

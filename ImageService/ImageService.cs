@@ -7,13 +7,9 @@ namespace ImageService;
 
 internal sealed partial class ImageService(ILogger<ImageService> logger, ActivitySource activitySource) : IImageService
 {
-    public bool TryPrepare(ReadOnlySpan<byte> bytes, out byte[] data, out uint width, out uint height, out uint bytesPerPixel)
+    public bool TryPrepare(ReadOnlySpan<byte> bytes, out byte[] data)
     {
         data = [];
-        width = 0;
-        height = 0;
-        bytesPerPixel = 0;
-        
         using var activity = activitySource.StartActivity();
         if (bytes.IsEmpty) return false;
         
@@ -48,10 +44,6 @@ internal sealed partial class ImageService(ILogger<ImageService> logger, Activit
             image.Strip();
 
             data = image.ToByteArray();
-            height = image.Height;
-            width = image.Width;
-            bytesPerPixel = image.ChannelCount;
-            
             return true;
         }
         catch (Exception e)

@@ -14,7 +14,7 @@ internal sealed class OcrService(
     ObjectPool<LineBuilder> lineBuilderObjectPool,
     ActivitySource activitySource) : IOcrService
 {
-    public ImageModel? Recognition(byte[] bytes, uint width, uint height, uint bytesPerPixel)
+    public ImageModel? Recognition(byte[] bytes)
     {
         using var activity = activitySource.StartActivity();
         ArgumentNullException.ThrowIfNull(bytes);
