@@ -251,10 +251,23 @@ internal sealed class TesseractEngine : IDisposable
         TesseractNative.TessBaseApiClear(_handle);
     }
 
+    public void ClearAdaptiveClassifier()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiAdaptiveClassifier(_handle);
+    }
+
     public bool IsValidWord(string word)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         return TesseractNative.TessBaseApiIsValidWord(_handle, word);
+    }
+
+    public Pix GetThresholdedImage()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var pixPtr = TesseractNative.TessBaseApiGetThresholdedImage(_handle);
+        return new Pix(pixPtr);
     }
 
     public void Dispose()

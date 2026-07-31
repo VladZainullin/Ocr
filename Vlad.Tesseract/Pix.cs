@@ -12,6 +12,11 @@ internal sealed unsafe class Pix : IDisposable
             _handle = LeptonicaNative.PixReadMem((nint)ptr, data.Length);
         }
     }
+
+    public Pix(nint handle)
+    {
+        _handle = handle;
+    }
     
     public nint Handle => _handle;
 
