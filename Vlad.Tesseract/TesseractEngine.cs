@@ -98,13 +98,21 @@ internal sealed class TesseractEngine : IDisposable
         TesseractNative.TessBaseApiSetInputName(_handle, name);
     }
 
-    public string? InputName
+    public string InputName
     {
         get
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            var inputNamePtr = TesseractNative.TessBaseApiGetInputName(_handle);
-            return Marshal.PtrToStringUTF8(inputNamePtr);
+            return TesseractNative.TessBaseApiGetInputName(_handle);
+        }
+    }
+
+    public string Text
+    {
+        get
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            return TesseractNative.TessBaseAPIGetUTF8Text(_handle);
         }
     }
 
@@ -138,21 +146,6 @@ internal sealed class TesseractEngine : IDisposable
         fixed (byte* imagePtr = imageData)
         {
             TesseractNative.TessBaseApiSetImage(_handle, (nint)imagePtr, width, height, bytesPerPixel, bytesPerLine);
-        }
-    }
-
-    public string Recognize()
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-
-        var textPtr = TesseractNative.TessBaseAPIGetUTF8Text(_handle);
-        try
-        {
-            return Marshal.PtrToStringUTF8(textPtr) ?? string.Empty;
-        }
-        finally
-        {
-            TesseractNative.TessDeleteText(textPtr);
         }
     }
 

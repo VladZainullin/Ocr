@@ -307,9 +307,9 @@ internal static partial class TesseractNative
     /// </summary>
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     /// <returns>Pointer to a null-terminated UTF-8 string containing the input name.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInputName")]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInputName",  StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetInputName(nint handle);
+    public static partial string TessBaseApiGetInputName(nint handle);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetDatapath", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -430,9 +430,9 @@ internal static partial class TesseractNative
     /// </summary>
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUTF8Text")]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUTF8Text",  StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseAPIGetUTF8Text(nint handle);
+    public static partial string TessBaseAPIGetUTF8Text(nint handle);
 
     /// <summary>
     /// Gets the recognized text in hOCR format (HTML-based OCR markup).

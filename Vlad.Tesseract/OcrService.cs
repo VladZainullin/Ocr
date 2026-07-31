@@ -21,7 +21,7 @@ internal sealed class OcrService(
         using var pix = new Pix(bytes);
         tesseractEngine.SetImage(pix);
 
-        tesseractEngine.Recognize();
+        _ = tesseractEngine.Text;
 
         var iterator = tesseractEngine.GetIterator();
         try
