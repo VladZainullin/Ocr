@@ -280,6 +280,11 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial PageSegmentationMode TessBaseApiGetPageSegMode(nint handle);
 
+
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetRectangle")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void TessBaseApiSetRectangle(int left, int top, int width, int height);
+
     #endregion
 
     #region BaseAPI Input/Output Names

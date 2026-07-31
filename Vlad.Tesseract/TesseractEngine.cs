@@ -126,6 +126,12 @@ internal sealed class TesseractEngine : IDisposable
         TesseractNative.TessBaseApiSetImage2(_handle, image.Handle);
     }
 
+    public void SetRectangle(int left, int top, int width, int height)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiSetRectangle(left, top, width, height);
+    }
+
     public unsafe void SetImage(byte[] imageData, uint width, uint height, uint bytesPerPixel)
     {
         var bytesPerLine = width * bytesPerPixel;
