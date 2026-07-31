@@ -10,6 +10,7 @@ public static class DependencyInjection
 {
     public static IHostApplicationBuilder AddTesseract(this IHostApplicationBuilder builder)
     {
+        builder.Services.TryAddSingleton<TesseractNativeLogBridge>();
         builder.Services.TryAddSingleton<TesseractEnginePooledObjectPolicy>();
         builder.Services.TryAddSingleton<ObjectPool<TesseractEngine>>(static serviceProvider =>
         {
