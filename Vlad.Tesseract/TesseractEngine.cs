@@ -12,14 +12,9 @@ internal sealed class TesseractEngine : IDisposable
         _handle = TesseractNative.TessBaseApiCreate();
     }
 
-    public static string? Version
-    {
-        get
-        {
-            var version = TesseractNative.TessVersion();
-            return Marshal.PtrToStringUTF8(version);
-        }
-    }
+    public static string Version => TesseractNative.TessVersion();
+
+    public static string DataPath => TesseractNative.TessBaseApiGetDataPath();
 
     public void SetVariable(string name, string value)
     {
@@ -74,6 +69,22 @@ internal sealed class TesseractEngine : IDisposable
 
         value = null;
         return false;
+    }
+
+    public void SetInputName(string name)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiSetInputName(_handle, name);
+    }
+
+    public string? InputName
+    {
+        get
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            var inputNamePtr = TesseractNative.TessBaseApiGetInputName(_handle);
+            return Marshal.PtrToStringUTF8(inputNamePtr);
+        }
     }
 
     public void SetSegmentationMode(PageSegmentationMode mode)

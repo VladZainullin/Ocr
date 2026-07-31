@@ -18,9 +18,9 @@ internal static partial class TesseractNative
     /// Returns the version string of the Tesseract library.
     /// </summary>
     /// <returns>Pointer to a null-terminated UTF-8 string containing the version. The caller must NOT free this pointer.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessVersion")]
+    [LibraryImport(LibraryName, EntryPoint = "TessVersion", StringMarshalling =  StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessVersion();
+    public static partial string TessVersion();
 
     /// <summary>
     /// Returns the version string of the Tesseract library associated with the given BaseAPI handle.
@@ -301,6 +301,10 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInputName")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessBaseApiGetInputName(nint handle);
+
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetDatapath", StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial string TessBaseApiGetDataPath();
 
     /// <summary>
     /// Sets the output base name for generated output files.
