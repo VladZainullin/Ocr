@@ -197,6 +197,24 @@ internal sealed class TesseractEngine : IDisposable
         return new TesseractPageIterator(iterator);
     }
 
+    public bool TryGetTextDirection(out int outOffset, out float slope)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetTextDirection(_handle, out outOffset, out slope);
+    }
+
+    public void SetMinimumOrientationMargin(double margin)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiSetMinOrientationMargin(_handle, margin);
+    }
+
+    public string GetUniChar(int uniCharId)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetUnichar(_handle, uniCharId);
+    }
+
     public void End()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);

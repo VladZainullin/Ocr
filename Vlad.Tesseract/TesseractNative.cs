@@ -627,7 +627,8 @@ internal static partial class TesseractNative
     /// <returns>Pointer to a null-terminated string describing the text direction.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetTextDirection")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetTextDirection(nint handle, out int offset, out float slope);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessBaseApiGetTextDirection(nint handle, out int offset, out float slope);
 
     #endregion
 
@@ -719,11 +720,11 @@ internal static partial class TesseractNative
     /// Gets the UTF-8 string representation of a unichar ID.
     /// </summary>
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
-    /// <param name="unicharId">The unichar ID to look up.</param>
+    /// <param name="uniCharId">The unichar ID to look up.</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUnichar")]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUnichar",  StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetUnichar(nint handle, int unicharId);
+    public static partial string TessBaseApiGetUnichar(nint handle, int uniCharId);
 
     #endregion
 
