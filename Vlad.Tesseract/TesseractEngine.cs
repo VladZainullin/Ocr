@@ -12,6 +12,15 @@ internal sealed class TesseractEngine : IDisposable
         _handle = TesseractNative.TessBaseApiCreate();
     }
 
+    public static string? Version
+    {
+        get
+        {
+            var version = TesseractNative.TessVersion();
+            return Marshal.PtrToStringUTF8(version);
+        }
+    }
+
     public void SetVariable(string name, string value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
