@@ -16,10 +16,31 @@ internal sealed class TesseractEngine : IDisposable
 
     public static string DataPath => TesseractNative.TessBaseApiGetDataPath();
 
+    public PageSegmentationMode PageSegmentationMode
+    {
+        get
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            return TesseractNative.TessBaseApiGetPageSegMode(_handle);
+        }
+    }
+
     public void SetVariable(string name, string value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         TesseractNative.TessBaseApiSetVariable(_handle, name, value);
+    }
+
+    public void SetDebugVariable(string name, string value)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiSetDebugVariable(_handle, name, value);
+    }
+
+    public void SetInputName(Pix pix)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiSetInputName(_handle, pix.Handle);
     }
 
     public string? GetVariable(string name)
