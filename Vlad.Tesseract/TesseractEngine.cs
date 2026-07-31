@@ -186,6 +186,13 @@ internal sealed class TesseractEngine : IDisposable
         TesseractNative.TessBaseApiSetImage2(_handle, image.Handle);
     }
 
+    public void Recognize(TesseractMonitor monitor)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(monitor);
+        TesseractNative.TessBaseApiRecognize(_handle, monitor.Handle);
+    }
+
     public void SetRectangle(int left, int top, int width, int height)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
