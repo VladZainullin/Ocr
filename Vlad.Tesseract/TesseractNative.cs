@@ -432,7 +432,7 @@ internal static partial class TesseractNative
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUTF8Text",  StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseAPIGetUTF8Text(nint handle);
+    public static partial string TessBaseAPIGetUtf8Text(nint handle);
 
     /// <summary>
     /// Gets the recognized text in hOCR format (HTML-based OCR markup).
@@ -440,9 +440,9 @@ internal static partial class TesseractNative
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     /// <param name="pageNumber">Page number (0-based).</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetHOCRText")]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetHOCRText", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetHOCRText(nint handle, int pageNumber);
+    public static partial string TessBaseApiGetHOcrText(nint handle, int pageNumber);
 
     /// <summary>
     /// Gets the recognized text in ALTO XML format.
@@ -450,9 +450,9 @@ internal static partial class TesseractNative
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     /// <param name="pageNumber">Page number (0-based).</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetAltoText")]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetAltoText",  StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetAltoText(nint handle, int pageNumber);
+    public static partial string TessBaseApiGetAltoText(nint handle, int pageNumber);
 
     /// <summary>
     /// Gets the recognized text in TSV (tab-separated values) format.
@@ -460,19 +460,23 @@ internal static partial class TesseractNative
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     /// <param name="pageNumber">Page number (0-based).</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetTsvText")]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetTsvText", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetTsvText(nint handle, int pageNumber);
+    public static partial string TessBaseApiGetTsvText(nint handle, int pageNumber);
 
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetBoxText", StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial string TessBaseApiGetBoxText(nint handle, int pageNumber);
+    
     /// <summary>
     /// Gets the recognized text with bounding box coordinates in LSTM Box format.
     /// </summary>
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     /// <param name="pageNumber">Page number (0-based).</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLSTMBoxText")]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLSTMBoxText", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetLSTMBoxText(nint handle, int pageNumber);
+    public static partial string TessBaseApiGetLstmBoxText(nint handle, int pageNumber);
 
     /// <summary>
     /// Gets the recognized text with bounding box coordinates in WordStr Box format.
@@ -582,7 +586,7 @@ internal static partial class TesseractNative
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIAnalyseLayout")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiAnalyseLayout(nint handle);
+    public static partial nint TessBaseApiAnalyseLayout(nint handle);
 
     /// <summary>
     /// Detects the orientation and script of the current image.
@@ -659,7 +663,8 @@ internal static partial class TesseractNative
     /// <returns>Non-zero if the word is valid, 0 if not, -1 on error.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIIsValidWord", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiIsValidWord(nint handle, string word);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessBaseApiIsValidWord(nint handle, string word);
 
     /// <summary>
     /// Adapts the Tesseract engine to the given word string for improved recognition.
@@ -677,6 +682,10 @@ internal static partial class TesseractNative
 
     #region BaseAPI Clear
 
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIEnd")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void TessBaseApiEnd(nint handle);
+    
     /// <summary>
     /// Clears the current recognition results and internal state, but keeps the initialized models.
     /// </summary>
@@ -1037,9 +1046,9 @@ internal static partial class TesseractNative
     /// <param name="iterator">Pointer to a ResultIterator instance.</param>
     /// <param name="level">Page iterator level of the element.</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetUTF8Text")]
+    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetUTF8Text", StringMarshalling =  StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessResultIteratorGetUtf8Text(nint iterator, PageIteratorLevel level);
+    public static partial string TessResultIteratorGetUtf8Text(nint iterator, PageIteratorLevel level);
 
     /// <summary>
     /// Gets the confidence value for the current element at the specified level.

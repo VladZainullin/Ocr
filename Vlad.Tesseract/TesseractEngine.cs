@@ -4,13 +4,8 @@ namespace Vlad.Tesseract;
 
 internal sealed class TesseractEngine : IDisposable
 {
-    private readonly IntPtr _handle;
+    private readonly IntPtr _handle = TesseractNative.TessBaseApiCreate();
     private bool _disposed;
-
-    public TesseractEngine()
-    {
-        _handle = TesseractNative.TessBaseApiCreate();
-    }
 
     public static string Version => TesseractNative.TessVersion();
 
@@ -112,8 +107,47 @@ internal sealed class TesseractEngine : IDisposable
         get
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            return TesseractNative.TessBaseAPIGetUTF8Text(_handle);
+            return TesseractNative.TessBaseAPIGetUtf8Text(_handle);
         }
+    }
+
+    public float MeanTextConfidence
+    {
+        get
+        {
+            ObjectDisposedException.ThrowIf(_disposed, this);
+            return TesseractNative.TessBaseApiMeanTextConf(_handle);
+        }
+    }
+
+    public string GetHOcrText(int pageNumber)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetHOcrText(_handle, pageNumber);
+    }
+
+    public string GetAltoText(int pageNumber)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetAltoText(_handle, pageNumber);
+    }
+
+    public string GetTsvText(int pageNumber)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetTsvText(_handle, pageNumber);
+    }
+
+    public string GetLstmText(int pageNumber)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetLstmBoxText(_handle, pageNumber);
+    }
+
+    public string GetBoxText(int pageNumber)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetBoxText(_handle, pageNumber);
     }
 
     public void SetSegmentationMode(PageSegmentationMode mode)
@@ -149,12 +183,24 @@ internal sealed class TesseractEngine : IDisposable
         }
     }
 
-    public TesseractIterator GetIterator()
+    public TesseractResultIterator GetIterator()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        
         var iterator = TesseractNative.TessBaseApiGetIterator(_handle);
-        return new TesseractIterator(iterator);
+        return new TesseractResultIterator(iterator);
+    }
+
+    public TesseractPageIterator AnalyzeLayout()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var iterator = TesseractNative.TessBaseApiAnalyseLayout(_handle);
+        return new TesseractPageIterator(iterator);
+    }
+
+    public void End()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiEnd(_handle);
     }
 
     public void Clear()
@@ -163,10 +209,21 @@ internal sealed class TesseractEngine : IDisposable
         TesseractNative.TessBaseApiClear(_handle);
     }
 
+    public bool IsValidWord(string word)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiIsValidWord(_handle, word);
+    }
+
     public void Dispose()
     {
         if (_disposed) return;
-        TesseractNative.TessBaseApiDelete(_handle);
+
+        if (_handle != IntPtr.Zero)
+        {
+            TesseractNative.TessBaseApiDelete(_handle);    
+        }
+        
         _disposed = true;
     }
 }
