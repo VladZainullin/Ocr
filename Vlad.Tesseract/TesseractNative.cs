@@ -1,5 +1,6 @@
 ﻿using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices.Marshalling;
 
 namespace Vlad.Tesseract;
 
@@ -57,7 +58,7 @@ internal static partial class TesseractNative
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit2", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiInit2(nint handle, string dataPath, string language, TessOcrEngineMode oem);
 
     /// <summary>
