@@ -1611,5 +1611,8 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIAdaptiveClassifier",  StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessBaseApiAdaptiveClassifier(nint handle);
-    
+
+    [LibraryImport(LibraryName, EntryPoint = "TessMonitorGetProgress")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial void TessMonitorSetProgressFunc(nint handle, nint callbackPointer);
 }

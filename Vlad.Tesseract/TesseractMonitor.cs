@@ -10,10 +10,20 @@ public sealed class TesseractMonitor : IDisposable
         nint cancelThis,
         int words);
     
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    [return: MarshalAs(UnmanagedType.I1)]
+    private delegate bool ProgressCallback(
+        nint monitor,
+        int left,
+        int right,
+        int top,
+        int bottom);
+    
     private readonly nint _handle = TesseractNative.TessMonitorCreate();
     private bool _disposed;
     
     private CancelCallback? _cancelCallback;
+    private ProgressCallback? _progressCallback;
 
     public nint Handle
     {
@@ -37,8 +47,6 @@ public sealed class TesseractMonitor : IDisposable
             }
             catch
             {
-                // Исключение нельзя передавать из C# в native-код.
-                // При ошибке останавливаем распознавание.
                 return true;
             }
         };
@@ -50,6 +58,46 @@ public sealed class TesseractMonitor : IDisposable
             _handle,
             callbackPointer);
     }
+    
+    public void SetProgress(
+        Func<int, int, int, int, int, bool> callback)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(callback);
+
+        _progressCallback = (
+            monitor,
+            left,
+            right,
+            top,
+            bottom) =>
+        {
+            try
+            {
+                var progress =
+                    TesseractNative.TessMonitorGetProgress(monitor);
+
+                return callback(
+                    progress,
+                    left,
+                    right,
+                    top,
+                    bottom);
+            }
+            catch
+            {
+                return false;
+            }
+        };
+
+        var callbackPointer =
+            Marshal.GetFunctionPointerForDelegate(_progressCallback);
+
+        TesseractNative.TessMonitorSetProgressFunc(
+            _handle,
+            callbackPointer);
+    }
+
     
     public void Dispose()
     {
