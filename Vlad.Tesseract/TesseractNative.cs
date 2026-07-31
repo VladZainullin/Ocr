@@ -1144,6 +1144,11 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalAs(UnmanagedType.Bool)]
     public static partial bool TessResultIteratorSymbolIsSubscript(nint iterator);
+    
+    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsDropcast")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessResultIteratorSymbolIsDropcast(nint iterator);
 
     /// <summary>
     /// Checks if the current symbol is a drop cap (large initial letter).

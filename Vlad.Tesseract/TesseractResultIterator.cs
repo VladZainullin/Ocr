@@ -13,4 +13,46 @@ public sealed class TesseractResultIterator(nint iterator) : TesseractPageIterat
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorGetConfidence(Iterator, level);
     }
+
+    public bool WordIsFromDictionary()
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorWordIsFromDictionary(Iterator);
+    }
+
+    public bool WordIsNumeric()
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorWordIsNumeric(Iterator);
+    }
+
+    public bool SymbolIsSuperscript()
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorSymbolIsSuperscript(Iterator);
+    }
+
+    public bool SymbolIsSubscript()
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorSymbolIsSubscript(Iterator);
+    }
+
+    public bool SymbolIsDropcast()
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorSymbolIsDropcast(Iterator);
+    }
+
+    protected override void Dispose(bool disposing)
+    {
+        if (Disposed) return;
+        if (Iterator != nint.Zero)
+        {
+            TesseractNative.TessResultIteratorDelete(Iterator);
+            Iterator = nint.Zero;
+        }
+        
+        base.Dispose(disposing);
+    }
 }

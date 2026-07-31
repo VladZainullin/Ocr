@@ -2,7 +2,7 @@ namespace Vlad.Tesseract;
 
 public class TesseractPageIterator(nint iterator) : IDisposable
 {
-    protected nint Iterator { get; private set; } = iterator;
+    protected nint Iterator { get; set; } = iterator;
 
     protected bool Disposed { get; private set; }
 
