@@ -33,6 +33,12 @@ public sealed class TesseractIterator(nint iterator) : IDisposable
         return TesseractNative.TessPageIteratorNext(iterator, level);
     }
 
+    public bool IsAtBeginningOf(PageIteratorLevel level)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessPageIteratorIsAtBeginningOf(iterator, level);
+    }
+
     public bool IsAtFinalElement(PageIteratorLevel level, PageIteratorLevel element)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
