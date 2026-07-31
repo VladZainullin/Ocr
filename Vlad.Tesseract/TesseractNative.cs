@@ -1318,18 +1318,18 @@ internal static partial class TesseractNative
     /// </summary>
     /// <param name="choiceIterator">Pointer to a ChoiceIterator instance.</param>
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorGetUTF8Text")]
+    [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorGetUTF8Text", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessChoiceIteratorGetUtf8Text(nint choiceIterator);
+    public static partial string TessChoiceIteratorGetUtf8Text(nint choiceIterator);
 
     /// <summary>
     /// Gets the confidence value of the current recognition choice.
     /// </summary>
     /// <param name="choiceIterator">Pointer to a ChoiceIterator instance.</param>
     /// <returns>Confidence value (0.0f to 100.0f).</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorGetConfidence")]
+    [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorConfidence")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial float TessChoiceIteratorGetConfidence(nint choiceIterator);
+    public static partial float TessChoiceIteratorConfidence(nint choiceIterator);
 
     /// <summary>
     /// Gets the confidence values for each character in the current word choice.

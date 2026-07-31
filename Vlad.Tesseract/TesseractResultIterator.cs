@@ -44,6 +44,13 @@ public sealed class TesseractResultIterator(nint iterator) : TesseractPageIterat
         return TesseractNative.TessResultIteratorSymbolIsDropcast(Iterator);
     }
 
+    public ChoiceIterator GetChoiceIterator()
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        var choiceIteratorPtr = TesseractNative.TessResultIteratorGetChoiceIterator(Iterator);
+        return new ChoiceIterator(choiceIteratorPtr);
+    }
+
     protected override void Dispose(bool disposing)
     {
         if (Disposed) return;
@@ -54,5 +61,35 @@ public sealed class TesseractResultIterator(nint iterator) : TesseractPageIterat
         }
         
         base.Dispose(disposing);
+    }
+}
+
+public sealed class ChoiceIterator(nint iterator) : IDisposable
+{
+    private bool _disposed;
+    
+    public bool Next()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessChoiceIteratorNext(iterator);
+    }
+
+    public string GetText()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessChoiceIteratorGetUtf8Text(iterator);
+    }
+
+    public float GetConfidence()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessChoiceIteratorConfidence(iterator);
+    }
+
+    public void Dispose()
+    {
+        if (_disposed) return;
+        _disposed = true;
+        TesseractNative.TessChoiceIteratorDelete(iterator);
     }
 }
