@@ -156,10 +156,28 @@ internal sealed class TesseractEngine : IDisposable
         TesseractNative.TessBaseApiSetPageSegMode(_handle, mode);
     }
 
+    public bool TryInitialization(string dataPath, string language)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiInit3(_handle, dataPath, language);
+    }
+
+    public int GetSourceYResolution()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetSourceYResolution(_handle);
+    }
+
+    public void SetSourceResolution(int ppi)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        TesseractNative.TessBaseApiSetSourceResolution(_handle, ppi);
+    }
+
     public bool TryInitialization(string dataPath, string language, TessOcrEngineMode oem)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiInit2(_handle, dataPath, language, oem) == 0;
+        return TesseractNative.TessBaseApiInit2(_handle, dataPath, language, oem);
     }
 
     public void SetImage(Pix image)
@@ -181,6 +199,12 @@ internal sealed class TesseractEngine : IDisposable
         {
             TesseractNative.TessBaseApiSetImage(_handle, (nint)imagePtr, width, height, bytesPerPixel, bytesPerLine);
         }
+    }
+
+    public string GetInitializationLanguages()
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetInitLanguagesAsString(_handle);
     }
 
     public TesseractResultIterator GetIterator()

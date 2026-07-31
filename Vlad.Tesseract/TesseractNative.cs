@@ -22,15 +22,6 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial string TessVersion();
 
-    /// <summary>
-    /// Returns the version string of the Tesseract library associated with the given BaseAPI handle.
-    /// </summary>
-    /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
-    /// <returns>Pointer to a null-terminated UTF-8 string containing the version.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIVersion")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiVersion(nint handle);
-
     #endregion
 
     #region BaseAPI Lifecycle
@@ -66,7 +57,8 @@ internal static partial class TesseractNative
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit2", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiInit2(nint handle, string dataPath, string language, TessOcrEngineMode oem);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessBaseApiInit2(nint handle, string dataPath, string language, TessOcrEngineMode oem);
 
     /// <summary>
     /// Initializes the Tesseract engine with the specified data path and language string.
@@ -78,7 +70,8 @@ internal static partial class TesseractNative
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit3", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiInit3(nint handle, string dataPath, string language);
+    [return: MarshalAs(UnmanagedType.Bool)]
+    public static partial bool TessBaseApiInit3(nint handle, string dataPath, string language);
 
     /// <summary>
     /// Initializes the Tesseract engine with the specified data path, language, engine mode,
@@ -1609,4 +1602,8 @@ internal static partial class TesseractNative
     public static partial void TessResultRendererSetPermissions(nint renderer, int permissions);
 
     #endregion
+
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInitLanguagesAsString",  StringMarshalling = StringMarshalling.Utf8)]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial string TessBaseApiGetInitLanguagesAsString(nint handle);
 }
