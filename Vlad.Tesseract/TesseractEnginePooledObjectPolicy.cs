@@ -3,9 +3,9 @@ using Microsoft.Extensions.ObjectPool;
 
 namespace Vlad.Tesseract;
 
-internal sealed class TesseractEnginePooledObjectPolicy(TesseractNativeLogBridge _) : IPooledObjectPolicy<TesseractEngine>
+internal sealed class TesseractEnginePooledObjectPolicy(ITesseractNativeLogBridge logBridge) : IPooledObjectPolicy<TesseractEngine>
 {
-    private readonly TesseractNativeLogBridge _unknown = _;
+    private readonly ITesseractNativeLogBridge _logBridge = logBridge;
 
     public TesseractEngine Create()
     {
