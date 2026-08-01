@@ -16,6 +16,7 @@
     <Project Path="Application.Contracts/Application.Contracts.csproj" />
     <Project Path="ImageService.Contracts/ImageService.Contracts.csproj" />
     <Project Path="OcrService.Contracts/OcrService.Contracts.csproj" />
+    <Project Path="Vlad.Tesseract.Contracts/Vlad.Tesseract.Contracts.csproj" />
   </Folder>
   <Folder Name="/src/infrastructure/">
     <Project Path="ImageService/ImageService.csproj" />
