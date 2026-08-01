@@ -1,5 +1,5 @@
-using System;
 using Microsoft.Extensions.ObjectPool;
+using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
@@ -10,8 +10,6 @@ internal sealed class TesseractEnginePooledObjectPolicy(ITesseractNativeLogBridg
     public TesseractEngine Create()
     {
         var engine = new TesseractEngine();
-
-        // engine.SetVariable("debug_file", "/dev/stderr");
         
         if (!engine.TryInitialization("/Users/vadislavzainullin/MEGAsync/tesseract", "rus+eng",
                 TessOcrEngineMode.OemLstmOnly)) 
