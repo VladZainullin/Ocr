@@ -2,12 +2,12 @@ using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
-internal sealed unsafe class Pix : IDisposable, IPix
+internal sealed class Pix : IDisposable, IPix
 {
     private nint _handle;
     private bool _disposed;
     
-    public Pix(ReadOnlySpan<byte> data)
+    public unsafe Pix(ReadOnlySpan<byte> data)
     {
         fixed (byte* ptr = data)
         {
