@@ -1,3 +1,5 @@
+using Vlad.Tesseract.Contracts;
+
 namespace Vlad.Tesseract;
 
 public sealed class TesseractResultIterator(nint iterator) : TesseractPageIterator(iterator)
@@ -51,7 +53,7 @@ public sealed class TesseractResultIterator(nint iterator) : TesseractPageIterat
         return new ChoiceIterator(choiceIteratorPtr);
     }
 
-    protected override void Dispose(bool disposing)
+    public override void Dispose(bool disposing)
     {
         if (Disposed) return;
         if (Iterator != nint.Zero)

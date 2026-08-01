@@ -1,6 +1,7 @@
 ﻿using System.Runtime.InteropServices;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices.Marshalling;
+using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 

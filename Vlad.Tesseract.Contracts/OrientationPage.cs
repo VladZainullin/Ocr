@@ -1,4 +1,4 @@
-﻿namespace Vlad.Tesseract;
+﻿namespace Vlad.Tesseract.Contracts;
 
 public enum OrientationPage
 {

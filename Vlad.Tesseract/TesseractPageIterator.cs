@@ -1,8 +1,10 @@
+using Vlad.Tesseract.Contracts;
+
 namespace Vlad.Tesseract;
 
-public class TesseractPageIterator(nint iterator) : IDisposable
+public class TesseractPageIterator(nint iterator) : IDisposable, ITesseractPageIterator
 {
-    protected nint Iterator { get; set; } = iterator;
+    public nint Iterator { get; set; } = iterator;
 
     protected bool Disposed { get; private set; }
 
@@ -12,7 +14,7 @@ public class TesseractPageIterator(nint iterator) : IDisposable
         TesseractNative.TessPageIteratorBegin(Iterator);
     }
 
-    public bool Next(PageIteratorLevel level)
+    public bool NextElement(PageIteratorLevel level)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessPageIteratorNext(Iterator, level);
@@ -49,7 +51,7 @@ public class TesseractPageIterator(nint iterator) : IDisposable
         return TesseractNative.TessPageIteratorBlockType(Iterator);
     }
 
-    public virtual TesseractPageIterator Copy()
+    public virtual ITesseractPageIterator Copy()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         var pageIteratorPage = TesseractNative.TessPageIteratorCopy(Iterator);
@@ -62,7 +64,7 @@ public class TesseractPageIterator(nint iterator) : IDisposable
         GC.SuppressFinalize(this);
     }
 
-    protected virtual void Dispose(bool disposing)
+    public virtual void Dispose(bool disposing)
     {
         if (disposing) return;
 
