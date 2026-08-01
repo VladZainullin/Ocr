@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.ObjectPool;
 using OcrService.Contracts;
+using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 

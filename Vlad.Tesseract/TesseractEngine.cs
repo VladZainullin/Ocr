@@ -3,7 +3,7 @@ using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
-internal sealed class TesseractEngine : IDisposable
+internal sealed class TesseractEngine : IDisposable, ITesseractEngine
 {
     private readonly IntPtr _handle = TesseractNative.TessBaseApiCreate();
     private bool _disposed;
@@ -33,7 +33,7 @@ internal sealed class TesseractEngine : IDisposable
         TesseractNative.TessBaseApiSetDebugVariable(_handle, name, value);
     }
 
-    public void SetInputName(Pix pix)
+    public void SetInputName(IPix pix)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         TesseractNative.TessBaseApiSetInputName(_handle, pix.Handle);
@@ -181,13 +181,13 @@ internal sealed class TesseractEngine : IDisposable
         return TesseractNative.TessBaseApiInit2(_handle, dataPath, language, oem);
     }
 
-    public void SetImage(Pix image)
+    public void SetImage(IPix image)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         TesseractNative.TessBaseApiSetImage2(_handle, image.Handle);
     }
 
-    public void Recognize(TesseractMonitor monitor)
+    public void Recognize(ITesseractMonitor monitor)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(monitor);
@@ -215,14 +215,14 @@ internal sealed class TesseractEngine : IDisposable
         return TesseractNative.TessBaseApiGetInitLanguagesAsString(_handle);
     }
 
-    public TesseractResultIterator GetIterator()
+    public ITesseractResultIterator GetIterator()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         var iterator = TesseractNative.TessBaseApiGetIterator(_handle);
         return new TesseractResultIterator(iterator);
     }
 
-    public TesseractPageIterator AnalyzeLayout()
+    public ITesseractPageIterator AnalyzeLayout()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         var iterator = TesseractNative.TessBaseApiAnalyseLayout(_handle);
@@ -247,7 +247,7 @@ internal sealed class TesseractEngine : IDisposable
         return TesseractNative.TessBaseApiGetUnichar(_handle, uniCharId);
     }
 
-    public void End()
+    public void EndElement()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         TesseractNative.TessBaseApiEnd(_handle);
@@ -271,7 +271,7 @@ internal sealed class TesseractEngine : IDisposable
         return TesseractNative.TessBaseApiIsValidWord(_handle, word);
     }
 
-    public Pix GetThresholdedImage()
+    public IPix GetThresholdedImage()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         var pixPtr = TesseractNative.TessBaseApiGetThresholdedImage(_handle);

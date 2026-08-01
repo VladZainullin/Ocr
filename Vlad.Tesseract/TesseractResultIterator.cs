@@ -2,7 +2,7 @@ using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
-public sealed class TesseractResultIterator(nint iterator) : TesseractPageIterator(iterator)
+public sealed class TesseractResultIterator(nint iterator) : TesseractPageIterator(iterator), ITesseractResultIterator
 {
     public string GetText(PageIteratorLevel level)
     {
@@ -46,7 +46,7 @@ public sealed class TesseractResultIterator(nint iterator) : TesseractPageIterat
         return TesseractNative.TessResultIteratorSymbolIsDropcast(Iterator);
     }
 
-    public ChoiceIterator GetChoiceIterator()
+    public IChoiceIterator GetChoiceIterator()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         var choiceIteratorPtr = TesseractNative.TessResultIteratorGetChoiceIterator(Iterator);

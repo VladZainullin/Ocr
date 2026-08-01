@@ -2,24 +2,41 @@
 
 public interface ITesseractEngine
 {
-    
-}
-
-public interface ITesseractPageIterator
-{
-    nint Iterator { get; set; }
-    void Begin();
-    bool NextElement(PageIteratorLevel level);
-    bool IsAtBeginningOf(PageIteratorLevel level);
-    bool IsAtFinalElement(PageIteratorLevel level, PageIteratorLevel element);
-    bool TryGetBaseLine(PageIteratorLevel level, out int x1, out int y1, out int x2, out int y2);
-    bool TryGetBoundingBox(PageIteratorLevel level, out int x, out int y, out int width, out int height);
-    PolyBlockType GetBlockType();
-    ITesseractPageIterator Copy();
-    void Dispose(bool disposing);
-}
-
-public interface ITesseractResultIterator : ITesseractPageIterator
-{
-    
+    PageSegmentationMode PageSegmentationMode { get; }
+    string InputName { get; }
+    string Text { get; }
+    float MeanTextConfidence { get; }
+    void SetVariable(string name, string value);
+    void SetDebugVariable(string name, string value);
+    void SetInputName(IPix pix);
+    void SetInputName(string name);
+    string? GetVariable(string name);
+    bool TryGetVariable(string name, out int? value);
+    bool TryGetVariable(string name, out double? value);
+    bool TryGetVariable(string name, out bool? value);
+    string GetHOcrText(int pageNumber);
+    string GetAltoText(int pageNumber);
+    string GetTsvText(int pageNumber);
+    string GetLstmText(int pageNumber);
+    string GetBoxText(int pageNumber);
+    void SetSegmentationMode(PageSegmentationMode mode);
+    bool TryInitialization(string dataPath, string language);
+    bool TryInitialization(string dataPath, string language, TessOcrEngineMode oem);
+    int GetSourceYResolution();
+    void SetSourceResolution(int ppi);
+    void SetImage(IPix image);
+    void SetImage(byte[] imageData, uint width, uint height, uint bytesPerPixel);
+    void Recognize(ITesseractMonitor monitor);
+    void SetRectangle(int left, int top, int width, int height);
+    string GetInitializationLanguages();
+    ITesseractResultIterator GetIterator();
+    ITesseractPageIterator AnalyzeLayout();
+    bool TryGetTextDirection(out int outOffset, out float slope);
+    void SetMinimumOrientationMargin(double margin);
+    string GetUniChar(int uniCharId);
+    void EndElement();
+    void Clear();
+    void ClearAdaptiveClassifier();
+    bool IsValidWord(string word);
+    IPix GetThresholdedImage();
 }

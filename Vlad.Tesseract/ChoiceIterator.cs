@@ -1,10 +1,12 @@
+using Vlad.Tesseract.Contracts;
+
 namespace Vlad.Tesseract;
 
-public sealed class ChoiceIterator(nint iterator) : IDisposable
+public sealed class ChoiceIterator(nint iterator) : IDisposable, IChoiceIterator
 {
     private bool _disposed;
     
-    public bool Next()
+    public bool NextElement()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         return TesseractNative.TessChoiceIteratorNext(iterator);

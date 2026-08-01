@@ -1,8 +1,9 @@
 using System.Runtime.InteropServices;
+using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
-public sealed class TesseractMonitor : IDisposable
+public sealed class TesseractMonitor : IDisposable, ITesseractMonitor
 {
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
     [return: MarshalAs(UnmanagedType.I1)]

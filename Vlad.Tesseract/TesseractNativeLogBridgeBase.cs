@@ -2,11 +2,12 @@ using System.IO.Pipes;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using Microsoft.Win32.SafeHandles;
+using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
 internal abstract partial class TesseractNativeLogBridgeBase
-    : ITesseractNativeLogBridge
+    : ITesseractNativeLogBridge, IAsyncDisposable
 {
     protected const int StandardErrorFileDescriptor = 2;
 

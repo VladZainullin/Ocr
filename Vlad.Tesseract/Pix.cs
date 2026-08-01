@@ -1,6 +1,8 @@
+using Vlad.Tesseract.Contracts;
+
 namespace Vlad.Tesseract;
 
-internal sealed unsafe class Pix : IDisposable
+internal sealed unsafe class Pix : IDisposable, IPix
 {
     private nint _handle;
     private bool _disposed;
