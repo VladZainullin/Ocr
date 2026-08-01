@@ -106,6 +106,7 @@ public sealed class TesseractMonitor : IDisposable
         TesseractNative.TessMonitorSetCancelFunc(
             _handle,
             nint.Zero);
+        TesseractNative.TessMonitorSetProgressFunc(_handle, nint.Zero);
 
         TesseractNative.TessMonitorDelete(_handle);
 
