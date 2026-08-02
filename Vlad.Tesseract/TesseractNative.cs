@@ -142,7 +142,7 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetDatapath", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseApiGetDataPath();
+    public static partial string TessBaseApiGetDataPath(nint handle);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetOutputName", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -227,10 +227,9 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessBaseApiInitLangMod(nint handle, string? dataPath, string? language);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInitForAnalysePage",
-        StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInitForAnalysePage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseApiInitForAnalysePage(nint handle);
+    public static partial void TessBaseApiInitForAnalysePage(nint handle);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIReadConfigFile", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -273,7 +272,7 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetRectangle")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetRectangle(int left, int top, int width, int height);
+    public static partial void TessBaseApiSetRectangle(nint handle, int left, int top, int width, int height);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetThresholdedImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -321,7 +320,7 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIAnalyseLayout")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiAnalyseLayout(nint handle);
+    public static partial nint TessBaseApiAnalyseLayout(nint handle);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIRecognize")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]

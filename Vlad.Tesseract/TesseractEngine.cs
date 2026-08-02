@@ -11,7 +11,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
 
     public static string Version => TesseractNative.TessVersion();
 
-    public static string DataPath => TesseractNative.TessBaseApiGetDataPath();
+    public string GetDataPath() => TesseractNative.TessBaseApiGetDataPath(Handle);
 
     public PageSegmentationMode PageSegmentationMode
     {
@@ -347,7 +347,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public void SetRectangle(int left, int top, int width, int height)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        TesseractNative.TessBaseApiSetRectangle(left, top, width, height);
+        TesseractNative.TessBaseApiSetRectangle(Handle, left, top, width, height);
     }
 
     public unsafe void SetImage(byte[] imageData, uint width, uint height, uint bytesPerPixel)
