@@ -11,7 +11,7 @@ public sealed class TesseractResultResultRenderer(nint handle) : ITesseractResul
         get
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            return TesseractNative.TessResultRendererExtention(handle);
+            return TesseractNative.TessResultRendererExtension(handle);
         }
     }
 

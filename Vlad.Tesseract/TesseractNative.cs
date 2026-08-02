@@ -99,7 +99,7 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererExtention", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessResultRendererExtention(nint renderer);
+    public static partial string TessResultRendererExtension(nint renderer);
 
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererTitle", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
