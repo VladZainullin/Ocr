@@ -35,7 +35,6 @@ public interface ITesseractEngine
     ITesseractPageIterator AnalyzeLayout();
     bool TryGetTextDirection(out int outOffset, out float slope);
     void SetMinimumOrientationMargin(double margin);
-    string GetUniChar(int uniCharId);
     void EndElement();
     void Clear();
     void ClearAdaptiveClassifier();

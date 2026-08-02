@@ -12,8 +12,6 @@ public interface ITesseractResultIterator : ITesseractPageIterator
     
     string GetText(PageIteratorLevel level);
 
-    float GetConfidence(PageIteratorLevel level);
-
     bool WordIsFromDictionary();
 
     bool WordIsNumeric();
@@ -22,5 +20,14 @@ public interface ITesseractResultIterator : ITesseractPageIterator
 
     bool SymbolIsSubscript();
 
-    bool SymbolIsDropcast();
+    bool TryGetWordFontAttributes(
+        out string fontName,
+        out bool isBold,
+        out bool isItalic,
+        out bool isUnderlined,
+        out bool isMonospace,
+        out bool serif,
+        out bool smallCaps,
+        out int pointSize,
+        out int fontId);
 }

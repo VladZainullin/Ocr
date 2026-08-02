@@ -35,12 +35,6 @@ public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorGetUtf8Text(Handle, level);
     }
-    
-    public float GetConfidence(PageIteratorLevel level)
-    {
-        ObjectDisposedException.ThrowIf(Disposed, this);
-        return TesseractNative.TessResultIteratorGetConfidence(Handle, level);
-    }
 
     public bool WordIsFromDictionary()
     {
@@ -64,12 +58,6 @@ public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorSymbolIsSubscript(Handle);
-    }
-
-    public bool SymbolIsDropcast()
-    {
-        ObjectDisposedException.ThrowIf(Disposed, this);
-        return TesseractNative.TessResultIteratorSymbolIsDropcast(Handle);
     }
 
     public ITesseractChoiceIterator GetChoiceIterator()

@@ -171,17 +171,13 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public void SetInputName(IPix pix)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        TesseractNative.TessBaseApiSetInputName(Handle, pix.Handle);
+        TesseractNative.TessBaseApiSetInputImage(Handle, pix.Handle);
     }
 
-    public string? GetVariable(string name)
+    public string GetVariable(string name)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        var pointer = TesseractNative.TessBaseApiGetStringVariable(
-            Handle,
-            name);
-
-        return Marshal.PtrToStringUTF8(pointer);
+        return TesseractNative.TessBaseApiGetStringVariable(Handle, name);
     }
 
     public bool TryGetVariable(string name, out int? value)
@@ -374,12 +370,6 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         TesseractNative.TessBaseApiSetMinOrientationMargin(Handle, margin);
-    }
-
-    public string GetUniChar(int uniCharId)
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiGetUnichar(Handle, uniCharId);
     }
 
     public void EndElement()
