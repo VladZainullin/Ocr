@@ -4,7 +4,7 @@ public interface ITesseractPageIterator : IDisposable
 {
     nint Handle { get; set; }
     void Begin();
-    bool NextElement(PageIteratorLevel level);
+    bool TryNext(PageIteratorLevel level);
     bool IsAtBeginningOf(PageIteratorLevel level);
     bool IsAtFinalElement(PageIteratorLevel level, PageIteratorLevel element);
     bool TryGetBaseLine(PageIteratorLevel level, out int x1, out int y1, out int x2, out int y2);

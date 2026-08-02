@@ -4,6 +4,12 @@ namespace Vlad.Tesseract;
 
 public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator(handle), ITesseractResultIterator
 {
+    public override bool TryNext(PageIteratorLevel level)
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorNext(Handle, level);
+    }
+
     public ITesseractPageIterator GetPageIterator()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);

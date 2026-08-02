@@ -938,33 +938,6 @@ internal static partial class TesseractNative
         out int firstLineIndent);
 
     /// <summary>
-    /// Gets font attributes for the word at the current iterator position.
-    /// </summary>
-    /// <param name="iterator">Pointer to a PageIterator instance.</param>
-    /// <param name="isBold">Output indicates if the font is bold.</param>
-    /// <param name="isItalic">Output indicates if the font is italic.</param>
-    /// <param name="isUnderlined">Output indicates if the font is underlined.</param>
-    /// <param name="isMonospace">Output indicates if the font is monospace.</param>
-    /// <param name="isSerif">Output indicates if the font is serif.</param>
-    /// <param name="isSmallCaps">Output indicates if the font is small caps.</param>
-    /// <param name="pointSize">Output font point size.</param>
-    /// <param name="fontId">Output font ID.</param>
-    /// <returns>TRUE if the attributes were successfully retrieved, FALSE otherwise.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorGetWordFontAttributes")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessPageIteratorGetWordFontAttributes(
-        nint iterator,
-        [MarshalAs(UnmanagedType.Bool)] out bool isBold,
-        [MarshalAs(UnmanagedType.Bool)] out bool isItalic,
-        [MarshalAs(UnmanagedType.Bool)] out bool isUnderlined,
-        [MarshalAs(UnmanagedType.Bool)] out bool isMonospace,
-        [MarshalAs(UnmanagedType.Bool)] out bool isSerif,
-        [MarshalAs(UnmanagedType.Bool)] out bool isSmallCaps,
-        out int pointSize,
-        out int fontId);
-
-    /// <summary>
     /// Creates a copy of the page iterator.
     /// </summary>
     /// <param name="iterator">Pointer to a PageIterator instance.</param>
@@ -1055,15 +1028,6 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetConfidence")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial float TessResultIteratorGetConfidence(nint iterator, PageIteratorLevel level);
-
-    /// <summary>
-    /// Gets the confidence values for each character in the current word.
-    /// </summary>
-    /// <param name="iterator">Pointer to a ResultIterator instance.</param>
-    /// <returns>Pointer to an array of integer confidence values (0-100). Must be freed with TessDeleteIntArray().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordConfidences")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessResultIteratorWordConfidences(nint iterator);
 
     /// <summary>
     /// Gets the recognition language of the current word.

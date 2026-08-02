@@ -2,7 +2,7 @@ using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
-public class TesseractPageIterator(nint handle) : IDisposable, ITesseractPageIterator
+public class TesseractPageIterator(nint handle) : ITesseractPageIterator
 {
     public nint Handle { get; set; } = handle;
 
@@ -14,7 +14,14 @@ public class TesseractPageIterator(nint handle) : IDisposable, ITesseractPageIte
         TesseractNative.TessPageIteratorBegin(Handle);
     }
 
-    public bool NextElement(PageIteratorLevel level)
+    public void GetParagraphInfo(
+        out ParagraphJustification justification, out bool isListItem, out bool isCrown, out int firstLineIndent)
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        TesseractNative.TessPageIteratorParagraphInfo(Handle, out justification, out isListItem, out isCrown, out firstLineIndent);
+    }
+
+    public virtual bool TryNext(PageIteratorLevel level)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessPageIteratorNext(Handle, level);
