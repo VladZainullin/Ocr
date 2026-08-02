@@ -129,11 +129,11 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial string TessBaseApiGetInputName(nint handle);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetInputImage", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetInputImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessBaseApiSetInputImage(nint handle, nint pix);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInputImage", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInputImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessBaseAPIGetInputImage(nint handle);
 
