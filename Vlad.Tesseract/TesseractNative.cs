@@ -135,7 +135,7 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInputImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseAPIGetInputImage(nint handle);
+    public static partial nint TessBaseApiGetInputImage(nint handle);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetSourceYResolution")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
