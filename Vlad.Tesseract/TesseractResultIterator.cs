@@ -87,7 +87,7 @@ public sealed class TesseractResultIterator(nint handle)
             out pointSize, out fontId);
     }
 
-    public bool WordIsFromDictionary()
+    public bool IsWordFromDictionary()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorWordIsFromDictionary(Handle);
