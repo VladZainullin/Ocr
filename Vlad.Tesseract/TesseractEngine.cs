@@ -375,7 +375,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(dataPath);
         ArgumentNullException.ThrowIfNull(language);
-        return TesseractNative.TessBaseApiInit2(Handle, dataPath, language, oem) != 0;
+        return TesseractNative.TessBaseApiInit2(Handle, dataPath, language, oem) == 0;
     }
 
     public void SetImage(IPix image)
