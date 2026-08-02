@@ -21,6 +21,7 @@ public interface ITesseractEngine
     string GetTsvText(int pageNumber);
     string GetLstmText(int pageNumber);
     string GetBoxText(int pageNumber);
+    string GetUniChar(int uniCharId);
     void SetSegmentationMode(PageSegmentationMode mode);
     bool TryInitialization(string dataPath, string language);
     bool TryInitialization(string dataPath, string language, OcrEngineMode oem);

@@ -4,10 +4,11 @@ namespace Vlad.Tesseract;
 
 public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator(handle), ITesseractResultIterator
 {
-    public override bool TryNext(PageIteratorLevel level)
+    public override ITesseractResultIterator Copy()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        return TesseractNative.TessResultIteratorNext(Handle, level);
+        var resultIterator = TesseractNative.TessResultIteratorCopy(Handle);
+        return new TesseractResultIterator(resultIterator);
     }
 
     public ITesseractPageIterator GetPageIterator()
@@ -24,16 +25,44 @@ public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator
         return new TesseractPageIterator(pageIteratorPtr);
     }
 
-    public string WordRecognitionLanguage()
+    public ITesseractChoiceIterator GetChoiceIterator()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        return TesseractNative.TessResultIteratorWordRecognitionLanguage(Handle);
+        var choiceIteratorPtr = TesseractNative.TessResultIteratorGetChoiceIterator(Handle);
+        return new TesseractChoiceIterator(choiceIteratorPtr);
+    }
+
+    public override bool TryNext(PageIteratorLevel level)
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorNext(Handle, level);
     }
 
     public string GetText(PageIteratorLevel level)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorGetUtf8Text(Handle, level);
+    }
+
+    public float GetConfidence(PageIteratorLevel level)
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorConfidence(Handle, level);
+    }
+
+    public string WordRecognitionLanguage()
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorWordRecognitionLanguage(Handle);
+    }
+
+    public string GetWordFontAttributes(out bool isBold, out bool isItalic, out bool isUnderlined, out bool isMonospace,
+        out bool isSerif, out bool isSmallCaps, out int pointSize, out int fontId)
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        return TesseractNative.TessResultIteratorWordFontAttributes(
+            Handle, out isBold, out isItalic, out isUnderlined, out isMonospace, out isSerif, out isSmallCaps,
+            out pointSize, out fontId);
     }
 
     public bool WordIsFromDictionary()
@@ -60,37 +89,10 @@ public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator
         return TesseractNative.TessResultIteratorSymbolIsSubscript(Handle);
     }
 
-    public ITesseractChoiceIterator GetChoiceIterator()
+    public bool SymbolIsDropCap()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        var choiceIteratorPtr = TesseractNative.TessResultIteratorGetChoiceIterator(Handle);
-        return new TesseractChoiceIterator(choiceIteratorPtr);
-    }
-
-    public bool TryGetWordFontAttributes(
-        out string fontName,
-        out bool isBold,
-        out bool isItalic,
-        out bool isUnderlined,
-        out bool isMonospace,
-        out bool serif,
-        out bool smallCaps,
-        out int pointSize,
-        out int fontId)
-    {
-        ObjectDisposedException.ThrowIf(Disposed, this);
-        fontName = TesseractNative.TessResultIteratorWordFontAttributes(
-            Handle,
-            out isBold,
-            out isItalic,
-            out isUnderlined,
-            out isMonospace,
-            out serif,
-            out smallCaps,
-            out pointSize,
-            out fontId);
-        
-        return true;
+        return TesseractNative.TessResultIteratorSymbolIsDropcap(Handle);
     }
 
     public override void Dispose(bool disposing)
@@ -101,7 +103,7 @@ public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator
             TesseractNative.TessResultIteratorDelete(Handle);
             Handle = nint.Zero;
         }
-        
+
         base.Dispose(disposing);
     }
 }

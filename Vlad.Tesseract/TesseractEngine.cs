@@ -366,6 +366,12 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
         return TesseractNative.TessBaseApiGetTextDirection(Handle, out outOffset, out slope);
     }
 
+    public string GetUniChar(int uniCharId)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        return TesseractNative.TessBaseApiGetUniChar(Handle, uniCharId);
+    }
+
     public void SetMinimumOrientationMargin(double margin)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
