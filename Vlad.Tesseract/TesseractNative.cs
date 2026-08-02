@@ -210,7 +210,7 @@ internal static partial class TesseractNative
         nint configs, int configsSize, nint varsVec, nint varsValues, nint varsVecSize,
         [MarshalAs(UnmanagedType.Bool)] bool setOnlyNonDebugParams);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInitLanguagesAsVector",
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInitLanguagesAsString",
         StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial string TessBaseApiGetInitLanguagesAsString(nint handle);
