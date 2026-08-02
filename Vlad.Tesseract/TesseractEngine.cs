@@ -108,7 +108,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
         get
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            return TesseractNative.TessBaseAPIGetUtf8Text(_handle);
+            return TesseractNative.TessBaseApiGetUtf8Text(_handle);
         }
     }
 

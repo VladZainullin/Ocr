@@ -427,7 +427,7 @@ internal static partial class TesseractNative
     /// <returns>Pointer to a null-terminated UTF-8 string. Must be freed with TessDeleteText().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUTF8Text",  StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseAPIGetUtf8Text(nint handle);
+    public static partial string TessBaseApiGetUtf8Text(nint handle);
 
     /// <summary>
     /// Gets the recognized text in hOCR format (HTML-based OCR markup).
