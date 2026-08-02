@@ -6,7 +6,7 @@ public sealed class TesseractChoiceIterator(nint iterator) : IDisposable, ITesse
 {
     private bool _disposed;
     
-    public bool NextElement()
+    public bool TryNext()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         return TesseractNative.TessChoiceIteratorNext(iterator);

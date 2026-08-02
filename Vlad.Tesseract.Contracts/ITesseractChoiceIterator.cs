@@ -2,7 +2,7 @@ namespace Vlad.Tesseract.Contracts;
 
 public interface ITesseractChoiceIterator
 {
-    bool NextElement();
+    bool TryNext();
 
     string GetText();
 
