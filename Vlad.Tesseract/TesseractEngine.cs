@@ -131,6 +131,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public ITesseractResultRenderer UnlvRendererCreate(string outputName)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(outputName);
         var rendererPtr = TesseractNative.TessUnlvRendererCreate(outputName);
         return new TesseractResultResultRenderer(rendererPtr);
     }
@@ -138,6 +139,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public ITesseractResultRenderer BoxTextRendererCreate(string outputName)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(outputName);
         var rendererPtr = TesseractNative.TessBoxTextRendererCreate(outputName);
         return new TesseractResultResultRenderer(rendererPtr);
     }
@@ -145,6 +147,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public ITesseractResultRenderer WordStrBoxRendererCreate(string outputName)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(outputName);
         var rendererPtr = TesseractNative.TessWordStrBoxRendererCreate(outputName);
         return new TesseractResultResultRenderer(rendererPtr);
     }
@@ -152,6 +155,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public ITesseractResultRenderer LstmBoxRendererCreate(string outputName)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(outputName);
         var rendererPtr = TesseractNative.TessLstmBoxRendererCreate(outputName);
         return new TesseractResultResultRenderer(rendererPtr);
     }
@@ -159,33 +163,40 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public void SetVariable(string name, string value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(value);
         TesseractNative.TessBaseApiSetVariable(Handle, name, value);
     }
 
     public void SetDebugVariable(string name, string value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(name);
+        ArgumentNullException.ThrowIfNull(value);
         TesseractNative.TessBaseApiSetDebugVariable(Handle, name, value);
     }
 
     public void SetInputName(IPix pix)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(pix);
         TesseractNative.TessBaseApiSetInputImage(Handle, pix.Handle);
     }
 
     public string GetVariable(string name)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(name);
         return TesseractNative.TessBaseApiGetStringVariable(Handle, name);
     }
 
     public bool TryGetVariable(string name, out int? value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        if (TesseractNative.TessBaseApiGetIntVariable(Handle, name, out var v))
+        ArgumentNullException.ThrowIfNull(name);
+        if (TesseractNative.TessBaseApiGetIntVariable(Handle, name, out var nativeValue))
         {
-            value = v;
+            value = nativeValue;
             return true;
         }
 
@@ -196,9 +207,10 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public bool TryGetVariable(string name, out double? value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        if (TesseractNative.TessBaseApiGetDoubleVariable(Handle, name, out var v))
+        ArgumentNullException.ThrowIfNull(name);
+        if (TesseractNative.TessBaseApiGetDoubleVariable(Handle, name, out var nativeValue))
         {
-            value = v;
+            value = nativeValue;
             return true;
         }
 
@@ -209,6 +221,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public bool TryGetVariable(string name, out bool? value)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(name);
         if (TesseractNative.TessBaseApiGetBoolVariable(Handle, name, out var v))
         {
             value = v;
@@ -222,6 +235,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public void SetInputName(string name)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(name);
         TesseractNative.TessBaseApiSetInputName(Handle, name);
     }
 
@@ -291,6 +305,8 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public bool TryInitialization(string dataPath, string language)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(dataPath);
+        ArgumentNullException.ThrowIfNull(language);
         return TesseractNative.TessBaseApiInit3(Handle, dataPath, language) != 0;
     }
 
@@ -309,12 +325,15 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public bool TryInitialization(string dataPath, string language, OcrEngineMode oem)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(dataPath);
+        ArgumentNullException.ThrowIfNull(language);
         return TesseractNative.TessBaseApiInit2(Handle, dataPath, language, oem) != 0;
     }
 
     public void SetImage(IPix image)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(image);
         TesseractNative.TessBaseApiSetImage2(Handle, image.Handle);
     }
 
@@ -333,6 +352,9 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
 
     public unsafe void SetImage(byte[] imageData, uint width, uint height, uint bytesPerPixel)
     {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        ArgumentNullException.ThrowIfNull(imageData);
+        
         var bytesPerLine = width * bytesPerPixel;
         fixed (byte* imagePtr = imageData)
         {
