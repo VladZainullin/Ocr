@@ -22,6 +22,13 @@ public class TesseractPageIterator(nint handle) : ITesseractPageIterator
             , out deskewAngle);
     }
 
+    public IPix GetBinaryImage(PageIteratorLevel level)
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        var pixPtr = TesseractNative.TessPageIteratorGetBinaryImage(Handle, level);
+        return new Pix(pixPtr);
+    }
+
     public IPix GetImage(PageIteratorLevel level, int padding, IPix originalImage, out int left, out int top)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);

@@ -3,6 +3,13 @@ namespace Vlad.Tesseract.Contracts;
 public interface ITesseractPageIterator : IDisposable
 {
     nint Handle { get; set; }
+
+    IPix GetBinaryImage(PageIteratorLevel level);
+
+    IPix GetImage(PageIteratorLevel level, int padding, IPix originalImage, out int left, out int top);
+
+    void GetOrientation(out OrientationPage orientation, out WritingDirection writingDirection,
+        out TextLineOrder textLineOrder, out float deskewAngle);
     void Begin();
     bool TryNext(PageIteratorLevel level);
     bool IsAtBeginningOf(PageIteratorLevel level);
