@@ -112,7 +112,7 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int*, int*, int*, int*, byte>
         _tessPageIteratorBoundingBox;
 
-    private readonly delegate* unmanaged[Cdecl]<nint, PolyBlockType> _tessPageIteratorBlockType;
+    private readonly delegate* unmanaged[Cdecl]<nint, PolygonBlockType> _tessPageIteratorBlockType;
     private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, nint> _tessPageIteratorGetBinaryImage;
 
     private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int, nint, int*, int*, nint>
@@ -358,7 +358,7 @@ public unsafe class TesseractLibrary : IDisposable
             NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorBoundingBox");
 
         _tessPageIteratorBlockType =
-            (delegate* unmanaged[Cdecl]<nint, PolyBlockType>)NativeLibrary.GetExport(_libraryHandle,
+            (delegate* unmanaged[Cdecl]<nint, PolygonBlockType>)NativeLibrary.GetExport(_libraryHandle,
                 "TessPageIteratorBlockType");
 
         _tessPageIteratorGetBinaryImage =
@@ -740,7 +740,7 @@ public unsafe class TesseractLibrary : IDisposable
     public byte TessPageIteratorBoundingBox(nint iterator, PageIteratorLevel level, int* left, int* top, int* right,
         int* bottom) => _tessPageIteratorBoundingBox(iterator, level, left, top, right, bottom);
 
-    public PolyBlockType TessPageIteratorBlockType(nint iterator) => _tessPageIteratorBlockType(iterator);
+    public PolygonBlockType TessPageIteratorBlockType(nint iterator) => _tessPageIteratorBlockType(iterator);
 
     public nint TessPageIteratorGetBinaryImage(nint iterator, PageIteratorLevel level) =>
         _tessPageIteratorGetBinaryImage(iterator, level);

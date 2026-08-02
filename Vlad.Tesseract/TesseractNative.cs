@@ -860,7 +860,7 @@ internal static partial class TesseractNative
     /// <returns>PolyBlockType value indicating the type of the current block.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorBlockType")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial PolyBlockType TessPageIteratorBlockType(nint iterator);
+    public static partial PolygonBlockType TessPageIteratorBlockType(nint iterator);
 
     /// <summary>
     /// Gets the binary image of the current element at the specified level.

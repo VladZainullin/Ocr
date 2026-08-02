@@ -1,6 +1,6 @@
-﻿namespace Vlad.Tesseract;
+﻿namespace Vlad.Tesseract.Contracts;
 
-public enum PolyBlockType
+public enum PolygonBlockType
 {
     Unknown = 0,
     FlowingText,

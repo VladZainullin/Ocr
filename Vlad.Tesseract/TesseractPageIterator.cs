@@ -69,7 +69,7 @@ public class TesseractPageIterator(nint handle) : ITesseractPageIterator
         return TesseractNative.TessPageIteratorBoundingBox(Handle, level, out x, out y, out width, out height);
     }
 
-    public PolyBlockType GetBlockType()
+    public PolygonBlockType GetBlockType()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessPageIteratorBlockType(Handle);
