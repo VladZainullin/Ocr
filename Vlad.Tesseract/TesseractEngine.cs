@@ -291,7 +291,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public bool TryInitialization(string dataPath, string language)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiInit3(Handle, dataPath, language);
+        return TesseractNative.TessBaseApiInit3(Handle, dataPath, language) != 0;
     }
 
     public int GetSourceYResolution()
@@ -309,7 +309,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public bool TryInitialization(string dataPath, string language, OcrEngineMode oem)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiInit2(Handle, dataPath, language, oem);
+        return TesseractNative.TessBaseApiInit2(Handle, dataPath, language, oem) != 0;
     }
 
     public void SetImage(IPix image)
@@ -318,11 +318,11 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
         TesseractNative.TessBaseApiSetImage2(Handle, image.Handle);
     }
 
-    public void Recognize(ITesseractMonitor monitor)
+    public bool TryRecognize(ITesseractMonitor monitor)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(monitor);
-        TesseractNative.TessBaseApiRecognize(Handle, monitor.Handle);
+        return TesseractNative.TessBaseApiRecognize(Handle, monitor.Handle) != 0;
     }
 
     public void SetRectangle(int left, int top, int width, int height)
@@ -399,7 +399,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     public bool IsValidWord(string word)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiIsValidWord(Handle, word);
+        return TesseractNative.TessBaseApiIsValidWord(Handle, word) != 0;
     }
 
     public IPix GetThresholdedImage()

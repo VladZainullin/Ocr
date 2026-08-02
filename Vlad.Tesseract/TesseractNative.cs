@@ -199,13 +199,11 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit2", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
-    public static partial bool TessBaseApiInit2(nint handle, string dataPath, string language, OcrEngineMode oem);
+    public static partial int TessBaseApiInit2(nint handle, string dataPath, string language, OcrEngineMode oem);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit3", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
-    public static partial bool TessBaseApiInit3(nint handle, string dataPath, string language);
+    public static partial int TessBaseApiInit3(nint handle, string dataPath, string language);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit4", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -328,8 +326,7 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIRecognize")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
-    public static partial bool TessBaseApiRecognize(nint handle, nint monitor);
+    public static partial int TessBaseApiRecognize(nint handle, nint monitor);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIRecognizeForChopTest")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -411,8 +408,7 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIIsValidWord", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
-    public static partial bool TessBaseApiIsValidWord(nint handle, string word);
+    public static partial int TessBaseApiIsValidWord(nint handle, string word);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetTextDirection")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]

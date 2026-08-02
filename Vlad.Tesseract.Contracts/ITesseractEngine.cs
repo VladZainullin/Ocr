@@ -29,7 +29,7 @@ public interface ITesseractEngine
     void SetSourceResolution(int ppi);
     void SetImage(IPix image);
     void SetImage(byte[] imageData, uint width, uint height, uint bytesPerPixel);
-    void Recognize(ITesseractMonitor monitor);
+    bool TryRecognize(ITesseractMonitor monitor);
     void SetRectangle(int left, int top, int width, int height);
     string GetInitializationLanguages();
     ITesseractResultIterator GetIterator();
