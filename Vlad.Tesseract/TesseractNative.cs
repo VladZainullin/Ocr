@@ -605,13 +605,13 @@ internal static partial class TesseractNative
     /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
     /// <param name="orientation">Output page orientation.</param>
     /// <param name="writingDirection">Output writing direction.</param>
-    /// <param name="textlineOrder">Output text line order.</param>
+    /// <param name="textLineOrder">Output text line order.</param>
     /// <param name="deskewAngle">Output deskew angle in radians.</param>
     /// <returns>Pointer to an OSResults structure, or NULL on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIDetectOS")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessBaseApiDetectOs(nint handle, out OrientationPage orientation,
-        out WritingDirection writingDirection, out TextlineOrder textlineOrder, out float deskewAngle);
+        out WritingDirection writingDirection, out TextLineOrder textLineOrder, out float deskewAngle);
 
     /// <summary>
     /// Gets the direction of the recognized text.
@@ -878,14 +878,14 @@ internal static partial class TesseractNative
     /// <param name="iterator">Pointer to a PageIterator instance.</param>
     /// <param name="level">Page iterator level of the element.</param>
     /// <param name="padding">Padding in pixels to add around the element.</param>
-    /// <param name="originalImage">Pointer to the original image as a Leptonica Pix.</param>
+    /// <param name="originalImagePtr">Pointer to the original image as a Leptonica Pix.</param>
     /// <param name="left">Output left coordinate of the extracted image.</param>
     /// <param name="top">Output top coordinate of the extracted image.</param>
     /// <returns>Pointer to a Leptonica Pix structure, or NULL on failure. Must be freed with pixDestroy().</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorGetImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessPageIteratorGetImage(nint iterator, PageIteratorLevel level, int padding,
-        nint originalImage, out int left, out int top);
+        nint originalImagePtr, out int left, out int top);
 
     /// <summary>
     /// Gets the baseline coordinates of the current element at the specified level.
@@ -899,7 +899,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the baseline is valid, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorBaseline")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessPageIteratorBaseline(nint iterator, PageIteratorLevel level, out int x1,
         out int y1, out int x2, out int y2);
 
@@ -909,7 +909,7 @@ internal static partial class TesseractNative
     /// <param name="iterator">Pointer to a PageIterator instance.</param>
     /// <param name="orientation">Output page orientation.</param>
     /// <param name="writingDirection">Output writing direction.</param>
-    /// <param name="textlineOrder">Output text line order.</param>
+    /// <param name="textLineOrder">Output text line order.</param>
     /// <param name="deskewAngle">Output deskew angle in radians.</param>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorOrientation")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -917,7 +917,7 @@ internal static partial class TesseractNative
         nint iterator,
         out OrientationPage orientation,
         out WritingDirection writingDirection,
-        out TextlineOrder textlineOrder,
+        out TextLineOrder textLineOrder,
         out float deskewAngle);
 
     /// <summary>

@@ -1,6 +1,6 @@
 namespace Vlad.Tesseract.Contracts;
 
-public enum TextlineOrder
+public enum TextLineOrder
 {
     LeftToRight = 0,
     RightToLeft,

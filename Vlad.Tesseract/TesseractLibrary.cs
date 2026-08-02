@@ -121,7 +121,7 @@ public unsafe class TesseractLibrary : IDisposable
     private readonly delegate* unmanaged[Cdecl]<nint, PageIteratorLevel, int*, int*, int*, int*, byte>
         _tessPageIteratorBaseline;
 
-    private readonly delegate* unmanaged[Cdecl]<nint, OrientationPage*, WritingDirection*, TextlineOrder*, float*, void>
+    private readonly delegate* unmanaged[Cdecl]<nint, OrientationPage*, WritingDirection*, TextLineOrder*, float*, void>
         _tessPageIteratorOrientation;
 
     private readonly delegate* unmanaged[Cdecl]<nint, ParagraphJustification*, byte*, byte*, int*, void>
@@ -374,7 +374,7 @@ public unsafe class TesseractLibrary : IDisposable
                 _libraryHandle, "TessPageIteratorBaseline");
 
         _tessPageIteratorOrientation =
-            (delegate* unmanaged[Cdecl]<nint, OrientationPage*, WritingDirection*, TextlineOrder*, float*, void>)
+            (delegate* unmanaged[Cdecl]<nint, OrientationPage*, WritingDirection*, TextLineOrder*, float*, void>)
             NativeLibrary.GetExport(_libraryHandle, "TessPageIteratorOrientation");
 
         _tessPageIteratorParagraphInfo =
@@ -752,7 +752,7 @@ public unsafe class TesseractLibrary : IDisposable
         _tessPageIteratorBaseline(iterator, level, x1, y1, x2, y2);
 
     public void TessPageIteratorOrientation(nint iterator, OrientationPage* orientation,
-        WritingDirection* writingDirection, TextlineOrder* textlineOrder, float* deskewAngle) =>
+        WritingDirection* writingDirection, TextLineOrder* textlineOrder, float* deskewAngle) =>
         _tessPageIteratorOrientation(iterator, orientation, writingDirection, textlineOrder, deskewAngle);
 
     public void TessPageIteratorParagraphInfo(nint iterator, ParagraphJustification* justification, byte* isListItem,

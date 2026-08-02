@@ -14,11 +14,28 @@ public class TesseractPageIterator(nint handle) : ITesseractPageIterator
         TesseractNative.TessPageIteratorBegin(Handle);
     }
 
+    public void GetOrientation(out OrientationPage orientation, out WritingDirection writingDirection,
+        out TextLineOrder textLineOrder, out float deskewAngle)
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        TesseractNative.TessPageIteratorOrientation(Handle, out orientation, out writingDirection, out textLineOrder
+            , out deskewAngle);
+    }
+
+    public IPix GetImage(PageIteratorLevel level, int padding, IPix originalImage, out int left, out int top)
+    {
+        ObjectDisposedException.ThrowIf(Disposed, this);
+        var pixPtr =
+            TesseractNative.TessPageIteratorGetImage(Handle, level, padding, originalImage.Handle, out left, out top);
+        return new Pix(pixPtr);
+    }
+
     public void GetParagraphInfo(
         out ParagraphJustification justification, out bool isListItem, out bool isCrown, out int firstLineIndent)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        TesseractNative.TessPageIteratorParagraphInfo(Handle, out justification, out isListItem, out isCrown, out firstLineIndent);
+        TesseractNative.TessPageIteratorParagraphInfo(Handle, out justification, out isListItem, out isCrown,
+            out firstLineIndent);
     }
 
     public virtual bool TryNext(PageIteratorLevel level)
