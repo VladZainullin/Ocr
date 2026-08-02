@@ -60,7 +60,7 @@ public class TesseractPageIterator(nint handle) : ITesseractPageIterator
     public bool IsAtFinalElement(PageIteratorLevel level, PageIteratorLevel element)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        return TesseractNative.TessPageIteratorIsAtFinalElement(Handle, level, element) != 0;
+        return TesseractNative.TessPageIteratorIsAtFinalElement(Handle, level, element);
     }
 
     public bool TryGetBaseLine(PageIteratorLevel level, out int x1, out int y1, out int x2, out int y2)

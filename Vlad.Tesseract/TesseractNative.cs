@@ -116,10 +116,6 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessBaseApiDelete(nint handle);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetOpenCLDevice", StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetOpenClDevice(nint handle, out nint device);
-
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetInputName", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessBaseApiSetInputName(nint handle, string name);
@@ -204,10 +200,13 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessBaseApiInit3(nint handle, string dataPath, string language);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit4", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(
+        LibraryName,
+        EntryPoint = "TessBaseAPIInit4",
+        StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiInit4(nint handle, string dataPath, string language, int mode,
-        nint configs, int configsSize, nint varsVec, nint varsValues, nint varsVecSize,
+    public static partial int TessBaseApiInit4(nint handle, string? dataPath, string? language, OcrEngineMode mode,
+        nint configs, int configsSize, nint varsVec, nint varsValues, nuint varsVecSize,
         [MarshalAs(UnmanagedType.Bool)] bool setOnlyNonDebugParams);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetInitLanguagesAsString",
@@ -222,10 +221,6 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLoadedLanguagesAsVector")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessBaseApiGetLoadedLanguagesAsVector(nint handle);
-
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInitLangMod", StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessBaseApiInitLangMod(nint handle, string? dataPath, string? language);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInitForAnalysePage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -248,9 +243,9 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial PageSegmentationMode TessBaseApiGetPageSegMode(nint handle);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIRect", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIRect")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseApiRect(nint handle, string imageData, int bytesPerPixel, int bytesPerLine,
+    public static partial nint TessBaseApiRect(nint handle, nint imageData, int bytesPerPixel, int bytesPerLine,
         int left, int top, int width, int height);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIClearAdaptiveClassifier")]
@@ -259,8 +254,8 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetImage(nint handle, nint imageData, uint width, uint height,
-        uint bytesPerPixel, uint bytesPerLine);
+    public static partial void TessBaseApiSetImage(nint handle, nint imageData, int width, int height,
+        int bytesPerPixel, int bytesPerLine);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetImage2")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -326,11 +321,6 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessBaseApiRecognize(nint handle, nint monitor);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIRecognizeForChopTest")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
-    public static partial bool TessBaseApiRecognizeForChopTest(nint handle, nint monitor);
-
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIProcessPages", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
@@ -351,29 +341,29 @@ internal static partial class TesseractNative
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessBaseApiGetMutableIterator(nint handle);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUTF8Text", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUTF8Text")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseApiGetUtf8Text(nint handle);
+    public static partial nint TessBaseApiGetUtf8Text(nint handle);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetHOCRText", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetHOCRText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseApiGetHOcrText(nint handle, int pageNumber);
+    public static partial nint TessBaseApiGetHOcrText(nint handle, int pageNumber);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetAltoText", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetAltoText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseApiGetAltoText(nint handle, int pageNumber);
+    public static partial nint TessBaseApiGetAltoText(nint handle, int pageNumber);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetTsvText", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetTsvText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseApiGetTsvText(nint handle, int pageNumber);
+    public static partial nint TessBaseApiGetTsvText(nint handle, int pageNumber);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetBoxText", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetBoxText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseApiGetBoxText(nint handle, int pageNumber);
+    public static partial nint TessBaseApiGetBoxText(nint handle, int pageNumber);
 
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLSTMBoxText", StringMarshalling = StringMarshalling.Utf8)]
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLSTMBoxText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessBaseApiGetLstmBoxText(nint handle, int pageNumber);
+    public static partial nint TessBaseApiGetLstmBoxText(nint handle, int pageNumber);
 
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetWordStrBoxText")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -445,7 +435,8 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorIsAtFinalElement")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial int TessPageIteratorIsAtFinalElement(nint iterator, PageIteratorLevel level,
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
+    public static partial bool TessPageIteratorIsAtFinalElement(nint iterator, PageIteratorLevel level,
         PageIteratorLevel element);
 
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorBoundingBox")]
@@ -490,46 +481,45 @@ internal static partial class TesseractNative
         [MarshalAs(UnmanagedType.Bool)] out bool isListItem,
         [MarshalAs(UnmanagedType.Bool)] out bool isCrown,
         out int firstLineIndent);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorDelete")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessResultIteratorDelete(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorCopy")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessResultIteratorCopy(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetPageIterator")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessResultIteratorGetPageIterator(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetPageIteratorConst")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessResultIteratorGetPageIteratorConst(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetChoiceIterator")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessResultIteratorGetChoiceIterator(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorNext(nint iterator, PageIteratorLevel level);
-    
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetUTF8Text",
-        StringMarshalling = StringMarshalling.Utf8)]
+
+    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetUTF8Text")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessResultIteratorGetUtf8Text(nint iterator, PageIteratorLevel level);
-    
+    public static partial nint TessResultIteratorGetUtf8Text(nint iterator, PageIteratorLevel level);
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorConfidence")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial float TessResultIteratorConfidence(nint iterator, PageIteratorLevel level);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordRecognitionLanguage",
         StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial string TessResultIteratorWordRecognitionLanguage(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordFontAttributes",
         StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
@@ -543,50 +533,50 @@ internal static partial class TesseractNative
         [MarshalAs(UnmanagedType.Bool)] out bool isSmallCaps,
         out int pointSize,
         out int fontId);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordIsFromDictionary")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorWordIsFromDictionary(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordIsNumeric")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorWordIsNumeric(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsSuperscript")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorSymbolIsSuperscript(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsSubscript")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorSymbolIsSubscript(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsDropcap")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorSymbolIsDropcap(nint iterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorDelete")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessChoiceIteratorDelete(nint choiceIterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessChoiceIteratorNext(nint choiceIterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorGetUTF8Text",
         StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial string TessChoiceIteratorGetUtf8Text(nint choiceIterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorConfidence")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial float TessChoiceIteratorConfidence(nint choiceIterator);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorCreate")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessMonitorCreate();
@@ -610,7 +600,7 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorSetProgressFunc")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessMonitorSetProgressFunc(nint monitor, nint progress);
-    
+
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorGetProgress")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessMonitorGetProgress(nint monitor);
@@ -618,9 +608,4 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessMonitorSetDeadlineMSecs")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial void TessMonitorSetDeadlineMSecs(nint monitor, int deadline);
-
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIAdaptiveClassifier",
-        StringMarshalling = StringMarshalling.Utf8)]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiAdaptiveClassifier(nint handle);
 }

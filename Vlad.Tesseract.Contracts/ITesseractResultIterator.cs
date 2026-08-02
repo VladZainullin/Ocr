@@ -8,7 +8,7 @@ public interface ITesseractResultIterator : ITesseractPageIterator
 
     ITesseractChoiceIterator GetChoiceIterator();
     
-    string GetText(PageIteratorLevel level);
+    string? GetText(PageIteratorLevel level);
     
     string WordRecognitionLanguage();
     

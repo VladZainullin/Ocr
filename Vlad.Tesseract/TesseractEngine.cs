@@ -74,7 +74,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
             TesseractNative.TessDeleteTextArray(listPtr);
             return [];
         }
-        
+
         try
         {
             var languages = new List<string>();
@@ -248,12 +248,20 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
         }
     }
 
-    public string Text
+    public string? Text
     {
         get
         {
             ObjectDisposedException.ThrowIf(_disposed, this);
-            return TesseractNative.TessBaseApiGetUtf8Text(Handle);
+            var textPtr = TesseractNative.TessBaseApiGetUtf8Text(Handle);
+            try
+            {
+                return Marshal.PtrToStringUTF8(textPtr);
+            }
+            finally
+            {
+                TesseractNative.TessDeleteText(textPtr);
+            }
         }
     }
 
@@ -266,34 +274,74 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
         }
     }
 
-    public string GetHOcrText(int pageNumber)
+    public string? GetHOcrText(int pageNumber)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiGetHOcrText(Handle, pageNumber);
+        var textPtr = TesseractNative.TessBaseApiGetHOcrText(Handle, pageNumber);
+        try
+        {
+            return Marshal.PtrToStringUTF8(textPtr);
+        }
+        finally
+        {
+            TesseractNative.TessDeleteText(textPtr);
+        }
     }
 
-    public string GetAltoText(int pageNumber)
+    public string? GetAltoText(int pageNumber)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiGetAltoText(Handle, pageNumber);
+        var textPtr = TesseractNative.TessBaseApiGetAltoText(Handle, pageNumber);
+        try
+        {
+            return Marshal.PtrToStringUTF8(textPtr);
+        }
+        finally
+        {
+            TesseractNative.TessDeleteText(textPtr);
+        }
     }
 
-    public string GetTsvText(int pageNumber)
+    public string? GetTsvText(int pageNumber)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiGetTsvText(Handle, pageNumber);
+        var textPtr = TesseractNative.TessBaseApiGetTsvText(Handle, pageNumber);
+        try
+        {
+            return Marshal.PtrToStringUTF8(textPtr);
+        }
+        finally
+        {
+            TesseractNative.TessDeleteText(textPtr);
+        }
     }
 
-    public string GetLstmText(int pageNumber)
+    public string? GetLstmText(int pageNumber)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiGetLstmBoxText(Handle, pageNumber);
+        var textPtr = TesseractNative.TessBaseApiGetLstmBoxText(Handle, pageNumber);
+        try
+        {
+            return Marshal.PtrToStringUTF8(textPtr);
+        }
+        finally
+        {
+            TesseractNative.TessDeleteText(textPtr);
+        }
     }
 
-    public string GetBoxText(int pageNumber)
+    public string? GetBoxText(int pageNumber)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessBaseApiGetBoxText(Handle, pageNumber);
+        var textPtr = TesseractNative.TessBaseApiGetBoxText(Handle, pageNumber);
+        try
+        {
+            return Marshal.PtrToStringUTF8(textPtr);
+        }
+        finally
+        {
+            TesseractNative.TessDeleteText(textPtr);
+        }
     }
 
     public void SetSegmentationMode(PageSegmentationMode mode)
@@ -350,11 +398,11 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
         TesseractNative.TessBaseApiSetRectangle(Handle, left, top, width, height);
     }
 
-    public unsafe void SetImage(byte[] imageData, uint width, uint height, uint bytesPerPixel)
+    public unsafe void SetImage(byte[] imageData, int width, int height, int bytesPerPixel)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         ArgumentNullException.ThrowIfNull(imageData);
-        
+
         var bytesPerLine = width * bytesPerPixel;
         fixed (byte* imagePtr = imageData)
         {
@@ -410,12 +458,6 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         TesseractNative.TessBaseApiClear(Handle);
-    }
-
-    public void ClearAdaptiveClassifier()
-    {
-        ObjectDisposedException.ThrowIf(_disposed, this);
-        TesseractNative.TessBaseApiAdaptiveClassifier(Handle);
     }
 
     public bool IsValidWord(string word)

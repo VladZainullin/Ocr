@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
@@ -38,10 +39,18 @@ public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator
         return TesseractNative.TessResultIteratorNext(Handle, level);
     }
 
-    public string GetText(PageIteratorLevel level)
+    public string? GetText(PageIteratorLevel level)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        return TesseractNative.TessResultIteratorGetUtf8Text(Handle, level);
+        var textPtr = TesseractNative.TessResultIteratorGetUtf8Text(Handle, level);
+        try
+        {
+            return Marshal.PtrToStringUTF8(textPtr);
+        }
+        finally
+        {
+            TesseractNative.TessDeleteText(textPtr);
+        }
     }
 
     public float GetConfidence(PageIteratorLevel level)
