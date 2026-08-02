@@ -2,6 +2,7 @@ using Domain.Builders;
 using Domain.Models;
 using Microsoft.Extensions.ObjectPool;
 using OcrService.Contracts;
+using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
@@ -19,7 +20,15 @@ internal sealed class OcrService(
         var tesseractEngine = tesseractEngineObjectPool.Get();
 
         using var pix = new Pix(bytes);
+        using var monitor = new TesseractMonitor();
+        monitor.SetCancel(words =>
+        {
+            Console.WriteLine($"Processed words: {words}");
+            return false;
+        });
         tesseractEngine.SetImage(pix);
+        
+        tesseractEngine.Recognize(monitor);
 
         _ = tesseractEngine.Text;
 
@@ -55,7 +64,7 @@ internal sealed class OcrService(
                         imageBuilder.AddBlock(blockModel);
                     }
                 }
-            } while (iterator.Next(PageIteratorLevel.Word));
+            } while (iterator.NextElement(PageIteratorLevel.Word));
             
             return imageBuilder.Build();
             

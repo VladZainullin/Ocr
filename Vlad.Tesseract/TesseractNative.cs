@@ -1524,7 +1524,8 @@ internal static partial class TesseractNative
     /// <returns>Pointer to the next ResultRenderer in the chain, or NULL if there is none.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessResultRendererNext(nint renderer);
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
+    public static partial bool TessResultRendererNext(nint renderer);
 
     /// <summary>
     /// Begins a new document in the renderer (required for formats like PDF that support multiple pages).
@@ -1534,7 +1535,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE on success, FALSE on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererBeginDocument", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultRendererBeginDocument(nint renderer, string title);
 
     /// <summary>
@@ -1545,7 +1546,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE on success, FALSE on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererAddImage")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultRendererAddImage(nint renderer, nint api);
 
     /// <summary>
@@ -1555,7 +1556,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE on success, FALSE on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererEndDocument")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultRendererEndDocument(nint renderer);
 
     /// <summary>
@@ -1563,18 +1564,18 @@ internal static partial class TesseractNative
     /// </summary>
     /// <param name="renderer">Pointer to the ResultRenderer instance.</param>
     /// <returns>Pointer to a null-terminated UTF-8 string containing the file extension (e.g., ".pdf", ".txt").</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultRendererExtention")]
+    [LibraryImport(LibraryName, EntryPoint = "TessResultRendererExtention", StringMarshalling =  StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessResultRendererExtention(nint renderer);
+    public static partial string TessResultRendererExtention(nint renderer);
 
     /// <summary>
     /// Gets the document title from the renderer.
     /// </summary>
     /// <param name="renderer">Pointer to the ResultRenderer instance.</param>
     /// <returns>Pointer to a null-terminated UTF-8 string containing the document title.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultRendererTitle")]
+    [LibraryImport(LibraryName, EntryPoint = "TessResultRendererTitle", StringMarshalling =  StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessResultRendererTitle(nint renderer);
+    public static partial string TessResultRendererTitle(nint renderer);
 
     /// <summary>
     /// Gets the current image number (page number) being processed by the renderer.
@@ -1584,24 +1585,6 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererImageNum")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial int TessResultRendererImageNum(nint renderer);
-
-    /// <summary>
-    /// Gets a string describing the output type of this renderer (e.g., "hocr", "pdf", "txt").
-    /// </summary>
-    /// <param name="renderer">Pointer to the ResultRenderer instance.</param>
-    /// <returns>Pointer to a null-terminated UTF-8 string containing the output type description.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultRendererOutputType")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessResultRendererOutputType(nint renderer);
-
-    /// <summary>
-    /// Sets the file permissions for the output file (mainly relevant for PDF).
-    /// </summary>
-    /// <param name="renderer">Pointer to the ResultRenderer instance.</param>
-    /// <param name="permissions">File permission flags.</param>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultRendererSetPermissions")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessResultRendererSetPermissions(nint renderer, int permissions);
 
     #endregion
 

@@ -4,6 +4,8 @@ public interface ITesseractEngine
 {
     PageSegmentationMode PageSegmentationMode { get; }
     string InputName { get; }
+    
+    nint Handle { get; }
     string Text { get; }
     float MeanTextConfidence { get; }
     void SetVariable(string name, string value);

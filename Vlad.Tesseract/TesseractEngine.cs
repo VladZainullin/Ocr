@@ -7,6 +7,8 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
 {
     private readonly IntPtr _handle = TesseractNative.TessBaseApiCreate();
     private bool _disposed;
+    
+    public nint Handle => _handle;
 
     public static string Version => TesseractNative.TessVersion();
 
@@ -19,6 +21,76 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
             ObjectDisposedException.ThrowIf(_disposed, this);
             return TesseractNative.TessBaseApiGetPageSegMode(_handle);
         }
+    }
+
+    public ITesseractResultRenderer TextRendererCreate(string outputName)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessTextRendererCreate(outputName);
+        return new TesseractResultResultRenderer(rendererPtr);
+    }
+    
+    public ITesseractResultRenderer HOcrRendererCreate(string outputName)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessHOcrRendererCreate(outputName);
+        return new TesseractResultResultRenderer(rendererPtr);
+    }
+    
+    public ITesseractResultRenderer HOcrRendererCreate(string outputName, bool fontInfo)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessHOcrRendererCreate2(outputName, fontInfo);
+        return new TesseractResultResultRenderer(rendererPtr);
+    }
+    
+    public ITesseractResultRenderer AltoRendererCreate(string outputName)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessAltoRendererCreate(outputName);
+        return new TesseractResultResultRenderer(rendererPtr);
+    }
+    
+    public ITesseractResultRenderer TsvRendererCreate(string outputName)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessTsvRendererCreate(outputName);
+        return new TesseractResultResultRenderer(rendererPtr);
+    }
+    
+    public ITesseractResultRenderer PdfRendererCreate(string outputName, string dataDir, bool textOnly)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessPdfRendererCreate(outputName, dataDir, textOnly);
+        return new TesseractResultResultRenderer(rendererPtr);
+    }
+    
+    public ITesseractResultRenderer UnlvRendererCreate(string outputName)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessUnlvRendererCreate(outputName);
+        return new TesseractResultResultRenderer(rendererPtr);
+    }
+    
+    public ITesseractResultRenderer BoxTextRendererCreate(string outputName)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessBoxTextRendererCreate(outputName);
+        return new TesseractResultResultRenderer(rendererPtr);
+    }
+    
+    public ITesseractResultRenderer WordStrBoxRendererCreate(string outputName)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessWordStrBoxRendererCreate(outputName);
+        return new TesseractResultResultRenderer(rendererPtr);
+    }
+    
+    public ITesseractResultRenderer LstmBoxRendererCreate(string outputName)
+    {
+        ObjectDisposedException.ThrowIf(_disposed, this);
+        var rendererPtr = TesseractNative.TessLstmBoxRendererCreate(outputName);
+        return new TesseractResultResultRenderer(rendererPtr);
     }
 
     public void SetVariable(string name, string value)
