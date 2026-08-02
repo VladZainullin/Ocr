@@ -1,6 +1,6 @@
 namespace Vlad.Tesseract.Contracts;
 
-public interface IChoiceIterator
+public interface ITesseractChoiceIterator
 {
     bool NextElement();
 

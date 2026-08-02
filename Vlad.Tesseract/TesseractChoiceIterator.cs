@@ -2,7 +2,7 @@ using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
-public sealed class ChoiceIterator(nint iterator) : IDisposable, IChoiceIterator
+public sealed class TesseractChoiceIterator(nint iterator) : IDisposable, ITesseractChoiceIterator
 {
     private bool _disposed;
     

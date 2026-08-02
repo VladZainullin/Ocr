@@ -1070,9 +1070,9 @@ internal static partial class TesseractNative
     /// </summary>
     /// <param name="iterator">Pointer to a ResultIterator instance.</param>
     /// <returns>Pointer to a null-terminated UTF-8 string containing the language code. Must be freed with TessDeleteText().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordRecognitionLanguage")]
+    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordRecognitionLanguage", StringMarshalling =  StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessResultIteratorWordRecognitionLanguage(nint iterator);
+    public static partial string TessResultIteratorWordRecognitionLanguage(nint iterator);
 
     /// <summary>
     /// Gets font attributes for the current word.
@@ -1087,10 +1087,9 @@ internal static partial class TesseractNative
     /// <param name="pointSize">Output font point size.</param>
     /// <param name="fontId">Output font ID.</param>
     /// <returns>TRUE if the attributes were successfully retrieved, FALSE otherwise.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordFontAttributes")]
+    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordFontAttributes",  StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorWordFontAttributes(
+    public static partial string TessResultIteratorWordFontAttributes(
         nint iterator,
         [MarshalAs(UnmanagedType.Bool)] out bool isBold,
         [MarshalAs(UnmanagedType.Bool)] out bool isItalic,
@@ -1211,72 +1210,6 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetPageIteratorConst")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial nint TessResultIteratorGetPageIteratorConst(nint iterator);
-
-    /// <summary>
-    /// Gets the image of the current element from the result iterator.
-    /// </summary>
-    /// <param name="iterator">Pointer to a ResultIterator instance.</param>
-    /// <param name="level">Page iterator level of the element.</param>
-    /// <param name="padding">Padding in pixels to add around the element.</param>
-    /// <param name="originalImage">Pointer to the original image as a Leptonica Pix.</param>
-    /// <param name="left">Output left coordinate of the extracted image.</param>
-    /// <param name="top">Output top coordinate of the extracted image.</param>
-    /// <returns>Pointer to a Leptonica Pix structure. Must be freed with pixDestroy().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetImage")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessResultIteratorGetImage(nint iterator, PageIteratorLevel level, int padding,
-        nint originalImage, out int left, out int top);
-
-    /// <summary>
-    /// Gets the bounding box of the current element from the result iterator.
-    /// </summary>
-    /// <param name="iterator">Pointer to a ResultIterator instance.</param>
-    /// <param name="level">Page iterator level of the element.</param>
-    /// <param name="left">Output left coordinate of the bounding box.</param>
-    /// <param name="top">Output top coordinate of the bounding box.</param>
-    /// <param name="right">Output right coordinate of the bounding box.</param>
-    /// <param name="bottom">Output bottom coordinate of the bounding box.</param>
-    /// <returns>TRUE if the bounding box is valid, FALSE otherwise.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorBoundingBox")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorBoundingBox(nint iterator, PageIteratorLevel level,
-        out int left, out int top, out int right, out int bottom);
-
-    /// <summary>
-    /// Gets the baseline of the current element from the result iterator.
-    /// </summary>
-    /// <param name="iterator">Pointer to a ResultIterator instance.</param>
-    /// <param name="level">Page iterator level of the element.</param>
-    /// <param name="x1">Output x coordinate of the baseline start.</param>
-    /// <param name="y1">Output y coordinate of the baseline start.</param>
-    /// <param name="x2">Output x coordinate of the baseline end.</param>
-    /// <param name="y2">Output y coordinate of the baseline end.</param>
-    /// <returns>TRUE if the baseline is valid, FALSE otherwise.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorBaseline")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessResultIteratorBaseline(nint iterator, PageIteratorLevel level,
-        out int x1, out int y1, out int x2, out int y2);
-
-    /// <summary>
-    /// Gets the block type of the current element from the result iterator.
-    /// </summary>
-    /// <param name="iterator">Pointer to a ResultIterator instance.</param>
-    /// <returns>PolyBlockType value indicating the type of the current block.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorBlockType")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial PolyBlockType TessResultIteratorBlockType(nint iterator);
-
-    /// <summary>
-    /// Gets the binary image of the current element from the result iterator.
-    /// </summary>
-    /// <param name="iterator">Pointer to a ResultIterator instance.</param>
-    /// <param name="level">Page iterator level of the element.</param>
-    /// <returns>Pointer to a Leptonica Pix structure. Must be freed with pixDestroy().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorGetBinaryImage")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessResultIteratorGetBinaryImage(nint iterator, PageIteratorLevel level);
 
     /// <summary>
     /// Gets a ChoiceIterator for the current symbol, allowing iteration through alternative recognition choices.

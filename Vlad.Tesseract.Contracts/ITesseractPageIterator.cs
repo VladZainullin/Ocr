@@ -2,7 +2,7 @@ namespace Vlad.Tesseract.Contracts;
 
 public interface ITesseractPageIterator : IDisposable
 {
-    nint Iterator { get; set; }
+    nint Handle { get; set; }
     void Begin();
     bool NextElement(PageIteratorLevel level);
     bool IsAtBeginningOf(PageIteratorLevel level);
