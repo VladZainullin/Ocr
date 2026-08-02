@@ -7,6 +7,6 @@ internal static class TesseractBoolMarshaller
 {
     public static bool ConvertToManaged(int nativeValue)
     {
-        return nativeValue == 0;
+        return nativeValue != 0;
     }
 }
