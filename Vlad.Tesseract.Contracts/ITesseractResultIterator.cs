@@ -10,18 +10,18 @@ public interface ITesseractResultIterator : ITesseractPageIterator
     
     string? GetText(PageIteratorLevel level);
     
-    string WordRecognitionLanguage();
+    string? WordRecognitionLanguage();
     
-    string GetWordFontAttributes(out bool isBold, out bool isItalic, out bool isUnderlined, out bool isMonospace,
+    string? GetWordFontAttributes(out bool isBold, out bool isItalic, out bool isUnderlined, out bool isMonospace,
         out bool isSerif, out bool isSmallCaps, out int pointSize, out int fontId);
 
     bool WordIsFromDictionary();
 
-    bool WordIsNumeric();
+    bool IsWordNumeric();
 
-    bool SymbolIsSuperscript();
+    bool IsSymbolSuperscript();
 
-    bool SymbolIsSubscript();
+    bool IsSymbolSubscript();
 
-    bool SymbolIsDropCap();
+    bool IsSymbolDropCap();
 }

@@ -2,9 +2,19 @@ using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
-public class TesseractPageIterator(nint handle) : ITesseractPageIterator
+public class TesseractPageIterator : ITesseractPageIterator
 {
-    public nint Handle { get; set; } = handle;
+    private readonly bool _ownsHandle;
+
+    public TesseractPageIterator(nint handle, bool ownsHandle)
+    {
+        if (handle == 0) throw new ArgumentException("Native iterator handle cannot be null.", nameof(handle));
+        
+        _ownsHandle = ownsHandle;
+        Handle = handle;
+    }
+
+    public nint Handle { get; private set; }
 
     protected bool Disposed { get; private set; }
 
@@ -26,14 +36,23 @@ public class TesseractPageIterator(nint handle) : ITesseractPageIterator
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         var pixPtr = TesseractNative.TessPageIteratorGetBinaryImage(Handle, level);
-        return new Pix(pixPtr);
+        return pixPtr == 0 
+            ? throw new InvalidOperationException("TessPageIteratorGetBinaryImage returned a null pointer.") 
+            : new Pix(pixPtr);
     }
 
     public IPix GetImage(PageIteratorLevel level, int padding, IPix originalImage, out int left, out int top)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
+        ArgumentOutOfRangeException.ThrowIfNegative(padding);
+        ArgumentNullException.ThrowIfNull(originalImage);
         var pixPtr =
             TesseractNative.TessPageIteratorGetImage(Handle, level, padding, originalImage.Handle, out left, out top);
+        if (pixPtr == 0)
+        {
+            throw new InvalidOperationException(
+                "TessPageIteratorGetImage returned a null pointer.");
+        }
         return new Pix(pixPtr);
     }
 
@@ -63,17 +82,17 @@ public class TesseractPageIterator(nint handle) : ITesseractPageIterator
         return TesseractNative.TessPageIteratorIsAtFinalElement(Handle, level, element);
     }
 
-    public bool TryGetBaseLine(PageIteratorLevel level, out int x1, out int y1, out int x2, out int y2)
+    public bool TryGetBaseline(PageIteratorLevel level, out int x1, out int y1, out int x2, out int y2)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessPageIteratorBaseline(Handle, level,
             out x1, out y1, out x2, out y2);
     }
 
-    public bool TryGetBoundingBox(PageIteratorLevel level, out int x, out int y, out int width, out int height)
+    public bool TryGetBoundingBox(PageIteratorLevel level, out int left, out int top, out int right, out int bottom)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        return TesseractNative.TessPageIteratorBoundingBox(Handle, level, out x, out y, out width, out height);
+        return TesseractNative.TessPageIteratorBoundingBox(Handle, level, out left, out top, out right, out bottom);
     }
 
     public PolygonBlockType GetBlockType()
@@ -85,26 +104,32 @@ public class TesseractPageIterator(nint handle) : ITesseractPageIterator
     public virtual ITesseractPageIterator Copy()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        var pageIteratorPage = TesseractNative.TessPageIteratorCopy(Handle);
-        return new TesseractPageIterator(pageIteratorPage);
+        var pageIteratorPtr = TesseractNative.TessPageIteratorCopy(Handle);
+        return pageIteratorPtr == 0 
+            ? throw new InvalidOperationException("TessPageIteratorCopy returned a null pointer.") 
+            : new TesseractPageIterator(pageIteratorPtr, true);
+    }
+
+    protected virtual void ReleaseHandle(nint handle)
+    {
+        TesseractNative.TessPageIteratorDelete(handle);
     }
 
     public void Dispose()
     {
-        Dispose(Disposed);
-        GC.SuppressFinalize(this);
-    }
-
-    public virtual void Dispose(bool disposing)
-    {
-        if (disposing) return;
-
-        if (Handle != 0)
-        {
-            TesseractNative.TessPageIteratorDelete(Handle);
-            Handle = 0;
-        }
+        if (Disposed)
+            return;
 
         Disposed = true;
+
+        var handle = Handle;
+        Handle = 0;
+
+        if (_ownsHandle && handle != 0)
+        {
+            ReleaseHandle(handle);
+        }
+
+        GC.SuppressFinalize(this);
     }
 }

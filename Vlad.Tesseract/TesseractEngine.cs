@@ -427,7 +427,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         var iterator = TesseractNative.TessBaseApiAnalyseLayout(Handle);
-        return new TesseractPageIterator(iterator);
+        return new TesseractPageIterator(iterator, false);
     }
 
     public bool TryGetTextDirection(out int outOffset, out float slope)

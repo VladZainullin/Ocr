@@ -518,12 +518,12 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordRecognitionLanguage",
         StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessResultIteratorWordRecognitionLanguage(nint iterator);
+    public static partial string? TessResultIteratorWordRecognitionLanguage(nint iterator);
 
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordFontAttributes",
         StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial string TessResultIteratorWordFontAttributes(
+    public static partial string? TessResultIteratorWordFontAttributes(
         nint iterator,
         [MarshalAs(UnmanagedType.Bool)] out bool isBold,
         [MarshalAs(UnmanagedType.Bool)] out bool isItalic,

@@ -3,34 +3,45 @@ using Vlad.Tesseract.Contracts;
 
 namespace Vlad.Tesseract;
 
-public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator(handle), ITesseractResultIterator
+public sealed class TesseractResultIterator(nint handle)
+    : TesseractPageIterator(handle, true), ITesseractResultIterator
 {
     public override ITesseractResultIterator Copy()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        var resultIterator = TesseractNative.TessResultIteratorCopy(Handle);
-        return new TesseractResultIterator(resultIterator);
+        var pointer = TesseractNative.TessResultIteratorCopy(Handle);
+        return pointer == 0
+            ? throw new InvalidOperationException("TessResultIteratorCopy returned a null pointer.")
+            : new TesseractResultIterator(pointer);
     }
 
     public ITesseractPageIterator GetPageIterator()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         var pageIteratorPtr = TesseractNative.TessResultIteratorGetPageIterator(Handle);
-        return new TesseractPageIterator(pageIteratorPtr);
+        return pageIteratorPtr == 0
+            ? throw new InvalidOperationException("TessResultIteratorGetPageIterator returned a null pointer.")
+            : new TesseractPageIterator(pageIteratorPtr, false);
     }
 
     public ITesseractPageIterator GetPageIteratorConst()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        var pageIteratorPtr = TesseractNative.TessResultIteratorGetPageIteratorConst(Handle);
-        return new TesseractPageIterator(pageIteratorPtr);
+
+        var pointer = TesseractNative.TessResultIteratorGetPageIteratorConst(Handle);
+        return pointer == 0
+            ? throw new InvalidOperationException("TessResultIteratorGetPageIteratorConst returned a null pointer.")
+            : new TesseractPageIterator(pointer, false);
     }
 
     public ITesseractChoiceIterator GetChoiceIterator()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        var choiceIteratorPtr = TesseractNative.TessResultIteratorGetChoiceIterator(Handle);
-        return new TesseractChoiceIterator(choiceIteratorPtr);
+
+        var pointer = TesseractNative.TessResultIteratorGetChoiceIterator(Handle);
+        return pointer == 0
+            ? throw new InvalidOperationException("TessResultIteratorGetChoiceIterator returned a null pointer.")
+            : new TesseractChoiceIterator(pointer);
     }
 
     public override bool TryNext(PageIteratorLevel level)
@@ -42,14 +53,16 @@ public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator
     public string? GetText(PageIteratorLevel level)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
-        var textPtr = TesseractNative.TessResultIteratorGetUtf8Text(Handle, level);
+        var pointer = TesseractNative.TessResultIteratorGetUtf8Text(Handle, level);
+        if (pointer == 0)
+            return null;
         try
         {
-            return Marshal.PtrToStringUTF8(textPtr);
+            return Marshal.PtrToStringUTF8(pointer);
         }
         finally
         {
-            TesseractNative.TessDeleteText(textPtr);
+            TesseractNative.TessDeleteText(pointer);
         }
     }
 
@@ -59,13 +72,13 @@ public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator
         return TesseractNative.TessResultIteratorConfidence(Handle, level);
     }
 
-    public string WordRecognitionLanguage()
+    public string? WordRecognitionLanguage()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorWordRecognitionLanguage(Handle);
     }
 
-    public string GetWordFontAttributes(out bool isBold, out bool isItalic, out bool isUnderlined, out bool isMonospace,
+    public string? GetWordFontAttributes(out bool isBold, out bool isItalic, out bool isUnderlined, out bool isMonospace,
         out bool isSerif, out bool isSmallCaps, out int pointSize, out int fontId)
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
@@ -80,39 +93,32 @@ public sealed class TesseractResultIterator(nint handle) : TesseractPageIterator
         return TesseractNative.TessResultIteratorWordIsFromDictionary(Handle);
     }
 
-    public bool WordIsNumeric()
+    public bool IsWordNumeric()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorWordIsNumeric(Handle);
     }
 
-    public bool SymbolIsSuperscript()
+    public bool IsSymbolSuperscript()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorSymbolIsSuperscript(Handle);
     }
 
-    public bool SymbolIsSubscript()
+    public bool IsSymbolSubscript()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorSymbolIsSubscript(Handle);
     }
 
-    public bool SymbolIsDropCap()
+    public bool IsSymbolDropCap()
     {
         ObjectDisposedException.ThrowIf(Disposed, this);
         return TesseractNative.TessResultIteratorSymbolIsDropcap(Handle);
     }
-
-    public override void Dispose(bool disposing)
+    
+    protected override void ReleaseHandle(nint handle)
     {
-        if (Disposed) return;
-        if (Handle != nint.Zero)
-        {
-            TesseractNative.TessResultIteratorDelete(Handle);
-            Handle = nint.Zero;
-        }
-
-        base.Dispose(disposing);
+        TesseractNative.TessResultIteratorDelete(handle);
     }
 }
