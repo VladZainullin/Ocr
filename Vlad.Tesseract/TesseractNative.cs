@@ -72,7 +72,7 @@ internal static partial class TesseractNative
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit3", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiInit3(nint handle, string dataPath, string language);
 
     /// <summary>
@@ -130,7 +130,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the variable was successfully set, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiSetVariable(nint handle, string name, string value);
 
     /// <summary>
@@ -142,7 +142,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the variable was successfully set, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetDebugVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiSetDebugVariable(nint handle, string name, string value);
 
     /// <summary>
@@ -154,7 +154,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the variable was found, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetIntVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiGetIntVariable(nint handle, string name, out int value);
 
     /// <summary>
@@ -166,7 +166,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the variable was found, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetBoolVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiGetBoolVariable(nint handle, string name,
         [MarshalAs(UnmanagedType.Bool)] out bool value);
 
@@ -179,7 +179,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the variable was found, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetDoubleVariable", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiGetDoubleVariable(nint handle, string name, out double value);
 
     /// <summary>
@@ -250,7 +250,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE on success, FALSE on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIPrintVariablesToFile", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiPrintVariablesToFile(nint handle, string filename);
 
     #endregion
@@ -398,7 +398,7 @@ internal static partial class TesseractNative
     /// <returns>0 on success, negative value on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIRecognize")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiRecognize(nint handle, nint monitor);
 
     /// <summary>
@@ -412,7 +412,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE on success, FALSE on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIProcessPages", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiProcessPages(nint handle, string filename, string retryConfig,
         int timeoutMillis, nint renderer);
 
@@ -595,7 +595,7 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIDetectOrientationScript",
         StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiDetectOrientationScript(nint handle, out int orientDeg,
         out float orientConf, out string scriptName, out float scriptConf);
 
@@ -622,7 +622,7 @@ internal static partial class TesseractNative
     /// <returns>Pointer to a null-terminated string describing the text direction.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetTextDirection")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiGetTextDirection(nint handle, out int offset, out float slope);
 
     #endregion
@@ -659,7 +659,7 @@ internal static partial class TesseractNative
     /// <returns>Non-zero if the word is valid, 0 if not, -1 on error.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIIsValidWord", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiIsValidWord(nint handle, string word);
 
     /// <summary>
@@ -671,7 +671,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE on success, FALSE on failure.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIAdaptToWordStr", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessBaseApiAdaptToWordStr(nint handle, PageSegmentationMode mode, string wordStr);
 
     #endregion
@@ -745,7 +745,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the iterator was advanced, FALSE if there are no more elements.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessPageIteratorNext(nint iterator, PageIteratorLevel level);
 
     /// <summary>
@@ -756,7 +756,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if at the beginning, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorIsAtBeginningOf")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessPageIteratorIsAtBeginningOf(nint iterator, PageIteratorLevel level);
 
     /// <summary>
@@ -783,7 +783,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the bounding box is valid, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessPageIteratorBoundingBox")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessPageIteratorBoundingBox(nint iterator, PageIteratorLevel level,
         out int left, out int top, out int right, out int bottom);
 
@@ -927,7 +927,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the iterator was advanced, FALSE if there are no more elements.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorNext(nint iterator, PageIteratorLevel level);
 
     /// <summary>
@@ -939,7 +939,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if at the final element, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorIsAtFinalElement")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorIsAtFinalElement(nint iterator, PageIteratorLevel level,
         PageIteratorLevel element);
 
@@ -1005,7 +1005,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the word is from the dictionary, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordIsFromDictionary")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorWordIsFromDictionary(nint iterator);
 
     /// <summary>
@@ -1015,7 +1015,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the word is numeric, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorWordIsNumeric")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorWordIsNumeric(nint iterator);
 
     /// <summary>
@@ -1025,7 +1025,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the symbol is superscript, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsSuperscript")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorSymbolIsSuperscript(nint iterator);
 
     /// <summary>
@@ -1035,12 +1035,12 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the symbol is subscript, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsSubscript")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorSymbolIsSubscript(nint iterator);
     
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsDropcast")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorSymbolIsDropcast(nint iterator);
 
     /// <summary>
@@ -1050,7 +1050,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if the symbol is a drop cap, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessResultIteratorSymbolIsDropcap")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessResultIteratorSymbolIsDropcap(nint iterator);
 
     /// <summary>
@@ -1137,7 +1137,7 @@ internal static partial class TesseractNative
     /// <returns>TRUE if there is another choice, FALSE otherwise.</returns>
     [LibraryImport(LibraryName, EntryPoint = "TessChoiceIteratorNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
+    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
     public static partial bool TessChoiceIteratorNext(nint choiceIterator);
 
     /// <summary>
