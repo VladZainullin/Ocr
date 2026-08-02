@@ -78,8 +78,7 @@ internal static partial class TesseractNative
 
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererNext")]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
-    public static partial bool TessResultRendererNext(nint renderer);
+    public static partial nint TessResultRendererNext(nint renderer);
 
     [LibraryImport(LibraryName, EntryPoint = "TessResultRendererBeginDocument",
         StringMarshalling = StringMarshalling.Utf8)]

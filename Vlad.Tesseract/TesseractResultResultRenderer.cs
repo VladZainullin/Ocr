@@ -33,10 +33,11 @@ public sealed class TesseractResultResultRenderer(nint handle) : ITesseractResul
         }
     }
 
-    public bool TryNext()
+    public ITesseractResultRenderer NextRenderer()
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
-        return TesseractNative.TessResultRendererNext(handle);
+        var rendererPtr = TesseractNative.TessResultRendererNext(handle);
+        return new TesseractResultResultRenderer(rendererPtr);
     }
 
     public void Insert(ITesseractResultRenderer renderer)

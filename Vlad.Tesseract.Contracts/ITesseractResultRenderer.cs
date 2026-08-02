@@ -7,8 +7,8 @@ public interface ITesseractResultRenderer
     string Title { get; }
     
     int ImageNumbers { get; }
-    
-    bool TryNext();
+
+    ITesseractResultRenderer NextRenderer();
     
     void Insert(ITesseractResultRenderer renderer);
 
