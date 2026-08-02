@@ -247,7 +247,7 @@ internal sealed class TesseractEngine : IDisposable, ITesseractEngine
         TesseractNative.TessBaseApiSetSourceResolution(_handle, ppi);
     }
 
-    public bool TryInitialization(string dataPath, string language, TessOcrEngineMode oem)
+    public bool TryInitialization(string dataPath, string language, OcrEngineMode oem)
     {
         ObjectDisposedException.ThrowIf(_disposed, this);
         return TesseractNative.TessBaseApiInit2(_handle, dataPath, language, oem);

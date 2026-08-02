@@ -60,7 +60,7 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIInit2", StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     [return: MarshalUsing(typeof(TesseractBoolMarshaller))]
-    public static partial bool TessBaseApiInit2(nint handle, string dataPath, string language, TessOcrEngineMode oem);
+    public static partial bool TessBaseApiInit2(nint handle, string dataPath, string language, OcrEngineMode oem);
 
     /// <summary>
     /// Initializes the Tesseract engine with the specified data path and language string.

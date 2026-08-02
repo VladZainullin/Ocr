@@ -12,7 +12,7 @@ internal sealed class TesseractEnginePooledObjectPolicy(ITesseractNativeLogBridg
         var engine = new TesseractEngine();
         
         if (!engine.TryInitialization("/Users/vadislavzainullin/MEGAsync/tesseract", "rus+eng",
-                TessOcrEngineMode.OemLstmOnly)) 
+                OcrEngineMode.OemLstmOnly)) 
             throw new InvalidOperationException("Cannot create Tesseract engine");
 
         engine.SetSegmentationMode(PageSegmentationMode.Auto);

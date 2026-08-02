@@ -23,7 +23,7 @@ public interface ITesseractEngine
     string GetBoxText(int pageNumber);
     void SetSegmentationMode(PageSegmentationMode mode);
     bool TryInitialization(string dataPath, string language);
-    bool TryInitialization(string dataPath, string language, TessOcrEngineMode oem);
+    bool TryInitialization(string dataPath, string language, OcrEngineMode oem);
     int GetSourceYResolution();
     void SetSourceResolution(int ppi);
     void SetImage(IPix image);
