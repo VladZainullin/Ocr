@@ -702,6 +702,10 @@ internal static partial class TesseractNative
 
     #region BaseAPI Languages
 
+    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLoadedLanguagesAsVector")]
+    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
+    public static partial nint TessBaseApiGetLoadedLanguagesAsVector(nint handle);
+    
     /// <summary>
     /// Gets a list of all available languages in the tessdata directory.
     /// </summary>
@@ -720,76 +724,6 @@ internal static partial class TesseractNative
     [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetUnichar",  StringMarshalling = StringMarshalling.Utf8)]
     [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
     public static partial string TessBaseApiGetUnichar(nint handle, int uniCharId);
-
-    #endregion
-
-    #region BaseAPI LSTM
-
-    /// <summary>
-    /// Gets the LSTM choice information for the last recognition.
-    /// </summary>
-    /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
-    /// <returns>Pointer to an LSTM choice structure.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLSTMChoice")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetLstmChoice(nint handle);
-
-    /// <summary>
-    /// Gets the LSTM timestep information for the last recognition.
-    /// </summary>
-    /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
-    /// <returns>Pointer to an LSTM timestep structure.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetLSTMTimestep")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetLstmTimestep(nint handle);
-
-    #endregion
-
-    #region BaseAPI Adaptive Classifier
-
-    /// <summary>
-    /// Enables or disables the adaptive classifier.
-    /// </summary>
-    /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
-    /// <param name="enable">TRUE to enable, FALSE to disable.</param>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPISetAdaptiveClassifier")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiSetAdaptiveClassifier(nint handle,
-        [MarshalAs(UnmanagedType.Bool)] bool enable);
-
-    /// <summary>
-    /// Checks if the adaptive classifier is currently enabled.
-    /// </summary>
-    /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
-    /// <returns>TRUE if enabled, FALSE otherwise.</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetAdaptiveClassifier")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    public static partial bool TessBaseApiGetAdaptiveClassifier(nint handle);
-
-    #endregion
-
-    #region BaseAPI Features (Training)
-
-    /// <summary>
-    /// Extracts feature vectors for a given blob. Used for training purposes.
-    /// </summary>
-    /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
-    /// <param name="blob">Pointer to a blob structure.</param>
-    /// <param name="featureSize">Output size of the feature vector.</param>
-    /// <returns>Pointer to the feature vector array. Must be freed with TessBaseApiFreeFeatures().</returns>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIGetFeaturesForBlob")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial nint TessBaseApiGetFeaturesForBlob(nint handle, nint blob, out int featureSize);
-
-    /// <summary>
-    /// Frees feature vectors allocated by TessBaseAPIGetFeaturesForBlob().
-    /// </summary>
-    /// <param name="handle">Pointer to the TessBaseAPI instance.</param>
-    /// <param name="features">Pointer to the feature vector array to free.</param>
-    [LibraryImport(LibraryName, EntryPoint = "TessBaseAPIFreeFeatures")]
-    [UnmanagedCallConv(CallConvs = [typeof(CallConvCdecl)])]
-    public static partial void TessBaseApiFreeFeatures(nint handle, nint features);
 
     #endregion
 

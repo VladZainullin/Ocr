@@ -8,6 +8,9 @@ public interface ITesseractPageIterator : IDisposable
 
     IPix GetImage(PageIteratorLevel level, int padding, IPix originalImage, out int left, out int top);
 
+    void GetParagraphInfo(
+        out ParagraphJustification justification, out bool isListItem, out bool isCrown, out int firstLineIndent);
+
     void GetOrientation(out OrientationPage orientation, out WritingDirection writingDirection,
         out TextLineOrder textLineOrder, out float deskewAngle);
     void Begin();
