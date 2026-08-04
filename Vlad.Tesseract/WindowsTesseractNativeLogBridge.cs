@@ -1,7 +1,9 @@
+using System.Runtime.Versioning;
 using Microsoft.Extensions.Logging;
 
 namespace Vlad.Tesseract;
 
+[SupportedOSPlatform("windows5.1.2600")]
 internal sealed class WindowsTesseractNativeLogBridge
     : TesseractNativeLogBridgeBase
 {
@@ -11,7 +13,7 @@ internal sealed class WindowsTesseractNativeLogBridge
         ILoggerFactory loggerFactory)
         : base(loggerFactory)
     {
-        if (!OperatingSystem.IsWindows())
+        if (!OperatingSystem.IsWindowsVersionAtLeast(5, 1, 2600))
         {
             DisposeAfterFailedConstruction();
 

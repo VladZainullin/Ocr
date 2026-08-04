@@ -1,39 +1,44 @@
 using System.ComponentModel;
 using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using Microsoft.Win32.SafeHandles;
+using Windows.Win32;
+using Windows.Win32.Foundation;
 
 namespace Vlad.Tesseract;
 
+[SupportedOSPlatform("windows5.1.2600")]
 internal static class WindowsNativeMethods
 {
     private const int OpenWriteOnly = 0x0001;
     private const int OpenBinary = 0x8000;
 
-    private const uint DuplicateSameAccess = 0x00000002;
-
     internal static int CreatePipeWriteDescriptor(
         SafePipeHandle pipeHandle)
     {
         var addRef = false;
-        nint duplicatedHandle = 0;
+        var duplicatedHandle = HANDLE.Null;
 
         try
         {
             pipeHandle.DangerousAddRef(ref addRef);
 
-            var currentProcess = Kernel32.GetCurrentProcess();
+            var currentProcess = PInvoke.GetCurrentProcess();
 
-            if (!Kernel32.DuplicateHandle(
-                    currentProcess,
-                    pipeHandle.DangerousGetHandle(),
-                    currentProcess,
-                    out duplicatedHandle,
-                    desiredAccess: 0,
-                    inheritHandle: false,
-                    options: (DuplicateHandleOptions)DuplicateSameAccess))
+            unsafe
             {
-                var error = Marshal.GetLastPInvokeError();
-                throw new Win32Exception(error, "DuplicateHandle(pipe) failed.");
+                if (!PInvoke.DuplicateHandle(
+                        currentProcess,
+                        new HANDLE(pipeHandle.DangerousGetHandle()),
+                        currentProcess,
+                        &duplicatedHandle,
+                        0,
+                        false,
+                        DUPLICATE_HANDLE_OPTIONS.DUPLICATE_SAME_ACCESS))
+                {
+                    var error = Marshal.GetLastPInvokeError();
+                    throw new Win32Exception(error, "DuplicateHandle(pipe) failed.");
+                }
             }
             
             var descriptor = UniversalCRuntimeBase.OpenOsFileHandle(
@@ -42,7 +47,7 @@ internal static class WindowsNativeMethods
 
             if (descriptor >= 0)
             {
-                duplicatedHandle = 0;
+                duplicatedHandle = HANDLE.Null;
                 return descriptor;
             }
 
@@ -54,9 +59,9 @@ internal static class WindowsNativeMethods
         }
         finally
         {
-            if (duplicatedHandle != 0)
+            if (!duplicatedHandle.IsNull)
             {
-                Kernel32.CloseHandle(duplicatedHandle);
+                PInvoke.CloseHandle(duplicatedHandle);
             }
 
             if (addRef)

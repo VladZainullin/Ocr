@@ -26,7 +26,7 @@ public static class DependencyInjection
                 return new MacOsTesseractNativeLogBridge(loggerFactory);
             }
 
-            if (OperatingSystem.IsWindows())
+            if (OperatingSystem.IsWindowsVersionAtLeast(5, 1, 2600))
             {
                 return new WindowsTesseractNativeLogBridge(loggerFactory);
             }
